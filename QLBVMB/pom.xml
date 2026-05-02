@@ -10,4 +10,49 @@
         <maven.compiler.release>25</maven.compiler.release>
         <exec.mainClass>com.mycompany.qlbvmb.QLBVMB</exec.mainClass>
     </properties>
+    
+    <dependencies>
+    <!-- FlatLaf Core -->
+    <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>3.4.1</version> <!-- Bạn có thể dùng 3.4.1 hoặc bản 3.5 mới nhất -->
+    </dependency>
+
+    <!-- FlatLaf Extras (để dùng các icon và tính năng mở rộng) -->
+    <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf-extras</artifactId>
+        <version>3.4.1</version>
+    </dependency>
+    
+    <!-- 2. Kết nối Database Oracle (ojdbc11) -->
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>23.3.0.23.09</version>
+        </dependency>
+
+        <!-- 3. Quản lý layout MigLayout -->
+        <dependency>
+            <groupId>com.miglayout</groupId>
+            <artifactId>miglayout-swing</artifactId>
+            <version>5.3</version>
+        </dependency>
+
+        <!-- 4. Hộp thoại Modal Dialog -->
+        <dependency>
+            <groupId>io.github.dj-raven</groupId>
+            <artifactId>modal-dialog</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        
+        <!-- 5. Thư viện Test JUnit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
+        </dependency>
+        </dependencies>
 </project>
