@@ -40,19 +40,14 @@ CREATE TABLE FLIGHT (
     FlightNumber VARCHAR2(50) UNIQUE,
     AirlineID NUMBER,
     AircraftID NUMBER,
-    DepartureAirportID NUMBER,
-    ArrivalAirportID NUMBER,
     RouteID NUMBER,
     DepartureTime DATE NOT NULL,
     ArrivalTime DATE,
     FlightStatus VARCHAR2(50),
     CONSTRAINT fk_flight_airline FOREIGN KEY (AirlineID) REFERENCES AIRLINE(AirlineID),
     CONSTRAINT fk_flight_aircraft FOREIGN KEY (AircraftID) REFERENCES AIRCRAFT(AircraftID),
-    CONSTRAINT fk_flight_dep FOREIGN KEY (DepartureAirportID) REFERENCES AIRPORT(AirportID),
-    CONSTRAINT fk_flight_arr FOREIGN KEY (ArrivalAirportID) REFERENCES AIRPORT(AirportID),
     CONSTRAINT fk_flight_route FOREIGN KEY (RouteID) REFERENCES ROUTE(RouteID),
     CONSTRAINT chk_flight_time CHECK (ArrivalTime > DepartureTime),
-    CONSTRAINT chk_flight_airport CHECK (DepartureAirportID <> ArrivalAirportID)
 );
 
 CREATE TABLE USERS (
