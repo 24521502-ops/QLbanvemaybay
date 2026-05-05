@@ -148,13 +148,18 @@ END;
 
 -- ================================= Bảng FLIGHT =================================
 CREATE OR REPLACE PROCEDURE SP_ADD_FLIGHT (
-    p_FlightNumber IN VARCHAR2, p_AirlineID IN VARCHAR2, p_AircraftID IN VARCHAR2, 
-    p_RouteID IN VARCHAR2, p_DepartureTime IN DATE, p_ArrivalTime IN DATE
+    p_FlightNumber IN VARCHAR2, 
+    p_AirlineID IN VARCHAR2, 
+    p_AircraftID IN VARCHAR2, 
+    p_RouteID IN VARCHAR2, 
+    p_DepartureTime IN DATE, 
+    p_ArrivalTime IN DATE,
+    p_Gate IN VARCHAR2 -- Đã bổ sung tham số Gate
 ) AS
 BEGIN
-    -- Lưu ý: Đã bỏ DepartureAirportID và ArrivalAirportID vì bảng FLIGHT của bạn chỉ nhận RouteID
-    INSERT INTO FLIGHT (FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus)
-    VALUES (p_FlightNumber, p_AirlineID, p_AircraftID, p_RouteID, p_DepartureTime, p_ArrivalTime, 'SCHEDULED');
+    INSERT INTO FLIGHT (FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, Gate, FlightStatus)
+    VALUES (p_FlightNumber, p_AirlineID, p_AircraftID, p_RouteID, p_DepartureTime, p_ArrivalTime, p_Gate, 'SCHEDULED');
+    
     COMMIT;
 END;
 /
@@ -203,6 +208,23 @@ BEGIN
 END;
 /
 
+-- Cập nhật Cổng ra máy bay (Gate) cho chuyến bay
+CREATE OR REPLACE PROCEDURE SP_UPDATE_FLIGHT_GATE (
+    p_FlightID IN VARCHAR2,
+    p_NewGate IN VARCHAR2
+) AS
+BEGIN
+    UPDATE FLIGHT 
+    SET Gate = p_NewGate 
+    WHERE FlightID = p_FlightID;
+
+    IF SQL%ROWCOUNT = 0 THEN
+        RAISE_APPLICATION_ERROR(-20080, 'Lỗi: Không tìm thấy chuyến bay để cập nhật Cổng.');
+    END IF;
+    
+    COMMIT;
+END;
+/
 
 -- ================================= Bảng BOOKING & PAYMENT =================================
 CREATE OR REPLACE PROCEDURE SP_CREATE_BOOKING_TRANSACTION (
