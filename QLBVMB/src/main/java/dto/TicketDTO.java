@@ -1,32 +1,32 @@
-
 package dto;
 
-
 public class TicketDTO {
-    private int ticketID;
-    private int bookingID;
-    private int flightID;
-    private int seatID;
-    private double price;
+    private String ticketID;
+    private String bookingID;
+    private String flightID;
+    private String seatID;
+    private String passengerID;
+    private Double price;
     private String ticketStatus;
 
     public TicketDTO() {}
 
-    public TicketDTO(int ticketID, int bookingID, int flightID, int seatID, double price, String ticketStatus) {
-        this.ticketID = ticketID; this.bookingID = bookingID; this.flightID = flightID; this.seatID = seatID; this.price = price; this.ticketStatus = ticketStatus;
+    public TicketDTO(String ticketID, String bookingID, String flightID, String seatID, String passengerID, Double price, String ticketStatus) {
+        this.ticketID = ticketID; this.bookingID = bookingID; this.flightID = flightID; this.seatID = seatID; this.passengerID = passengerID; this.price = price; this.ticketStatus = ticketStatus;
     }
 
-    public int getTicketID() { return ticketID; }
-    public void setTicketID(int ticketID) { this.ticketID = ticketID; }
-    public int getBookingID() { return bookingID; }
-    public void setBookingID(int bookingID) { this.bookingID = bookingID; }
-    public int getFlightID() { return flightID; }
-    public void setFlightID(int flightID) { this.flightID = flightID; }
-    public int getSeatID() { return seatID; }
-    public void setSeatID(int seatID) { this.seatID = seatID; }
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public String getTicketID() { return ticketID; }
+    public void setTicketID(String ticketID) { this.ticketID = ticketID; }
+    public String getBookingID() { return bookingID; }
+    public void setBookingID(String bookingID) { this.bookingID = bookingID; }
+    public String getFlightID() { return flightID; }
+    public void setFlightID(String flightID) { this.flightID = flightID; }
+    public String getSeatID() { return seatID; }
+    public void setSeatID(String seatID) { this.seatID = seatID; }
+    public String getPassengerID() { return passengerID; }
+    public void setPassengerID(String passengerID) { this.passengerID = passengerID; }
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
     public String getTicketStatus() { return ticketStatus; }
     public void setTicketStatus(String ticketStatus) { this.ticketStatus = ticketStatus; }
-
 }

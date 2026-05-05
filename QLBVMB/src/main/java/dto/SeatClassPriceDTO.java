@@ -1,26 +1,23 @@
-
 package dto;
 
-
 public class SeatClassPriceDTO {
-    private int priceID;
-    private int flightID;
-    private String seatClass;
-    private double price;
+    private String priceID;
+    private String flightID;
+    private String seatClass; 
+    private Double price;
 
     public SeatClassPriceDTO() {}
 
-    public SeatClassPriceDTO(int priceID, int flightID, String seatClass, double price) {
+    public SeatClassPriceDTO(String priceID, String flightID, String seatClass, Double price) {
         this.priceID = priceID; this.flightID = flightID; this.seatClass = seatClass; this.price = price;
     }
 
-    public int getPriceID() { return priceID; }
-    public void setPriceID(int priceID) { this.priceID = priceID; }
-    public int getFlightID() { return flightID; }
-    public void setFlightID(int flightID) { this.flightID = flightID; }
+    public String getPriceID() { return priceID; }
+    public void setPriceID(String priceID) { this.priceID = priceID; }
+    public String getFlightID() { return flightID; }
+    public void setFlightID(String flightID) { this.flightID = flightID; }
     public String getSeatClass() { return seatClass; }
     public void setSeatClass(String seatClass) { this.seatClass = seatClass; }
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
-
+    public Double getPrice() { return price; }
+    public void setPrice(Double price) { this.price = price; }
 }

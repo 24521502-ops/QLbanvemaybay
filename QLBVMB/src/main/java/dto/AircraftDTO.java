@@ -1,30 +1,26 @@
-
 package dto;
 
-import java.util.Date;
-
 public class AircraftDTO {
-    private int aircraftID;
-    private int airlineID;
+    private String aircraftID;
+    private String airlineID;
     private String model;
-    private int capacity;
-    private int manufactureYear;
+    private Integer capacity;
+    private Integer manufactureYear;
 
     public AircraftDTO() {}
 
-    public AircraftDTO(int aircraftID, int airlineID, String model, int capacity, int manufactureYear) {
+    public AircraftDTO(String aircraftID, String airlineID, String model, Integer capacity, Integer manufactureYear) {
         this.aircraftID = aircraftID; this.airlineID = airlineID; this.model = model; this.capacity = capacity; this.manufactureYear = manufactureYear;
     }
 
-    public int getAircraftID() { return aircraftID; }
-    public void setAircraftID(int aircraftID) { this.aircraftID = aircraftID; }
-    public int getAirlineID() { return airlineID; }
-    public void setAirlineID(int airlineID) { this.airlineID = airlineID; }
+    public String getAircraftID() { return aircraftID; }
+    public void setAircraftID(String aircraftID) { this.aircraftID = aircraftID; }
+    public String getAirlineID() { return airlineID; }
+    public void setAirlineID(String airlineID) { this.airlineID = airlineID; }
     public String getModel() { return model; }
     public void setModel(String model) { this.model = model; }
-    public int getCapacity() { return capacity; }
-    public void setCapacity(int capacity) { this.capacity = capacity; }
-    public int getManufactureYear() { return manufactureYear; }
-    public void setManufactureYear(int manufactureYear) { this.manufactureYear = manufactureYear; }
-
+    public Integer getCapacity() { return capacity; }
+    public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public Integer getManufactureYear() { return manufactureYear; }
+    public void setManufactureYear(Integer manufactureYear) { this.manufactureYear = manufactureYear; }
 }

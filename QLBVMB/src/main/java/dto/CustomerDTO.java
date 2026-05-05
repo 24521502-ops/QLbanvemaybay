@@ -1,12 +1,10 @@
-
 package dto;
 
 import java.util.Date;
 
-
 public class CustomerDTO {
-    private int customerID;
-    private int accountID;
+    private String customerID;
+    private String accountID;
     private String fullName;
     private String gender;
     private Date dateOfBirth;
@@ -17,14 +15,14 @@ public class CustomerDTO {
 
     public CustomerDTO() {}
 
-    public CustomerDTO(int customerID, int accountID, String fullName, String gender, Date dateOfBirth, String phone, String email, String passportNumber, String nationality) {
+    public CustomerDTO(String customerID, String accountID, String fullName, String gender, Date dateOfBirth, String phone, String email, String passportNumber, String nationality) {
         this.customerID = customerID; this.accountID = accountID; this.fullName = fullName; this.gender = gender; this.dateOfBirth = dateOfBirth; this.phone = phone; this.email = email; this.passportNumber = passportNumber; this.nationality = nationality;
     }
 
-    public int getCustomerID() { return customerID; }
-    public void setCustomerID(int customerID) { this.customerID = customerID; }
-    public int getAccountID() { return accountID; }
-    public void setAccountID(int accountID) { this.accountID = accountID; }
+    public String getCustomerID() { return customerID; }
+    public void setCustomerID(String customerID) { this.customerID = customerID; }
+    public String getAccountID() { return accountID; }
+    public void setAccountID(String accountID) { this.accountID = accountID; }
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getGender() { return gender; }
@@ -39,5 +37,4 @@ public class CustomerDTO {
     public void setPassportNumber(String passportNumber) { this.passportNumber = passportNumber; }
     public String getNationality() { return nationality; }
     public void setNationality(String nationality) { this.nationality = nationality; }
-
 }

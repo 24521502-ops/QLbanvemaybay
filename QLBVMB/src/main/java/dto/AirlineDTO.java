@@ -4,7 +4,7 @@ package dto;
 import java.util.Date;
 
 public class AirlineDTO {
-    private int airlineID;
+    private String airlineID;
     private String airlineName;
     private String country;
     private String phone;
@@ -12,12 +12,12 @@ public class AirlineDTO {
 
     public AirlineDTO() {}
 
-    public AirlineDTO(int airlineID, String airlineName, String country, String phone, String email) {
+    public AirlineDTO(String airlineID, String airlineName, String country, String phone, String email) {
         this.airlineID = airlineID; this.airlineName = airlineName; this.country = country; this.phone = phone; this.email = email;
     }
 
-    public int getAirlineID() { return airlineID; }
-    public void setAirlineID(int airlineID) { this.airlineID = airlineID; }
+    public String getAirlineID() { return airlineID; }
+    public void setAirlineID(String airlineID) { this.airlineID = airlineID; }
     public String getAirlineName() { return airlineName; }
     public void setAirlineName(String airlineName) { this.airlineName = airlineName; }
     public String getCountry() { return country; }

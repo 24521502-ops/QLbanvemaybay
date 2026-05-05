@@ -1,10 +1,8 @@
-
 package dto;
 
-
 public class EmployeeDTO {
-    private int employeeID;
-    private int accountID;
+    private String employeeID;
+    private String accountID;
     private String fullName;
     private String position;
     private String phone;
@@ -12,14 +10,14 @@ public class EmployeeDTO {
 
     public EmployeeDTO() {}
 
-    public EmployeeDTO(int employeeID, int accountID, String fullName, String position, String phone, String email) {
+    public EmployeeDTO(String employeeID, String accountID, String fullName, String position, String phone, String email) {
         this.employeeID = employeeID; this.accountID = accountID; this.fullName = fullName; this.position = position; this.phone = phone; this.email = email;
     }
 
-    public int getEmployeeID() { return employeeID; }
-    public void setEmployeeID(int employeeID) { this.employeeID = employeeID; }
-    public int getAccountID() { return accountID; }
-    public void setAccountID(int accountID) { this.accountID = accountID; }
+    public String getEmployeeID() { return employeeID; }
+    public void setEmployeeID(String employeeID) { this.employeeID = employeeID; }
+    public String getAccountID() { return accountID; }
+    public void setAccountID(String accountID) { this.accountID = accountID; }
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public String getPosition() { return position; }
@@ -28,5 +26,4 @@ public class EmployeeDTO {
     public void setPhone(String phone) { this.phone = phone; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-
 }

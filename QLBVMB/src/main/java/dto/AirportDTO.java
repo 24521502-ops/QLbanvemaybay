@@ -1,10 +1,9 @@
-
 package dto;
 
 import java.util.Date;
 
 public class AirportDTO {
-    private int airportID;
+    private String airportID;
     private String airportName;
     private String city;
     private String country;
@@ -12,12 +11,12 @@ public class AirportDTO {
 
     public AirportDTO() {}
 
-    public AirportDTO(int airportID, String airportName, String city, String country, String iataCode) {
+    public AirportDTO(String airportID, String airportName, String city, String country, String iataCode) {
         this.airportID = airportID; this.airportName = airportName; this.city = city; this.country = country; this.iataCode = iataCode;
     }
 
-    public int getAirportID() { return airportID; }
-    public void setAirportID(int airportID) { this.airportID = airportID; }
+    public String getAirportID() { return airportID; }
+    public void setAirportID(String airportID) { this.airportID = airportID; }
     public String getAirportName() { return airportName; }
     public void setAirportName(String airportName) { this.airportName = airportName; }
     public String getCity() { return city; }
