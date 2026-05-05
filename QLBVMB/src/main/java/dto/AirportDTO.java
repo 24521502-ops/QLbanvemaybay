@@ -1,5 +1,7 @@
 package dto;
 
+import java.util.Date;
+
 public class AirportDTO {
     private String airportID;
     private String airportName;
