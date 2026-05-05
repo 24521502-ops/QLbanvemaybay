@@ -587,6 +587,85 @@ END;
 
 -- ================================= Bảng TRANSACTION_HISTORY =================================
 
+CREATE OR REPLACE PROCEDURE SP_GET_DASHBOARD_REPORT (
+    p_StartDate IN DATE,          -- Ngày bắt đầu lọc (VD: '01-OCT-2023')
+    p_EndDate IN DATE,            -- Ngày kết thúc lọc (VD: '31-OCT-2023')
+    p_AirlineID IN NUMBER,        -- ID hãng bay (Truyền NULL nếu muốn xem TẤT CẢ hãng)
+    p_KPI_Data OUT SYS_REFCURSOR,       -- Trả về 4 thẻ chỉ số tổng quan
+    p_RevenueTrend OUT SYS_REFCURSOR,   -- Trả về dữ liệu Biểu đồ đường (Theo tháng)
+    p_ClassRevenue OUT SYS_REFCURSOR    -- Trả về dữ liệu Biểu đồ cột (Theo hạng ghế)
+) AS
+BEGIN
+    -- ==============================================================================
+    -- 1. TẬP KẾT QUẢ 1: 4 THẺ CHỈ SỐ TỔNG QUAN (KPIs)
+    -- ==============================================================================
+    OPEN p_KPI_Data FOR
+        WITH FilteredFlights AS (
+            -- Lọc các chuyến bay trong khoảng thời gian và theo Hãng (nếu có)
+            SELECT FlightID, DepartureTime, FlightStatus
+            FROM FLIGHT
+            WHERE (p_AirlineID IS NULL OR AirlineID = p_AirlineID)
+              AND DepartureTime BETWEEN p_StartDate AND p_EndDate
+        )
+        SELECT 
+            -- Tổng doanh thu (Lấy từ vé đã thanh toán thuộc các chuyến bay hợp lệ)
+            (SELECT NVL(SUM(t.Price), 0) 
+             FROM TICKET t 
+             JOIN FilteredFlights f ON t.FlightID = f.FlightID 
+             WHERE t.TicketStatus = 'PAID') AS Total_Revenue,
+             
+            -- Tổng số đặt chỗ (Đếm số Booking không bị hủy có chứa vé của các chuyến này)
+            (SELECT COUNT(DISTINCT t.BookingID) 
+             FROM TICKET t 
+             JOIN FilteredFlights f ON t.FlightID = f.FlightID 
+             WHERE t.TicketStatus != 'CANCELLED') AS Total_Bookings,
+             
+            -- Tỷ lệ lấp đầy ghế (Sử dụng lại Function FUNC_GET_OCCUPANCY_RATE của bạn)
+            (SELECT NVL(ROUND(AVG(FUNC_GET_OCCUPANCY_RATE(f.FlightID)), 2), 0) 
+             FROM FilteredFlights f) AS Avg_Occupancy_Rate,
+             
+            -- Số chuyến bay hoàn thành (Giả sử bạn dùng status COMPLETED cho chuyến bay đã bay)
+            (SELECT COUNT(FlightID) 
+             FROM FilteredFlights 
+             WHERE FlightStatus = 'COMPLETED') AS Completed_Flights
+        FROM DUAL;
+
+    -- ==============================================================================
+    -- 2. TẬP KẾT QUẢ 2: BIỂU ĐỒ XU HƯỚNG DOANH THU (Theo tháng)
+    -- ==============================================================================
+    OPEN p_RevenueTrend FOR
+        SELECT 
+            TO_CHAR(f.DepartureTime, 'MM') AS Month_Number,
+            TO_CHAR(f.DepartureTime, 'Mon') AS Month_Name,
+            NVL(SUM(t.Price), 0) AS Monthly_Revenue
+        FROM TICKET t
+        JOIN FLIGHT f ON t.FlightID = f.FlightID
+        WHERE (p_AirlineID IS NULL OR f.AirlineID = p_AirlineID)
+          AND f.DepartureTime BETWEEN p_StartDate AND p_EndDate
+          AND t.TicketStatus = 'PAID'
+        GROUP BY TO_CHAR(f.DepartureTime, 'MM'), TO_CHAR(f.DepartureTime, 'Mon')
+        ORDER BY Month_Number;
+
+    -- ==============================================================================
+    -- 3. TẬP KẾT QUẢ 3: BIỂU ĐỒ DOANH THU THEO HẠNG GHẾ
+    -- ==============================================================================
+    OPEN p_ClassRevenue FOR
+        SELECT 
+            s.Class AS Seat_Class,
+            NVL(SUM(t.Price), 0) AS Revenue,
+            COUNT(t.TicketID) AS Tickets_Sold
+        FROM TICKET t
+        JOIN FLIGHT f ON t.FlightID = f.FlightID
+        JOIN SEAT s ON t.SeatID = s.SeatID
+        WHERE (p_AirlineID IS NULL OR f.AirlineID = p_AirlineID)
+          AND f.DepartureTime BETWEEN p_StartDate AND p_EndDate
+          AND t.TicketStatus = 'PAID'
+        GROUP BY s.Class
+        ORDER BY Revenue DESC;
+
+END SP_GET_DASHBOARD_REPORT;
+
+
 -- ================================= Bảng SEATCLASSPRICE  =================================
 
 -- Thêm giá vé ban đầu cho hạng ghế của chuyến bay
