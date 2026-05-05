@@ -84,3 +84,23 @@ EXCEPTION
     WHEN NO_DATA_FOUND THEN RETURN 'LỖI: Vé không tồn tại.';
 END;
 
+--Function tính "Giờ Lên Máy Bay" để in vé (Page 14)
+CREATE OR REPLACE FUNCTION FUNC_CALCULATE_BOARDING_TIME (p_FlightID IN NUMBER) 
+RETURN DATE AS
+    v_DepartureTime DATE;
+    v_BoardingTime DATE;
+BEGIN
+    -- Lấy giờ khởi hành
+    SELECT DepartureTime INTO v_DepartureTime 
+    FROM FLIGHT 
+    WHERE FlightID = p_FlightID;
+    
+    -- Trừ đi 40 phút (trong Oracle: 1 ngày = 24h * 60p = 1440 phút)
+    v_BoardingTime := v_DepartureTime - (40 / 1440);
+    
+    RETURN v_BoardingTime;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
