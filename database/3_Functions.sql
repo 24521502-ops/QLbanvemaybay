@@ -1,6 +1,6 @@
---1. Lấy số ghế trống theo hạng 
-CREATE OR REPLACE FUNCTION FUNC_GET_AVAILABLE_SEATS (p_FlightID IN NUMBER, p_Class IN VARCHAR2) RETURN NUMBER AS
-    v_TotalSeats NUMBER; v_BookedSeats NUMBER; v_AircraftID NUMBER;
+-- 1. Lấy số ghế trống theo hạng 
+CREATE OR REPLACE FUNCTION FUNC_GET_AVAILABLE_SEATS (p_FlightID IN VARCHAR2, p_Class IN VARCHAR2) RETURN NUMBER AS
+    v_TotalSeats NUMBER; v_BookedSeats NUMBER; v_AircraftID VARCHAR2(20);
 BEGIN
     SELECT AircraftID INTO v_AircraftID FROM FLIGHT WHERE FlightID = p_FlightID;
     SELECT COUNT(*) INTO v_TotalSeats FROM SEAT WHERE AircraftID = v_AircraftID AND Class = p_Class;
@@ -9,10 +9,10 @@ BEGIN
 
     RETURN v_TotalSeats - v_BookedSeats;
 END;
+/
 
-
---2.Tính giá vé động
-CREATE OR REPLACE FUNCTION FUNC_GET_DYNAMIC_PRICE (p_FlightID IN NUMBER, p_Class IN VARCHAR2) RETURN NUMBER AS
+-- 2. Tính giá vé động
+CREATE OR REPLACE FUNCTION FUNC_GET_DYNAMIC_PRICE (p_FlightID IN VARCHAR2, p_Class IN VARCHAR2) RETURN NUMBER AS
     v_BasePrice NUMBER; v_DepartureTime DATE; v_DaysDifference NUMBER;
 BEGIN
     SELECT Price INTO v_BasePrice FROM SEATCLASSPRICE WHERE FlightID = p_FlightID AND Class = p_Class;
@@ -23,10 +23,10 @@ BEGIN
     ELSIF v_DaysDifference <= 3 THEN RETURN v_BasePrice * 1.2;
     ELSE RETURN v_BasePrice; END IF;
 END;
+/
 
-
---3. Tính tỷ lệ lấp đầy 
-CREATE OR REPLACE FUNCTION FUNC_GET_OCCUPANCY_RATE (p_FlightID IN NUMBER) RETURN NUMBER AS
+-- 3. Tính tỷ lệ lấp đầy 
+CREATE OR REPLACE FUNCTION FUNC_GET_OCCUPANCY_RATE (p_FlightID IN VARCHAR2) RETURN NUMBER AS
     v_Capacity NUMBER; v_Booked NUMBER;
 BEGIN
     SELECT a.Capacity INTO v_Capacity FROM FLIGHT f JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID WHERE f.FlightID = p_FlightID;
@@ -35,10 +35,10 @@ BEGIN
     IF v_Capacity = 0 THEN RETURN 0; END IF;
     RETURN ROUND((v_Booked / v_Capacity) * 100, 2);
 END;
+/
 
-
---4. Tính phí hoàn tiền khi hủy
-CREATE OR REPLACE FUNCTION FUNC_CALCULATE_REFUND (p_TicketID IN NUMBER) RETURN NUMBER AS
+-- 4. Tính phí hoàn tiền khi hủy
+CREATE OR REPLACE FUNCTION FUNC_CALCULATE_REFUND (p_TicketID IN VARCHAR2) RETURN NUMBER AS
     v_Price NUMBER; v_DepartureTime DATE; v_HoursDiff NUMBER; v_RefundAmount NUMBER;
 BEGIN
     SELECT t.Price, f.DepartureTime INTO v_Price, v_DepartureTime
@@ -54,10 +54,10 @@ BEGIN
 EXCEPTION
     WHEN NO_DATA_FOUND THEN RETURN 0;
 END;
+/
 
-
---5. Tạo mã vé PNR tự động 
-CREATE OR REPLACE FUNCTION FUNC_GENERATE_TICKET_CODE (p_FlightID IN NUMBER, p_SeatID IN NUMBER) RETURN VARCHAR2 AS
+-- 5. Tạo mã vé PNR tự động 
+CREATE OR REPLACE FUNCTION FUNC_GENERATE_TICKET_CODE (p_FlightID IN VARCHAR2, p_SeatID IN VARCHAR2) RETURN VARCHAR2 AS
     v_FlightNum VARCHAR2(50); v_SeatNum VARCHAR2(10);
 BEGIN
     SELECT FlightNumber INTO v_FlightNum FROM FLIGHT WHERE FlightID = p_FlightID;
@@ -65,10 +65,10 @@ BEGIN
     
     RETURN v_FlightNum || '-' || v_SeatNum || '-' || TO_CHAR(SYSDATE, 'MMDD');
 END;
+/
 
-
---6. Kiểm tra điều kiện Check-in 
-CREATE OR REPLACE FUNCTION FUNC_CHECK_VALID_CHECKIN (p_TicketID IN NUMBER) RETURN VARCHAR2 AS
+-- 6. Kiểm tra điều kiện Check-in 
+CREATE OR REPLACE FUNCTION FUNC_CHECK_VALID_CHECKIN (p_TicketID IN VARCHAR2) RETURN VARCHAR2 AS
     v_TicketStatus VARCHAR2(50); v_DepartureTime DATE; v_HoursToFlight NUMBER;
 BEGIN
     SELECT t.TicketStatus, f.DepartureTime INTO v_TicketStatus, v_DepartureTime
@@ -83,9 +83,10 @@ BEGIN
 EXCEPTION
     WHEN NO_DATA_FOUND THEN RETURN 'LỖI: Vé không tồn tại.';
 END;
+/
 
---Function tính "Giờ Lên Máy Bay" để in vé (Page 14)
-CREATE OR REPLACE FUNCTION FUNC_CALCULATE_BOARDING_TIME (p_FlightID IN NUMBER) 
+-- 7. Function tính "Giờ Lên Máy Bay" để in vé (Page 14)
+CREATE OR REPLACE FUNCTION FUNC_CALCULATE_BOARDING_TIME (p_FlightID IN VARCHAR2) 
 RETURN DATE AS
     v_DepartureTime DATE;
     v_BoardingTime DATE;
