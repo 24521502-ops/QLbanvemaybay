@@ -1,9 +1,5 @@
 package dto;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 269a6f14206fe8801516b8183fa33338261b487c
 public class AirlineDTO {
     private String airlineID;
     private String airlineName;
