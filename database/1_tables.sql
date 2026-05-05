@@ -43,6 +43,7 @@ CREATE TABLE FLIGHT (
     RouteID NUMBER,
     DepartureTime DATE NOT NULL,
     ArrivalTime DATE,
+    Gate VARCHAR2(10),
     FlightStatus VARCHAR2(50),
     CONSTRAINT fk_flight_airline FOREIGN KEY (AirlineID) REFERENCES AIRLINE(AirlineID),
     CONSTRAINT fk_flight_aircraft FOREIGN KEY (AircraftID) REFERENCES AIRCRAFT(AircraftID),
