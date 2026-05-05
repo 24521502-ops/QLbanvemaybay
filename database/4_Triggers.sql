@@ -18,7 +18,7 @@ BEGIN
         'Ghế này đã được đặt trong chuyến bay!');
     END IF;
 END;
-
+/
 
 --2.Trigger kiểm tra số vé không vượt quá số ghế (RB65)//
 CREATE OR REPLACE TRIGGER TRG_PREVENT_OVERBOOKING
@@ -34,7 +34,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20002, 'Lỗi: Chuyến bay đã hết chỗ (Overbooking).');
     END IF;
 END;
-
+/
 
 
 --3.Trigger cập nhật TotalAmount của BOOKING (RB67)//
@@ -58,7 +58,7 @@ BEGIN
         WHERE BookingID = :OLD.BookingID;
     END IF;
 END;
-
+/
 
 --4.Trigger không được đặt vé sau khi chuyến bay đã khởi hành (RB63)//
 CREATE OR REPLACE TRIGGER TRG_PREVENT_PAST_BOOKING
@@ -72,15 +72,15 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20003, 'Lỗi: Chuyến bay đã hoặc đang khởi hành.');
     END IF;
 END;
-
+/
 
 --5.Trigger ghế phải thuộc đúng máy bay của chuyến bay (RB62)
 CREATE OR REPLACE TRIGGER TRG_RB65_CHECK_SEAT_AIRCRAFT
 BEFORE INSERT OR UPDATE ON TICKET
 FOR EACH ROW
 DECLARE
-    v_FlightAircraftID NUMBER;
-    v_SeatAircraftID NUMBER;
+    v_FlightAircraftID VARCHAR2(20); -- Đã sửa thành VARCHAR2
+    v_SeatAircraftID VARCHAR2(20);   -- Đã sửa thành VARCHAR2
 BEGIN
     -- Lấy AircraftID của chuyến bay
     SELECT AircraftID INTO v_FlightAircraftID 
@@ -97,7 +97,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20004, 'RB65: Lỗi! Ghế được chọn không thuộc về máy bay thực hiện chuyến bay này.');
     END IF;
 END;
-
+/
 
 --6.Ràng buộc 64: Vé chỉ hợp lệ khi đã có thanh toán
 CREATE OR REPLACE TRIGGER TRG_RB64_CHECK_TICKET_PAYMENT
@@ -106,19 +106,20 @@ FOR EACH ROW
 DECLARE
     v_PaymentCount NUMBER;
 BEGIN
-    -- Chỉ kiểm tra khi trạng thái vé được đổi thành ACTIVE
-    IF :NEW.TicketStatus = 'ACTIVE' THEN
+    -- Đã sửa 'ACTIVE' thành 'PAID' để khớp với Constraint bảng TICKET
+    IF :NEW.TicketStatus = 'PAID' THEN
         
         -- Đếm số lượng giao dịch thanh toán của Booking này
         SELECT COUNT(*) INTO v_PaymentCount
         FROM PAYMENT
-        WHERE BookingID = :NEW.BookingID;
+        WHERE BookingID = :NEW.BookingID AND PaymentStatus = 'SUCCESS';
 
         IF v_PaymentCount = 0 THEN
-            RAISE_APPLICATION_ERROR(-20006, 'RB64: Lỗi! Vé chỉ được kích hoạt hợp lệ (ACTIVE) khi Booking đã được thanh toán.');
+            RAISE_APPLICATION_ERROR(-20006, 'RB64: Lỗi! Vé chỉ được cập nhật trạng thái PAID khi Booking đã được thanh toán thành công.');
         END IF;
     END IF;
 END;
+/
 
 
 -- ================================= Bảng FLIGHT =================================
@@ -140,7 +141,7 @@ CREATE OR REPLACE TRIGGER TRG_Check_Airline_Aircraft
 BEFORE INSERT OR UPDATE ON FLIGHT 
 FOR EACH ROW 
 DECLARE
-    v_airlineID_aircraft NUMBER; 
+    v_airlineID_aircraft VARCHAR2(20); -- Đã sửa thành VARCHAR2
 BEGIN
     SELECT AirlineID INTO v_airlineID_aircraft 
     FROM AIRCRAFT 
@@ -149,9 +150,8 @@ BEGIN
     IF v_airlineID_aircraft <> :NEW.AirlineID THEN
         RAISE_APPLICATION_ERROR(-20004, 'Máy bay không thuộc sở hữu của hãng hàng không này!');
     END IF;
-
 END;
-
+/
 
 --9 Đảm bảo máy bay không bay 2 chuyến cùng lúc
 CREATE OR REPLACE TRIGGER TRG_CHECK_AIRCRAFT_OVERLAP
@@ -160,8 +160,9 @@ FOR EACH ROW
 DECLARE
     v_Count NUMBER;
 BEGIN
+    -- Đã sửa số 0 thành chuỗi '0' trong hàm NVL
     SELECT COUNT(*) INTO v_Count FROM FLIGHT
-    WHERE AircraftID = :NEW.AircraftID AND FlightID != NVL(:NEW.FlightID, 0)
+    WHERE AircraftID = :NEW.AircraftID AND FlightID != NVL(:NEW.FlightID, '0')
       AND ((:NEW.DepartureTime BETWEEN DepartureTime AND ArrivalTime) OR
           (:NEW.ArrivalTime BETWEEN DepartureTime AND ArrivalTime));
 
@@ -169,24 +170,24 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20004, 'Lỗi: Máy bay bị trùng lịch bay.');
     END IF;
 END;
-
-
+/
 
 -- ================================= Bảng PAYMENT =================================
-
+    
 --10. Trigger tự tạo Transaction History khi thanh toán---------//
 CREATE OR REPLACE TRIGGER TRG_LOG_SUCCESSFUL_PAYMENT
 AFTER INSERT OR UPDATE OF PaymentStatus ON PAYMENT
 FOR EACH ROW
 WHEN (NEW.PaymentStatus = 'SUCCESS')
 DECLARE
-    v_CustomerID NUMBER;
+    v_CustomerID VARCHAR2(20); -- Đã sửa thành VARCHAR2
 BEGIN
     SELECT CustomerID INTO v_CustomerID FROM BOOKING WHERE BookingID = :NEW.BookingID;
 
     INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description)
     VALUES (v_CustomerID, :NEW.BookingID, :NEW.PaymentID, 'PAYMENT', :NEW.Amount, SYSDATE, 'Thanh toán thành công qua ' || :NEW.PaymentMethod);
 END;
+/
 
 
 --11. Ràng buộc 60: Payment không vượt quá tổng tiền Booking
