@@ -1,5 +1,5 @@
 CREATE TABLE AIRLINE (
-    AirlineID NUMBER PRIMARY KEY,
+    AirlineID VARCHAR2(20) PRIMARY KEY,
     AirlineName VARCHAR2(100) NOT NULL,
     Country VARCHAR2(100) NOT NULL,
     Phone VARCHAR2(20),
@@ -7,7 +7,7 @@ CREATE TABLE AIRLINE (
 );
 
 CREATE TABLE AIRPORT (
-    AirportID NUMBER PRIMARY KEY,
+    AirportID VARCHAR2(20) PRIMARY KEY,
     AirportName VARCHAR2(150) NOT NULL,
     City VARCHAR2(100) NOT NULL,
     Country VARCHAR2(100) NOT NULL,
@@ -15,19 +15,18 @@ CREATE TABLE AIRPORT (
 );
 
 CREATE TABLE AIRCRAFT (
-    AircraftID NUMBER PRIMARY KEY,
-    AirlineID NUMBER,
+    AircraftID VARCHAR2(20) PRIMARY KEY,
+    AirlineID VARCHAR2(20),
     Model VARCHAR2(100) NOT NULL,
     Capacity NUMBER CHECK (Capacity > 0),
     ManufactureYear NUMBER,
-    CONSTRAINT fk_aircraft_airline 
-        FOREIGN KEY (AirlineID) REFERENCES AIRLINE(AirlineID)
+    CONSTRAINT fk_aircraft_airline FOREIGN KEY (AirlineID) REFERENCES AIRLINE(AirlineID)
 );
 
 CREATE TABLE ROUTE (
-    RouteID NUMBER PRIMARY KEY,
-    DepartureAirportID NUMBER,
-    ArrivalAirportID NUMBER,
+    RouteID VARCHAR2(20) PRIMARY KEY,
+    DepartureAirportID VARCHAR2(20),
+    ArrivalAirportID VARCHAR2(20),
     Distance NUMBER,
     EstimatedTime NUMBER,
     CONSTRAINT fk_route_dep FOREIGN KEY (DepartureAirportID) REFERENCES AIRPORT(AirportID),
@@ -36,25 +35,24 @@ CREATE TABLE ROUTE (
 );
 
 CREATE TABLE FLIGHT (
-    FlightID NUMBER PRIMARY KEY,
+    FlightID VARCHAR2(20) PRIMARY KEY,
     FlightNumber VARCHAR2(50) UNIQUE,
-    AirlineID NUMBER,
-    AircraftID NUMBER,
-    RouteID NUMBER,
+    AirlineID VARCHAR2(20),
+    AircraftID VARCHAR2(20),
+    RouteID VARCHAR2(20),
     DepartureTime DATE NOT NULL,
     ArrivalTime DATE,
     Gate VARCHAR2(10),
-    FlightStatus VARCHAR2(50),
+    FlightStatus VARCHAR2(50) DEFAULT 'SCHEDULED',
     CONSTRAINT fk_flight_airline FOREIGN KEY (AirlineID) REFERENCES AIRLINE(AirlineID),
     CONSTRAINT fk_flight_aircraft FOREIGN KEY (AircraftID) REFERENCES AIRCRAFT(AircraftID),
     CONSTRAINT fk_flight_route FOREIGN KEY (RouteID) REFERENCES ROUTE(RouteID),
     CONSTRAINT chk_flight_time CHECK (ArrivalTime > DepartureTime),
-    -- Thêm ràng buộc FlightStatus
     CONSTRAINT chk_flight_status CHECK (FlightStatus IN ('SCHEDULED', 'DELAYED', 'CANCELLED', 'LANDED', 'COMPLETED'))
 );
 
 CREATE TABLE USERS (
-    UserID NUMBER PRIMARY KEY,
+    UserID VARCHAR2(20) PRIMARY KEY,
     FullName VARCHAR2(150) NOT NULL,
     Email VARCHAR2(100) UNIQUE NOT NULL,
     Created_At DATE DEFAULT SYSDATE,
@@ -63,22 +61,21 @@ CREATE TABLE USERS (
 );
 
 CREATE TABLE ACCOUNT (
-    AccountID NUMBER PRIMARY KEY,
-    UserID NUMBER,
+    AccountID VARCHAR2(20) PRIMARY KEY,
+    UserID VARCHAR2(20),
     UserName VARCHAR2(100) UNIQUE NOT NULL,
     Password VARCHAR2(200) NOT NULL,
-    Status VARCHAR2(50),
+    Status VARCHAR2(50) DEFAULT 'ACTIVE',
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
     IsDeleted NUMBER CHECK (IsDeleted IN (0,1)),
     CONSTRAINT fk_account_user FOREIGN KEY (UserID) REFERENCES USERS(UserID),
-    -- Thêm ràng buộc Status
     CONSTRAINT chk_account_status CHECK (Status IN ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'LOCKED'))
 );
 
 CREATE TABLE CUSTOMER (
-    CustomerID NUMBER PRIMARY KEY,
-    AccountID NUMBER UNIQUE,
+    CustomerID VARCHAR2(20) PRIMARY KEY,
+    AccountID VARCHAR2(20) UNIQUE,
     FullName VARCHAR2(150) NOT NULL,
     Gender VARCHAR2(10),
     DateOfBirth DATE,
@@ -87,13 +84,12 @@ CREATE TABLE CUSTOMER (
     PassportNumber VARCHAR2(50) UNIQUE,
     Nationality VARCHAR2(50),
     CONSTRAINT fk_customer_account FOREIGN KEY (AccountID) REFERENCES ACCOUNT(AccountID),
-    -- Thêm ràng buộc Gender
     CONSTRAINT chk_customer_gender CHECK (Gender IN ('Male', 'Female', 'Other'))
 );
 
 CREATE TABLE EMPLOYEE (
-    EmployeeID NUMBER PRIMARY KEY,
-    AccountID NUMBER UNIQUE,
+    EmployeeID VARCHAR2(20) PRIMARY KEY,
+    AccountID VARCHAR2(20) UNIQUE,
     FullName VARCHAR2(150) NOT NULL,
     Position VARCHAR2(100),
     Phone VARCHAR2(20),
@@ -102,79 +98,82 @@ CREATE TABLE EMPLOYEE (
 );
 
 CREATE TABLE SEAT (
-    SeatID NUMBER PRIMARY KEY,
-    AircraftID NUMBER,
+    SeatID VARCHAR2(20) PRIMARY KEY,
+    AircraftID VARCHAR2(20),
     SeatNumber VARCHAR2(10) NOT NULL,
     Class VARCHAR2(20),
     CONSTRAINT fk_seat_aircraft FOREIGN KEY (AircraftID) REFERENCES AIRCRAFT(AircraftID),
     CONSTRAINT uq_seat UNIQUE (AircraftID, SeatNumber),
-    -- Thêm ràng buộc Class
     CONSTRAINT chk_seat_class CHECK (Class IN ('Economy', 'Premium Economy', 'Business', 'First Class'))
 );
 
 CREATE TABLE BOOKING (
-    BookingID NUMBER PRIMARY KEY,
-    CustomerID NUMBER,
-    EmployeeID NUMBER,
-    BookingDate DATE NOT NULL,
-    TotalAmount NUMBER CHECK (TotalAmount >= 0),
-    Status VARCHAR2(50),
+    BookingID VARCHAR2(20) PRIMARY KEY,
+    CustomerID VARCHAR2(20),
+    EmployeeID VARCHAR2(20),
+    BookingDate DATE DEFAULT SYSDATE NOT NULL,
+    TotalAmount NUMBER DEFAULT 0 CHECK (TotalAmount >= 0),
+    Status VARCHAR2(50) DEFAULT 'PENDING',
     CONSTRAINT fk_booking_customer FOREIGN KEY (CustomerID) REFERENCES CUSTOMER(CustomerID),
     CONSTRAINT fk_booking_employee FOREIGN KEY (EmployeeID) REFERENCES EMPLOYEE(EmployeeID),
-    -- Thêm ràng buộc Status
     CONSTRAINT chk_booking_status CHECK (Status IN ('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'))
 );
 
-
+CREATE TABLE PASSENGER (
+    PassengerID VARCHAR2(20) PRIMARY KEY,
+    FullName VARCHAR2(150) NOT NULL,
+    Gender VARCHAR2(10),
+    DateOfBirth DATE,
+    PassportNumber VARCHAR2(50) UNIQUE,
+    CONSTRAINT chk_passenger_gender CHECK (Gender IN ('Male','Female','Other'))
+);
 
 CREATE TABLE TICKET (
-    TicketID NUMBER PRIMARY KEY,
-    BookingID NUMBER,
-    FlightID NUMBER,
-    SeatID NUMBER,
-    PassengerID NUMBER,
+    TicketID VARCHAR2(20) PRIMARY KEY,
+    BookingID VARCHAR2(20),
+    FlightID VARCHAR2(20),
+    SeatID VARCHAR2(20),
+    PassengerID VARCHAR2(20),
     Price NUMBER CHECK (Price > 0),
-    TicketStatus VARCHAR2(50),
+    TicketStatus VARCHAR2(50) DEFAULT 'BOOKED',
     CONSTRAINT fk_ticket_booking FOREIGN KEY (BookingID) REFERENCES BOOKING(BookingID),
     CONSTRAINT fk_ticket_flight FOREIGN KEY (FlightID) REFERENCES FLIGHT(FlightID),
     CONSTRAINT fk_ticket_seat FOREIGN KEY (SeatID) REFERENCES SEAT(SeatID),
     CONSTRAINT fk_ticket_passenger FOREIGN KEY (PassengerID) REFERENCES PASSENGER(PassengerID),
     CONSTRAINT uq_ticket_seat UNIQUE (FlightID, SeatID),
     CONSTRAINT uq_passenger_flight UNIQUE (PassengerID, FlightID),
-    CONSTRAINT chk_ticket_status CHECK (TicketStatus IN ('Booked','Paid','Cancelled','Checked-in'))
+    CONSTRAINT chk_ticket_status CHECK (TicketStatus IN ('BOOKED','PAID','CANCELLED','CHECKED-IN'))
 );
 
 CREATE TABLE PAYMENT (
-    PaymentID NUMBER PRIMARY KEY,
-    BookingID NUMBER,
-    PaymentDate DATE NOT NULL,
+    PaymentID VARCHAR2(20) PRIMARY KEY,
+    BookingID VARCHAR2(20),
+    PaymentDate DATE DEFAULT SYSDATE NOT NULL,
     Amount NUMBER CHECK (Amount > 0),
     PaymentMethod VARCHAR2(50),
     PaymentStatus VARCHAR2(50),
     CONSTRAINT fk_payment_booking FOREIGN KEY (BookingID) REFERENCES BOOKING(BookingID),
-    -- Thêm ràng buộc Method & Status
     CONSTRAINT chk_payment_method CHECK (PaymentMethod IN ('CREDIT CARD', 'BANK TRANSFER','MOMO')),
     CONSTRAINT chk_payment_status CHECK (PaymentStatus IN ('PENDING', 'SUCCESS', 'FAILED', 'REFUNDED'))
 );
 
 CREATE TABLE BAGGAGE (
-    BaggageID NUMBER PRIMARY KEY,
-    TicketID NUMBER,
+    BaggageID VARCHAR2(20) PRIMARY KEY,
+    TicketID VARCHAR2(20),
     Weight NUMBER CHECK (Weight >= 0),
     BaggageType VARCHAR2(50),
     CONSTRAINT fk_baggage_ticket FOREIGN KEY (TicketID) REFERENCES TICKET(TicketID),
-    -- Thêm ràng buộc BaggageType
     CONSTRAINT chk_baggage_type CHECK (BaggageType IN ('Carry-on', 'Checked','Fragile', 'Oversized'))
 );
 
 CREATE TABLE TRANSACTION_HISTORY (
-    TransactionID NUMBER PRIMARY KEY,
-    CustomerID NUMBER,
-    BookingID NUMBER,
-    PaymentID NUMBER,
+    TransactionID VARCHAR2(20) PRIMARY KEY,
+    CustomerID VARCHAR2(20),
+    BookingID VARCHAR2(20),
+    PaymentID VARCHAR2(20),
     TransactionType VARCHAR2(50),
     Amount NUMBER CHECK (Amount >= 0),
-    TransactionDate DATE NOT NULL,
+    TransactionDate DATE DEFAULT SYSDATE NOT NULL,
     Description VARCHAR2(255),
     CONSTRAINT fk_th_customer FOREIGN KEY (CustomerID) REFERENCES CUSTOMER(CustomerID),
     CONSTRAINT fk_th_booking FOREIGN KEY (BookingID) REFERENCES BOOKING(BookingID),
@@ -182,17 +181,16 @@ CREATE TABLE TRANSACTION_HISTORY (
 );
 
 CREATE TABLE SEATCLASSPRICE (
-    PriceID NUMBER PRIMARY KEY,
-    FlightID NUMBER,
+    PriceID VARCHAR2(20) PRIMARY KEY,
+    FlightID VARCHAR2(20),
     Class VARCHAR2(20),
     Price NUMBER CHECK (Price >= 0),
     CONSTRAINT fk_price_flight FOREIGN KEY (FlightID) REFERENCES FLIGHT(FlightID),
-    -- Thêm ràng buộc Class
     CONSTRAINT chk_price_class CHECK (Class IN ('Economy', 'Premium Economy', 'Business', 'First Class'))
 );
 
-CREATE TABLE FUNCTION (
-    FunctionID NUMBER PRIMARY KEY,
+CREATE TABLE "FUNCTION" (
+    FunctionID VARCHAR2(20) PRIMARY KEY,
     NameFunction VARCHAR2(100) NOT NULL,
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
@@ -200,8 +198,8 @@ CREATE TABLE FUNCTION (
 );
 
 CREATE TABLE ROLE (
-    RoleID NUMBER PRIMARY KEY,
-    FunctionID NUMBER,
+    RoleID VARCHAR2(20) PRIMARY KEY,
+    FunctionID VARCHAR2(20),
     AddPerm NUMBER CHECK (AddPerm IN (0,1)),
     EditPerm NUMBER CHECK (EditPerm IN (0,1)),
     DeletePerm NUMBER CHECK (DeletePerm IN (0,1)),
@@ -210,11 +208,11 @@ CREATE TABLE ROLE (
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
     IsDeleted NUMBER CHECK (IsDeleted IN (0,1)),
-    CONSTRAINT fk_role_function FOREIGN KEY (FunctionID) REFERENCES FUNCTION(FunctionID)
+    CONSTRAINT fk_role_function FOREIGN KEY (FunctionID) REFERENCES "FUNCTION"(FunctionID)
 );
 
 CREATE TABLE ROLE_GROUP (
-    RoleGroupID NUMBER PRIMARY KEY,
+    RoleGroupID VARCHAR2(20) PRIMARY KEY,
     NameRoleGroup VARCHAR2(100) NOT NULL,
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
@@ -222,8 +220,8 @@ CREATE TABLE ROLE_GROUP (
 );
 
 CREATE TABLE ROLE_GROUP_ASSIGN_ROLE (
-    RoleGroupID NUMBER,
-    RoleID NUMBER,
+    RoleGroupID VARCHAR2(20),
+    RoleID VARCHAR2(20),
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
     IsDeleted NUMBER CHECK (IsDeleted IN (0,1)),
@@ -233,8 +231,8 @@ CREATE TABLE ROLE_GROUP_ASSIGN_ROLE (
 );
 
 CREATE TABLE ACCOUNT_ASSIGN_ROLE_GROUP (
-    AccountID NUMBER,
-    RoleGroupID NUMBER,
+    AccountID VARCHAR2(20),
+    RoleGroupID VARCHAR2(20),
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
     IsDeleted NUMBER CHECK (IsDeleted IN (0,1)),
@@ -244,8 +242,8 @@ CREATE TABLE ACCOUNT_ASSIGN_ROLE_GROUP (
 );
 
 CREATE TABLE ACCOUNT_ASSIGN_ROLE (
-    AccountID NUMBER,
-    RoleID NUMBER,
+    AccountID VARCHAR2(20),
+    RoleID VARCHAR2(20),
     Created_At DATE DEFAULT SYSDATE,
     Updated_At DATE DEFAULT SYSDATE,
     IsDeleted NUMBER CHECK (IsDeleted IN (0,1)),
@@ -254,20 +252,8 @@ CREATE TABLE ACCOUNT_ASSIGN_ROLE (
     FOREIGN KEY (RoleID) REFERENCES ROLE(RoleID)
 );
 
-CREATE TABLE PASSENGER (
-    PassengerID NUMBER PRIMARY KEY,
-    FullName VARCHAR2(150) NOT NULL,
-    Gender VARCHAR2(10),
-    DateOfBirth DATE,
-    PassportNumber VARCHAR2(50) UNIQUE,
-    
-    CONSTRAINT chk_passenger_gender 
-    CHECK (Gender IN ('Male','Female','Other'))
-);
-
-
 -- =========================================================
---            TẠO CÁC VIEW HIỂN THỊ GIAO DIỆN
+--            TẠO VIEW HIỂN THỊ GIAO DIỆN
 -- =========================================================
 
 CREATE OR REPLACE VIEW VW_FLIGHT_LIST AS
@@ -285,4 +271,3 @@ JOIN ROUTE r ON f.RouteID = r.RouteID
 JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
 JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
 JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID;
-
