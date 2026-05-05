@@ -314,7 +314,46 @@ BEGIN
     COMMIT;
 END;
 
+--Procedure thêm chuyến bay trực tiếp từ UI (Tự động xử lý Tuyến bay - Page 5)
+CREATE OR REPLACE PROCEDURE SP_ADD_FLIGHT_UI (
+    p_FlightNumber IN VARCHAR2,
+    p_AirlineID IN NUMBER,
+    p_AircraftID IN NUMBER,
+    p_DepartureAirportID IN NUMBER,
+    p_ArrivalAirportID IN NUMBER,
+    p_DepartureTime IN DATE,
+    p_ArrivalTime IN DATE,
+    p_Gate IN VARCHAR2,
+    p_FlightStatus IN VARCHAR2
+) AS
+    v_RouteID NUMBER;
+BEGIN
+    -- 1. Tìm xem tuyến bay (Route) đã tồn tại chưa
+    BEGIN
+        SELECT RouteID INTO v_RouteID
+        FROM ROUTE
+        WHERE DepartureAirportID = p_DepartureAirportID 
+          AND ArrivalAirportID = p_ArrivalAirportID
+          AND ROWNUM = 1;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            -- 2. Nếu chưa có, insert tuyến bay mới và lấy RouteID vừa được trigger tự tạo ra
+            INSERT INTO ROUTE (DepartureAirportID, ArrivalAirportID)
+            VALUES (p_DepartureAirportID, p_ArrivalAirportID)
+            RETURNING RouteID INTO v_RouteID;
+    END;
 
+    -- 3. Thêm chuyến bay với RouteID (đã tìm thấy hoặc vừa tạo)
+    INSERT INTO FLIGHT (FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, Gate, FlightStatus)
+    VALUES (p_FlightNumber, p_AirlineID, p_AircraftID, v_RouteID, p_DepartureTime, p_ArrivalTime, p_Gate, NVL(p_FlightStatus, 'On Time'));
+    
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
 
 -- ================================= Bảng CUSTOMER  =================================
 
@@ -842,6 +881,44 @@ BEGIN
     END IF;
     COMMIT;
 END;
+
+--Procedure Đăng ký Tài Khoản & Khách hàng an toàn (Page 2)
+
+CREATE OR REPLACE PROCEDURE SP_REGISTER_ACCOUNT (
+    p_FullName IN VARCHAR2,
+    p_Email IN VARCHAR2,
+    p_Phone IN VARCHAR2,
+    p_Password IN VARCHAR2
+) AS
+    v_AccountID NUMBER;
+    v_HashedPassword VARCHAR2(256);
+    v_CheckEmail NUMBER;
+BEGIN
+    -- 1. Kiểm tra email đã tồn tại chưa
+    SELECT COUNT(*) INTO v_CheckEmail FROM ACCOUNT WHERE Email = p_Email;
+    IF v_CheckEmail > 0 THEN
+        RAISE_APPLICATION_ERROR(-20010, 'Lỗi: Email này đã được đăng ký trong hệ thống!');
+    END IF;
+
+    -- 2. Mã hóa mật khẩu (SHA-256 là chuẩn bảo mật hiện hành tốt nhất có sẵn trong Oracle)
+    v_HashedPassword := STANDARD_HASH(p_Password, 'SHA256');
+
+    -- 3. Tạo Account (Lấy AccountID do Trigger tự sinh ra thông qua RETURNING)
+    INSERT INTO ACCOUNT (Email, Password) -- Cột Username/Email tuỳ bạn đặt tên
+    VALUES (p_Email, v_HashedPassword)
+    RETURNING AccountID INTO v_AccountID;
+
+    -- 4. Tạo User/Khách hàng kết nối với AccountID vừa tạo
+    INSERT INTO USERS (AccountID, FullName, Phone) 
+    VALUES (v_AccountID, p_FullName, p_Phone);
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+/
 
 
 -- ================================= Bảng FUNCTION   =================================
