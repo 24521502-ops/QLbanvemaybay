@@ -2,80 +2,60 @@
    1. BẢNG DANH MỤC: AIRLINE, AIRPORT, AIRCRAFT, ROUTE
    ========================================================= */
 
--- Thêm 15 hãng hàng không
+-- Thêm 10 Hãng hàng không
 INSERT ALL
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Vietnam Airlines', 'Vietnam', '19001100', 'contact@vietnamairlines.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('VietJet Air', 'Vietnam', '19001886', 'info@vietjetair.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Bamboo Airways', 'Vietnam', '19001166', '19001166@bambooairways.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Pacific Airlines', 'Vietnam', '19001550', 'callcenter@pacificairlines.vn')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Vietravel Airlines', 'Vietnam', '19006686', 'customercare@vietravelairlines.vn')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Singapore Airlines', 'Singapore', '+6562238888', 'contact@singaporeair.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Thai Airways', 'Thailand', '+6623561111', 'contact@thaiairways.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Emirates', 'UAE', '+971600555555', 'customer.affairs@emirates.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Qatar Airways', 'Qatar', '+97440230000', 'support@qatarairways.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Korean Air', 'South Korea', '+8215882001', 'engcskal@koreanair.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Japan Airlines', 'Japan', '+81367333062', 'jal_info@jal.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('AirAsia', 'Malaysia', '+60321719222', 'support@airasia.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Delta Air Lines', 'USA', '+18002211212', 'charter@delta.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Lufthansa', 'Germany', '+496986799799', 'customer.relations@lufthansa.com')
-    INTO AIRLINE (AirlineName, Country, Phone, Email) VALUES ('Air France', 'France', '+33969393654', 'contact@airfrance.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (1, 'Vietnam Airlines', 'Vietnam', '19001100', 'vn@vietnamairlines.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (2, 'VietJet Air', 'Vietnam', '19001886', 'vj@vietjetair.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (3, 'Bamboo Airways', 'Vietnam', '19001166', 'bb@bambooairways.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (4, 'Singapore Airlines', 'Singapore', '+6562238888', 'contact@singaporeair.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (5, 'Thai Airways', 'Thailand', '+6623561111', 'contact@thaiairways.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (6, 'Qatar Airways', 'Qatar', '+97440230000', 'support@qatar.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (7, 'Emirates', 'UAE', '+971600555555', 'support@emirates.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (8, 'Korean Air', 'South Korea', '+8215882001', 'info@koreanair.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (9, 'Japan Airlines', 'Japan', '+81367333062', 'info@jal.com')
+    INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (10, 'Air France', 'France', '+33969393654', 'contact@airfrance.com')
 SELECT 1 FROM DUAL;
 
--- Thêm 15 sân bay
+-- Thêm 10 Sân bay
 INSERT ALL
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Tan Son Nhat', 'Ho Chi Minh', 'Vietnam', 'SGN')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Noi Bai', 'Hanoi', 'Vietnam', 'HAN')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Da Nang', 'Da Nang', 'Vietnam', 'DAD')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Cam Ranh', 'Nha Trang', 'Vietnam', 'CXR')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Phu Quoc', 'Phu Quoc', 'Vietnam', 'PQC')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Cat Bi', 'Hai Phong', 'Vietnam', 'HPH')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Lien Khuong', 'Da Lat', 'Vietnam', 'DLI')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Changi', 'Singapore', 'Singapore', 'SIN')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Suvarnabhumi', 'Bangkok', 'Thailand', 'BKK')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Incheon', 'Seoul', 'South Korea', 'ICN')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Narita', 'Tokyo', 'Japan', 'NRT')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Dubai Intl', 'Dubai', 'UAE', 'DXB')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Hamad', 'Doha', 'Qatar', 'DOH')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('JFK Intl', 'New York', 'USA', 'JFK')
-    INTO AIRPORT (AirportName, City, Country, IATACode) VALUES ('Charles de Gaulle', 'Paris', 'France', 'CDG')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (1, 'Tan Son Nhat', 'Ho Chi Minh', 'Vietnam', 'SGN')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (2, 'Noi Bai', 'Hanoi', 'Vietnam', 'HAN')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (3, 'Da Nang', 'Da Nang', 'Vietnam', 'DAD')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (4, 'Phu Quoc', 'Phu Quoc', 'Vietnam', 'PQC')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (5, 'Changi', 'Singapore', 'Singapore', 'SIN')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (6, 'Suvarnabhumi', 'Bangkok', 'Thailand', 'BKK')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (7, 'Hamad', 'Doha', 'Qatar', 'DOH')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (8, 'Dubai Intl', 'Dubai', 'UAE', 'DXB')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (9, 'Incheon', 'Seoul', 'South Korea', 'ICN')
+    INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (10, 'Narita', 'Tokyo', 'Japan', 'NRT')
 SELECT 1 FROM DUAL;
 
--- Thêm 15 Máy bay
+-- Thêm 10 Máy bay
 INSERT ALL
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (1, 'Airbus A321', 180, 2015)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (1, 'Boeing 787', 250, 2018)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (2, 'Airbus A320', 160, 2017)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (2, 'Airbus A321neo', 200, 2020)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (3, 'Boeing 787-9', 290, 2019)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (3, 'Airbus A320neo', 170, 2021)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (4, 'Airbus A320', 180, 2014)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (5, 'Airbus A321ceo', 210, 2020)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (6, 'Airbus A350', 300, 2018)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (7, 'Boeing 777', 350, 2016)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (8, 'Airbus A380', 500, 2015)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (9, 'Boeing 777X', 380, 2022)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (10, 'Boeing 747-8', 410, 2017)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (11, 'Boeing 787-8', 240, 2016)
-    INTO AIRCRAFT (AirlineID, Model, Capacity, ManufactureYear) VALUES (12, 'Airbus A320', 180, 2013)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (1, 1, 'Airbus A321', 180, 2018)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (2, 2, 'Airbus A320', 160, 2020)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (3, 3, 'Boeing 787', 250, 2021)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (4, 4, 'Airbus A350', 300, 2019)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (5, 5, 'Boeing 777', 350, 2017)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (6, 1, 'Boeing 787-9', 290, 2022)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (7, 2, 'Airbus A321neo', 200, 2021)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (8, 6, 'Airbus A380', 500, 2018)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (9, 8, 'Boeing 747-8', 410, 2016)
+    INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (10, 9, 'Boeing 787-8', 240, 2020)
 SELECT 1 FROM DUAL;
 
--- Thêm 15 Tuyến đường bay (Route)
+-- Thêm 10 Tuyến bay
 INSERT ALL
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 2, 1150, 120) -- SGN - HAN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 1, 1150, 120) -- HAN - SGN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 3, 600, 80)   -- SGN - DAD
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 3, 630, 85)   -- HAN - DAD
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 5, 300, 50)   -- SGN - PQC
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 5, 1200, 125) -- HAN - PQC
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 8, 1100, 120) -- SGN - SIN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 8, 2200, 190) -- HAN - SIN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 9, 750, 90)   -- SGN - BKK
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 10, 2700, 240) -- HAN - ICN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 10, 3600, 300) -- SGN - ICN
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 11, 3700, 310) -- HAN - NRT
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 11, 4300, 350) -- SGN - NRT
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 12, 5600, 480) -- SGN - DXB
-    INTO ROUTE (DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 15, 9200, 720) -- HAN - CDG
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (1, 1, 2, 1150, 120) -- SGN-HAN
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (2, 2, 1, 1150, 120) -- HAN-SGN
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (3, 1, 3, 600, 80)   -- SGN-DAD
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (4, 1, 4, 300, 50)   -- SGN-PQC
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (5, 1, 5, 1100, 120) -- SGN-SIN
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (6, 2, 6, 1200, 130) -- HAN-BKK
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (7, 1, 9, 3600, 300) -- SGN-ICN
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (8, 2, 10, 3700, 310) -- HAN-NRT
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (9, 1, 8, 5600, 480) -- SGN-DXB
+    INTO ROUTE (RouteID, DepartureAirportID, ArrivalAirportID, Distance, EstimatedTime) VALUES (10, 2, 7, 5500, 470) -- HAN-DOH
 SELECT 1 FROM DUAL;
 
 
@@ -83,80 +63,65 @@ SELECT 1 FROM DUAL;
    2. BẢNG NGƯỜI DÙNG: USERS, ACCOUNT, CUSTOMER, EMPLOYEE
    ========================================================= */
 
--- Thêm 20 Users
+-- Thêm 15 Users
 INSERT ALL
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Nguyen Van A', 'nguyenvana@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Tran Thi B', 'tranthib@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Le Van C', 'levanc@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Pham Thi D', 'phamthid@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Hoang Van E', 'hoangvane@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Ngo Thi F', 'ngothif@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Vu Van G', 'vuvang@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Dang Thi H', 'dangthih@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Bui Van I', 'buivani@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Do Thi K', 'dothik@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Ly Van L', 'lyvanl@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Truong Thi M', 'truongthim@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Dinh Van N', 'dinhvann@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Phan Thi P', 'phanthip@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Mai Van Q', 'maivanq@gmail.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Admin Sys', 'admin@system.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Staff One', 'staff1@airline.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Staff Two', 'staff2@airline.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Manager One', 'manager1@airline.com', 0)
-    INTO USERS (FullName, Email, IsDeleted) VALUES ('Manager Two', 'manager2@airline.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (1, 'Nguyen Khach A', 'khacha@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (2, 'Tran Khach B', 'khachb@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (3, 'Le Khach C', 'khachc@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (4, 'Pham Khach D', 'khachd@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (5, 'Hoang Khach E', 'khache@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (6, 'Vu Khach F', 'khachf@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (7, 'Dang Khach G', 'khachg@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (8, 'Bui Khach H', 'khachh@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (9, 'Do Khach I', 'khachi@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (10, 'Ly Khach K', 'khachk@gmail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (11, 'Admin He Thong', 'admin@airline.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (12, 'Nhan Vien Nam', 'nam.staff@airline.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (13, 'Nhan Vien Nu', 'nu.staff@airline.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (14, 'Quan Ly Chi Nhanh', 'manager1@airline.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES (15, 'Quan Ly Truong', 'manager2@airline.com', 0)
 SELECT 1 FROM DUAL;
 
--- Thêm 20 Accounts (Ánh xạ 1-1 với Users qua UserID 1-20)
+-- Thêm 15 Accounts (Trạng thái đa dạng: ACTIVE, INACTIVE, LOCKED)
 INSERT ALL
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (1, 'usera', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (2, 'userb', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (3, 'userc', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (4, 'userd', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (5, 'usere', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (6, 'userf', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (7, 'userg', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (8, 'userh', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (9, 'useri', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (10, 'userk', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (11, 'userl', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (12, 'userm', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (13, 'usern', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (14, 'userp', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (15, 'userq', 'pass123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (16, 'admin', 'admin123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (17, 'staff1', 'staff123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (18, 'staff2', 'staff123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (19, 'manager1', 'mgr123', 'ACTIVE', 0)
-    INTO ACCOUNT (UserID, UserName, Password, Status, IsDeleted) VALUES (20, 'manager2', 'mgr123', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (1, 1, 'khacha', 'pass1', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (2, 2, 'khachb', 'pass2', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (3, 3, 'khachc', 'pass3', 'LOCKED', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (4, 4, 'khachd', 'pass4', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (5, 5, 'khache', 'pass5', 'INACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (6, 6, 'khachf', 'pass6', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (7, 7, 'khachg', 'pass7', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (8, 8, 'khachh', 'pass8', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (9, 9, 'khachi', 'pass9', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (10, 10, 'khachk', 'pass10', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (11, 11, 'admin', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (12, 12, 'staffnam', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (13, 13, 'staffnu', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (14, 14, 'manager1', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES (15, 15, 'manager2', 'pass', 'ACTIVE', 0)
 SELECT 1 FROM DUAL;
 
--- Thêm 15 Customers (Gắn với Account từ 1 đến 15)
+-- Thêm 10 Customers (Khớp với Account 1-10)
 INSERT ALL
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (1, 'Nguyen Van A', 'Male', DATE '1990-01-15', '0901111111', 'nguyenvana@gmail.com', 'P001', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (2, 'Tran Thi B', 'Female', DATE '1992-05-20', '0902222222', 'tranthib@gmail.com', 'P002', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (3, 'Le Van C', 'Male', DATE '1985-08-10', '0903333333', 'levanc@gmail.com', 'P003', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (4, 'Pham Thi D', 'Female', DATE '1998-12-05', '0904444444', 'phamthid@gmail.com', 'P004', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (5, 'Hoang Van E', 'Male', DATE '2000-03-25', '0905555555', 'hoangvane@gmail.com', 'P005', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (6, 'Ngo Thi F', 'Female', DATE '1995-07-11', '0906666666', 'ngothif@gmail.com', 'P006', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (7, 'Vu Van G', 'Male', DATE '1988-11-30', '0907777777', 'vuvang@gmail.com', 'P007', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (8, 'Dang Thi H', 'Female', DATE '1993-02-14', '0908888888', 'dangthih@gmail.com', 'P008', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (9, 'Bui Van I', 'Male', DATE '1997-09-09', '0909999999', 'buivani@gmail.com', 'P009', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (10, 'Do Thi K', 'Female', DATE '1982-04-18', '0910000000', 'dothik@gmail.com', 'P010', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (11, 'Ly Van L', 'Male', DATE '1991-06-22', '0911111111', 'lyvanl@gmail.com', 'P011', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (12, 'Truong Thi M', 'Female', DATE '1996-10-15', '0912222222', 'truongthim@gmail.com', 'P012', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (13, 'Dinh Van N', 'Male', DATE '1989-01-08', '0913333333', 'dinhvann@gmail.com', 'P013', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (14, 'Phan Thi P', 'Female', DATE '1994-05-19', '0914444444', 'phanthip@gmail.com', 'P014', 'Vietnam')
-    INTO CUSTOMER (AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber, Nationality) VALUES (15, 'Mai Van Q', 'Male', DATE '1987-12-25', '0915555555', 'maivanq@gmail.com', 'P015', 'Vietnam')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (1, 1, 'Nguyen Khach A', 'Male', DATE '1990-01-01', '090111', 'khacha@gmail.com', 'P001')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (2, 2, 'Tran Khach B', 'Female', DATE '1992-02-02', '090222', 'khachb@gmail.com', 'P002')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (3, 3, 'Le Khach C', 'Male', DATE '1985-03-03', '090333', 'khachc@gmail.com', 'P003')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (4, 4, 'Pham Khach D', 'Female', DATE '1998-04-04', '090444', 'khachd@gmail.com', 'P004')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (5, 5, 'Hoang Khach E', 'Male', DATE '2000-05-05', '090555', 'khache@gmail.com', 'P005')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (6, 6, 'Vu Khach F', 'Female', DATE '1988-06-06', '090666', 'khachf@gmail.com', 'P006')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (7, 7, 'Dang Khach G', 'Male', DATE '1995-07-07', '090777', 'khachg@gmail.com', 'P007')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (8, 8, 'Bui Khach H', 'Female', DATE '1993-08-08', '090888', 'khachh@gmail.com', 'P008')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (9, 9, 'Do Khach I', 'Male', DATE '1991-09-09', '090999', 'khachi@gmail.com', 'P009')
+    INTO CUSTOMER (CustomerID, AccountID, FullName, Gender, DateOfBirth, Phone, Email, PassportNumber) VALUES (10, 10, 'Ly Khach K', 'Other', DATE '1996-10-10', '091000', 'khachk@gmail.com', 'P010')
 SELECT 1 FROM DUAL;
 
--- Thêm 5 Employees (Gắn với Account từ 16 đến 20)
+-- Thêm 5 Employees (Khớp với Account 11-15)
 INSERT ALL
-    INTO EMPLOYEE (AccountID, FullName, Position, Phone, Email) VALUES (16, 'Admin Sys', 'System Administrator', '0981000001', 'admin@system.com')
-    INTO EMPLOYEE (AccountID, FullName, Position, Phone, Email) VALUES (17, 'Staff One', 'Ticketing Staff', '0981000002', 'staff1@airline.com')
-    INTO EMPLOYEE (AccountID, FullName, Position, Phone, Email) VALUES (18, 'Staff Two', 'Ticketing Staff', '0981000003', 'staff2@airline.com')
-    INTO EMPLOYEE (AccountID, FullName, Position, Phone, Email) VALUES (19, 'Manager One', 'Branch Manager', '0981000004', 'manager1@airline.com')
-    INTO EMPLOYEE (AccountID, FullName, Position, Phone, Email) VALUES (20, 'Manager Two', 'Sales Manager', '0981000005', 'manager2@airline.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES (1, 11, 'Admin He Thong', 'System Admin', '099111', 'admin@airline.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES (2, 12, 'Nhan Vien Nam', 'Ticketing Staff', '099222', 'nam.staff@airline.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES (3, 13, 'Nhan Vien Nu', 'Ticketing Staff', '099333', 'nu.staff@airline.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES (4, 14, 'Quan Ly Chi Nhanh', 'Branch Manager', '099444', 'manager1@airline.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES (5, 15, 'Quan Ly Truong', 'General Manager', '099555', 'manager2@airline.com')
 SELECT 1 FROM DUAL;
 
 
@@ -164,207 +129,229 @@ SELECT 1 FROM DUAL;
    3. BẢNG GIAO DỊCH: FLIGHT, SEAT, PRICE, BOOKING, TICKET
    ========================================================= */
 
--- 1. Thêm 15 Chuyến bay (Đa dạng trạng thái thực tế)
+-- Thêm 10 Chuyến bay (Đủ các trạng thái)
 INSERT ALL
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('VN101', 1, 1, 1, 2, 1, SYSDATE - 1, SYSDATE - 1 + (2/24), 'COMPLETED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('VN102', 1, 2, 2, 1, 2, SYSDATE + 2, SYSDATE + 2 + (2/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('VJ201', 2, 3, 1, 3, 3, SYSDATE + 3, SYSDATE + 3 + (1.5/24), 'DELAYED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('VJ202', 2, 4, 2, 3, 4, SYSDATE + 4, SYSDATE + 4 + (1.5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('QH301', 3, 5, 1, 5, 5, SYSDATE + 5, SYSDATE + 5 + (1/24), 'CANCELLED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('QH302', 3, 6, 2, 5, 6, SYSDATE + 6, SYSDATE + 6 + (2.5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('BL401', 4, 7, 1, 8, 7, SYSDATE - 0.5, SYSDATE - 0.5 + (2/24), 'LANDED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('VU501', 5, 8, 2, 8, 8, SYSDATE + 8, SYSDATE + 8 + (4/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('SQ601', 6, 9, 1, 9, 9, SYSDATE + 9, SYSDATE + 9 + (1.5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('TG701', 7, 10, 2, 10, 10, SYSDATE + 10, SYSDATE + 10 + (4.5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('EK801', 8, 11, 1, 10, 11, SYSDATE + 11, SYSDATE + 11 + (5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('QR901', 9, 12, 2, 11, 12, SYSDATE + 12, SYSDATE + 12 + (5.5/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('KE001', 10, 13, 1, 11, 13, SYSDATE + 13, SYSDATE + 13 + (6/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('JL002', 11, 14, 1, 12, 14, SYSDATE + 14, SYSDATE + 14 + (8/24), 'SCHEDULED')
-    INTO FLIGHT (FlightNumber, AirlineID, AircraftID, DepartureAirportID, ArrivalAirportID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES ('AK003', 12, 15, 2, 15, 15, SYSDATE + 15, SYSDATE + 15 + (12/24), 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (1, 'VN101', 1, 1, 1, SYSDATE - 2, SYSDATE - 2 + 2/24, 'COMPLETED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (2, 'VN102', 1, 6, 2, SYSDATE - 1, SYSDATE - 1 + 2/24, 'LANDED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (3, 'VJ201', 2, 2, 3, SYSDATE + 1, SYSDATE + 1 + 1.5/24, 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (4, 'VJ202', 2, 7, 4, SYSDATE + 2, SYSDATE + 2 + 1/24, 'DELAYED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (5, 'BB301', 3, 3, 1, SYSDATE + 3, SYSDATE + 3 + 2/24, 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (6, 'BB302', 3, 3, 5, SYSDATE + 4, SYSDATE + 4 + 2/24, 'CANCELLED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (7, 'SQ401', 4, 4, 5, SYSDATE + 5, SYSDATE + 5 + 2/24, 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (8, 'TG501', 5, 5, 6, SYSDATE + 6, SYSDATE + 6 + 2.5/24, 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (9, 'KE601', 8, 9, 7, SYSDATE + 7, SYSDATE + 7 + 5/24, 'SCHEDULED')
+    INTO FLIGHT (FlightID, FlightNumber, AirlineID, AircraftID, RouteID, DepartureTime, ArrivalTime, FlightStatus) VALUES (10, 'JL701', 9, 10, 8, SYSDATE + 8, SYSDATE + 8 + 5.5/24, 'SCHEDULED')
 SELECT 1 FROM DUAL;
 
--- 2. Thêm 20 Ghế (Cho máy bay số 1 và 2 với 4 Hạng ghế)
+-- Thêm ~20 Ghế (Cho các máy bay 1, 2, 3, 4, 6)
 INSERT ALL
-    -- Máy bay 1 (ID 1 - 10 ghế): Có đủ 4 hạng ghế
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '1A', 'First Class')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '1B', 'First Class')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '2A', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '2B', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '10A', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '10B', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '10C', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '11A', 'Premium Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '11B', 'Premium Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (1, '11C', 'Premium Economy')
-    
-    -- Máy bay 2 (ID 2 - 10 ghế): Chỉ có Business và Economy
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '1A', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '1B', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '2A', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '2B', 'Business')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '15A', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '15B', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '15C', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '16A', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '16B', 'Economy')
-    INTO SEAT (AircraftID, SeatNumber, Class) VALUES (2, '16C', 'Economy')
+    -- Máy bay 1 (A321)
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (1, 1, '1A', 'Business')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (2, 1, '1B', 'Business')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (3, 1, '10A', 'Economy')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (4, 1, '10B', 'Economy')
+    -- Máy bay 2 (A320)
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (5, 2, '1A', 'Premium Economy')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (6, 2, '2A', 'Premium Economy')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (7, 2, '15C', 'Economy')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (8, 2, '15D', 'Economy')
+    -- Máy bay 3 (B787)
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (9, 3, '1A', 'First Class')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (10, 3, '1B', 'First Class')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (11, 3, '20A', 'Economy')
+    -- Máy bay 4 (A350)
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (12, 4, '5A', 'Business')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (13, 4, '30C', 'Economy')
+    -- Máy bay 6 (B787-9)
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (14, 6, '2A', 'Business')
+    INTO SEAT (SeatID, AircraftID, SeatNumber, Class) VALUES (15, 6, '12B', 'Economy')
 SELECT 1 FROM DUAL;
 
--- 3. Thêm Bảng giá vé (Đồng bộ với hạng ghế đã tạo ở trên)
+-- Bảng giá (Khớp theo Flight và Hạng ghế)
 INSERT ALL
-    -- Flight 1 (Sử dụng Máy bay 1)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (1, 'Economy', 1500000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (1, 'Premium Economy', 2200000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (1, 'Business', 4500000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (1, 'First Class', 9000000)
-    
-    -- Flight 2 (Sử dụng Máy bay 2)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (2, 'Economy', 1600000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (2, 'Business', 3800000)
-    
-    -- Các Flight khác (Giá đa dạng)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (3, 'Economy', 1200000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (3, 'Business', 2800000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (4, 'Economy', 1300000)
-    INTO SEATCLASSPRICE (FlightID, Class, Price) VALUES (5, 'Economy', 1000000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (1, 1, 'Business', 4000000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (2, 1, 'Economy', 1500000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (3, 2, 'Business', 4200000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (4, 2, 'Economy', 1600000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (5, 3, 'Premium Economy', 2000000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (6, 3, 'Economy', 1200000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (7, 5, 'First Class', 8000000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (8, 5, 'Economy', 1400000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (9, 7, 'Business', 6000000)
+    INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (10, 7, 'Economy', 2500000)
 SELECT 1 FROM DUAL;
 
--- 4. Thêm 15 Booking (Để TotalAmount = 0 vì đã có Trigger tính)
+-- Thêm 15 Hành khách (Gồm Khách hàng tự đi, và người thân/trẻ em)
 INSERT ALL
-    -- Nhóm 1: Đã xác nhận (CONFIRMED)
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (1, 2, SYSDATE - 5, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (2, 2, SYSDATE - 4, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (3, 3, SYSDATE - 3, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (4, 3, SYSDATE - 2, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (5, 2, SYSDATE - 1, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (6, 2, SYSDATE, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (7, 3, SYSDATE, 0, 'CONFIRMED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (8, 3, SYSDATE, 0, 'CONFIRMED')
-    
-    -- Nhóm 2: Chờ thanh toán (PENDING)
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (9, 2, SYSDATE, 0, 'PENDING')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (10, 2, SYSDATE, 0, 'PENDING')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (11, 3, SYSDATE, 0, 'PENDING')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (12, 3, SYSDATE, 0, 'PENDING')
-    
-    -- Nhóm 3: Đã hủy (CANCELLED)
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (13, 2, SYSDATE - 6, 0, 'CANCELLED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (14, 2, SYSDATE - 7, 0, 'CANCELLED')
-    INTO BOOKING (CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (15, 3, SYSDATE - 8, 0, 'CANCELLED')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (1, 'Nguyen Khach A', 'Male', DATE '1990-01-01', 'P001')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (2, 'Tran Khach B', 'Female', DATE '1992-02-02', 'P002')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (3, 'Le Khach C', 'Male', DATE '1985-03-03', 'P003')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (4, 'Pham Khach D', 'Female', DATE '1998-04-04', 'P004')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (5, 'Hoang Khach E', 'Male', DATE '2000-05-05', 'P005')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (6, 'Vu Khach F', 'Female', DATE '1988-06-06', 'P006')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (7, 'Dang Khach G', 'Male', DATE '1995-07-07', 'P007')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (8, 'Bui Khach H', 'Female', DATE '1993-08-08', 'P008')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (9, 'Do Khach I', 'Male', DATE '1991-09-09', 'P009')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (10, 'Ly Khach K', 'Other', DATE '1996-10-10', 'P010')
+    -- Người thân đi kèm
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (11, 'Nguyen Con Nho', 'Male', DATE '2015-01-01', 'P001_KID')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (12, 'Tran Con Nho', 'Female', DATE '2018-05-05', 'P002_KID')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (13, 'Le Vo C', 'Female', DATE '1987-03-03', 'P003_WIFE')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (14, 'Pham Chong D', 'Male', DATE '1995-04-04', 'P004_HUSBAND')
+    INTO PASSENGER (PassengerID, FullName, Gender, DateOfBirth, PassportNumber) VALUES (15, 'Hoang Ban E', 'Male', DATE '1999-05-05', 'P005_FRIEND')
 SELECT 1 FROM DUAL;
 
--- 5. Thêm 15 Ticket (Khớp chặt chẽ với Flight 1 & 2 và SeatID)
+-- Thêm 10 Booking (Khớp TotalAmount với giá vé bên dưới)
 INSERT ALL
-    -- Flight 1 (SeatID 1 -> 10)
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (1, 1, 1, 9000000, 'PAID')      -- First Class
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (2, 1, 2, 9000000, 'PAID')      -- First Class
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (3, 1, 3, 4500000, 'PAID')      -- Business
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (4, 1, 5, 1500000, 'PAID')      -- Economy
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (5, 1, 8, 2200000, 'PAID')      -- Premium Economy
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (11, 1, 6, 1500000, 'BOOKED')   -- Economy (Chờ TT)
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (12, 1, 9, 2200000, 'BOOKED')   -- Prem Eco (Chờ TT)
-    
-    -- Flight 2 (SeatID 11 -> 20)
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (6, 2, 11, 3800000, 'PAID')     -- Business
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (7, 2, 12, 3800000, 'PAID')     -- Business
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (8, 2, 15, 1600000, 'PAID')     -- Economy
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (9, 2, 16, 1600000, 'BOOKED')   -- Economy (Chờ TT)
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (10, 2, 17, 1600000, 'BOOKED')  -- Economy (Chờ TT)
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (13, 2, 18, 1600000, 'CANCELLED')-- Bị hủy
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (14, 2, 19, 1600000, 'CANCELLED')-- Bị hủy
-    INTO TICKET (BookingID, FlightID, SeatID, Price, TicketStatus) VALUES (15, 2, 20, 1600000, 'CANCELLED')-- Bị hủy
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (1, 1, 2, SYSDATE - 10, 5500000, 'COMPLETED') -- 1 Bus(4M) + 1 Eco(1.5M) Flight 1
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (2, 2, 2, SYSDATE - 9, 5800000, 'COMPLETED') -- 1 Bus(4.2M) + 1 Eco(1.6M) Flight 2
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (3, 3, 3, SYSDATE - 8, 4000000, 'CONFIRMED') -- 2 PremEco(2M) Flight 3
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (4, 4, 3, SYSDATE - 7, 2400000, 'PENDING')   -- 2 Eco(1.2M) Flight 3
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (5, 5, 2, SYSDATE - 6, 8000000, 'CONFIRMED') -- 1 First(8M) Flight 5
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (6, 6, 2, SYSDATE - 5, 8000000, 'CANCELLED') -- Bị hủy, 1 First(8M) Flight 5
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (7, 7, 3, SYSDATE - 4, 6000000, 'CONFIRMED') -- 1 Bus(6M) Flight 7
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (8, 8, 3, SYSDATE - 3, 2500000, 'CONFIRMED') -- 1 Eco(2.5M) Flight 7
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (9, 9, 2, SYSDATE - 2, 1500000, 'PENDING')   -- 1 Eco(1.5M) Flight 1 (mua muộn)
+    INTO BOOKING (BookingID, CustomerID, EmployeeID, BookingDate, TotalAmount, Status) VALUES (10, 10, 2, SYSDATE - 1, 1600000, 'CANCELLED') -- Bị hủy
 SELECT 1 FROM DUAL;
 
--- 6. Thêm 15 Lịch sử Thanh toán (Khớp Amount 100% với Ticket Price)
+-- Thêm 15 Vé (Match BookingID, FlightID, SeatID và TicketStatus chính xác)
 INSERT ALL
-    -- Nhóm 1: Thanh toán thành công (SUCCESS)
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (1, SYSDATE - 5, 9000000, 'CREDIT CARD', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (2, SYSDATE - 4, 9000000, 'BANK TRANSFER', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (3, SYSDATE - 3, 4500000, 'CASH', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (4, SYSDATE - 2, 1500000, 'MOMO', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (5, SYSDATE - 1, 2200000, 'CREDIT CARD', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (6, SYSDATE, 3800000, 'BANK TRANSFER', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (7, SYSDATE, 3800000, 'CASH', 'SUCCESS')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (8, SYSDATE, 1600000, 'CREDIT CARD', 'SUCCESS')
-    
-    -- Nhóm 2: Đang chờ xử lý (PENDING)
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (9, SYSDATE, 1600000, 'ZALOPAY', 'PENDING')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (10, SYSDATE, 1600000, 'MOMO', 'PENDING')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (11, SYSDATE, 1500000, 'CREDIT CARD', 'PENDING')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (12, SYSDATE, 2200000, 'BANK TRANSFER', 'PENDING')
-    
-    -- Nhóm 3: Lỗi hoặc Hoàn tiền
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (13, SYSDATE - 6, 1600000, 'BANK TRANSFER', 'FAILED')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (14, SYSDATE - 7, 1600000, 'CREDIT CARD', 'FAILED')
-    INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (15, SYSDATE - 8, 1600000, 'MOMO', 'REFUNDED')
+    -- Booking 1 (Đã bay -> Checked-in)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (1, 1, 1, 1, 1, 4000000, 'Checked-in')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (2, 1, 1, 3, 11, 1500000, 'Checked-in')
+    -- Booking 2 (Đã bay -> Checked-in)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (3, 2, 2, 14, 2, 4200000, 'Checked-in')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (4, 2, 2, 15, 12, 1600000, 'Checked-in')
+    -- Booking 3 (Sắp bay -> Paid)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (5, 3, 3, 5, 3, 2000000, 'Paid')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (6, 3, 3, 6, 13, 2000000, 'Paid')
+    -- Booking 4 (Chờ thanh toán -> Booked)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (7, 4, 3, 7, 4, 1200000, 'Booked')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (8, 4, 3, 8, 14, 1200000, 'Booked')
+    -- Booking 5, 6 (Flight 5 - First Class)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (9, 5, 5, 9, 5, 8000000, 'Paid')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (10, 6, 5, 10, 6, 8000000, 'Cancelled') -- Hủy
+    -- Booking 7, 8 (Flight 7)
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (11, 7, 7, 12, 7, 6000000, 'Paid')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (12, 8, 7, 13, 8, 2500000, 'Paid')
+    -- Booking 9, 10
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (13, 9, 1, 4, 9, 1500000, 'Booked')
+    INTO TICKET (TicketID, BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus) VALUES (14, 10, 2, 8, 10, 1600000, 'Cancelled')
 SELECT 1 FROM DUAL;
 
--- 7. Thêm 15 Hành lý (Đa dạng loại hình, khớp theo hạng vé)
+-- Thêm 10 Thanh toán (Khớp Amount với TotalAmount của Booking)
 INSERT ALL
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (1, 40, 'First Class Priority') -- Ghế First Class
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (2, 35, 'First Class Priority') -- Ghế First Class
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (3, 30, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (4, 15, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (5, 7, 'Carry-on')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (6, 30, 'Fragile')              -- Hàng dễ vỡ
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (7, 45, 'Oversized')            -- Hành lý quá khổ
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (8, 15, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (9, 20, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (10, 7, 'Carry-on')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (11, 25, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (12, 15, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (13, 7, 'Carry-on')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (14, 20, 'Checked')
-    INTO BAGGAGE (TicketID, Weight, BaggageType) VALUES (15, 30, 'Checked')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (1, 1, SYSDATE - 10, 5500000, 'CREDIT CARD', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (2, 2, SYSDATE - 9, 5800000, 'BANK TRANSFER', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (3, 3, SYSDATE - 8, 4000000, 'MOMO', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (4, 4, SYSDATE - 7, 2400000, 'CREDIT CARD', 'PENDING')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (5, 5, SYSDATE - 6, 8000000, 'BANK TRANSFER', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (6, 6, SYSDATE - 5, 8000000, 'CREDIT CARD', 'REFUNDED') -- Booking hủy -> Hoàn tiền
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (7, 7, SYSDATE - 4, 6000000, 'MOMO', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (8, 8, SYSDATE - 3, 2500000, 'CREDIT CARD', 'SUCCESS')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (9, 9, SYSDATE - 2, 1500000, 'BANK TRANSFER', 'PENDING')
+    INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) VALUES (10, 10, SYSDATE - 1, 1600000, 'MOMO', 'FAILED') -- Lỗi thanh toán dẫn đến Booking bị hủy
+SELECT 1 FROM DUAL;
+
+-- Thêm 10 Hành lý (Cho 10 vé ngẫu nhiên)
+INSERT ALL
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (1, 1, 7, 'Carry-on')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (2, 1, 30, 'Checked')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (3, 2, 7, 'Carry-on')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (4, 3, 20, 'Fragile')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (5, 5, 40, 'Oversized')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (6, 7, 15, 'Checked')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (7, 9, 45, 'Checked')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (8, 11, 7, 'Carry-on')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (9, 11, 20, 'Checked')
+    INTO BAGGAGE (BaggageID, TicketID, Weight, BaggageType) VALUES (10, 12, 10, 'Checked')
+SELECT 1 FROM DUAL;
+
+-- Thêm 10 Lịch sử Giao dịch
+INSERT ALL
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (1, 1, 1, 1, 'PAYMENT', 5500000, SYSDATE - 10, 'Thanh toan ve')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (2, 2, 2, 2, 'PAYMENT', 5800000, SYSDATE - 9, 'Thanh toan ve')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (3, 3, 3, 3, 'PAYMENT', 4000000, SYSDATE - 8, 'Thanh toan ve')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (4, 5, 5, 5, 'PAYMENT', 8000000, SYSDATE - 6, 'Thanh toan ve')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (5, 6, 6, 6, 'REFUND', 8000000, SYSDATE - 4, 'Hoan tien do huy chuyen')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (6, 7, 7, 7, 'PAYMENT', 6000000, SYSDATE - 4, 'Thanh toan ve')
+    INTO TRANSACTION_HISTORY (TransactionID, CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description) VALUES (7, 8, 8, 8, 'PAYMENT', 2500000, SYSDATE - 3, 'Thanh toan ve')
 SELECT 1 FROM DUAL;
 
 /* =========================================================
    4. BẢNG PHÂN QUYỀN (Auth & Roles)
    ========================================================= */
 
--- Thêm Function (Chức năng hệ thống)
+-- 1. Thêm 5 Chức năng (Function) của hệ thống
 INSERT ALL
-    INTO FUNCTION (NameFunction, IsDeleted) VALUES ('DASHBOARD', 0)
-    INTO FUNCTION (NameFunction, IsDeleted) VALUES ('BOOKING_MANAGEMENT', 0)
-    INTO FUNCTION (NameFunction, IsDeleted) VALUES ('FLIGHT_MANAGEMENT', 0)
-    INTO FUNCTION (NameFunction, IsDeleted) VALUES ('CUSTOMER_MANAGEMENT', 0)
-    INTO FUNCTION (NameFunction, IsDeleted) VALUES ('REPORTING', 0)
+    INTO FUNCTION (FunctionID, NameFunction, IsDeleted) VALUES (1, 'DASHBOARD', 0)
+    INTO FUNCTION (FunctionID, NameFunction, IsDeleted) VALUES (2, 'BOOKING_MANAGEMENT', 0)
+    INTO FUNCTION (FunctionID, NameFunction, IsDeleted) VALUES (3, 'FLIGHT_MANAGEMENT', 0)
+    INTO FUNCTION (FunctionID, NameFunction, IsDeleted) VALUES (4, 'CUSTOMER_MANAGEMENT', 0)
+    INTO FUNCTION (FunctionID, NameFunction, IsDeleted) VALUES (5, 'SYSTEM_MANAGEMENT', 0)
 SELECT 1 FROM DUAL;
 
--- Thêm Roles (Quyền thao tác)
+-- 2. Thêm 6 Quyền thao tác chi tiết (Role)
 INSERT ALL
-    INTO ROLE (FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (1, 0, 0, 0, 1, 1, 0) -- Chỉ xem Dashboard
-    INTO ROLE (FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (2, 1, 1, 1, 1, 1, 0) -- Full quyền Booking
-    INTO ROLE (FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (3, 1, 1, 0, 0, 1, 0) -- Sửa Flight, ko xóa
-    INTO ROLE (FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (4, 1, 1, 1, 1, 1, 0) -- Full quyền Customer
-    INTO ROLE (FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (5, 0, 0, 0, 1, 1, 0) -- Quyền Report
+    -- Quyền cho Khách hàng (Chỉ xem Dashboard)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (1, 1, 0, 0, 0, 0, 1, 0)
+    -- Quyền cho Nhân viên bán vé (Thêm/Sửa/Xem Booking, Xem Flight)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (2, 2, 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (3, 3, 0, 0, 0, 0, 1, 0)
+    -- Quyền cho Quản lý (Toàn quyền Booking, Flight, Customer)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (4, 2, 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (5, 3, 1, 1, 1, 1, 1, 0)
+    -- Quyền cho Admin (Toàn quyền Hệ thống)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES (6, 5, 1, 1, 1, 1, 1, 0)
 SELECT 1 FROM DUAL;
 
--- Thêm Role Group (Nhóm quyền)
+-- 3. Thêm 4 Nhóm quyền (Role Group)
 INSERT ALL
-    INTO ROLE_GROUP (NameRoleGroup, IsDeleted) VALUES ('ADMIN', 0)
-    INTO ROLE_GROUP (NameRoleGroup, IsDeleted) VALUES ('MANAGER', 0)
-    INTO ROLE_GROUP (NameRoleGroup, IsDeleted) VALUES ('STAFF', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES (1, 'CUSTOMER_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES (2, 'STAFF_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES (3, 'MANAGER_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES (4, 'ADMIN_GROUP', 0)
 SELECT 1 FROM DUAL;
 
--- Thêm Role_Group_Assign_Role (Gán quyền cho nhóm)
+-- 4. Gán Quyền vào Nhóm quyền (Role Group Assign Role)
 INSERT ALL
-    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (1, 2, 0) -- Admin có quyền Booking
-    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (1, 3, 0) -- Admin có quyền Flight
-    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (1, 4, 0) -- Admin có quyền Customer
-    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (2, 5, 0) -- Manager có quyền Report
-    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (3, 2, 0) -- Staff có quyền Booking
+    -- Nhóm Khách hàng có quyền 1
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (1, 1, 0)
+    -- Nhóm Staff có quyền 2, 3
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (2, 2, 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (2, 3, 0)
+    -- Nhóm Manager có quyền 4, 5
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (3, 4, 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (3, 5, 0)
+    -- Nhóm Admin có quyền 6
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES (4, 6, 0)
 SELECT 1 FROM DUAL;
 
--- Gán nhóm quyền cho Account (VD Account 16 là Admin, 19 là Manager, 17 là Staff)
+-- 5. Gán Nhóm quyền cho các Tài khoản (Account Assign Role Group)
 INSERT ALL
-    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (16, 1, 0)
-    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (19, 2, 0)
-    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (17, 3, 0)
+    -- 10 Khách hàng (Account 1 đến 10) vào nhóm Khách
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (1, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (2, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (3, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (4, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (5, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (6, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (7, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (8, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (9, 1, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (10, 1, 0)
+    -- Admin Hệ Thống (Account 11) vào nhóm Admin
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (11, 4, 0)
+    -- Nhân viên (Account 12, 13) vào nhóm Staff
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (12, 2, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (13, 2, 0)
+    -- Quản lý (Account 14, 15) vào nhóm Manager
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (14, 3, 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES (15, 3, 0)
 SELECT 1 FROM DUAL;
 
--- Gán quyền lẻ (nếu có) cho Account
+-- 6. Gán quyền đặc biệt lẻ tẻ (Account Assign Role) - VD: Admin được quyền xem cả Dashboard của khách
 INSERT ALL
-    INTO ACCOUNT_ASSIGN_ROLE (AccountID, RoleID, IsDeleted) VALUES (16, 1, 0) -- Admin xem Dashboard
-    INTO ACCOUNT_ASSIGN_ROLE (AccountID, RoleID, IsDeleted) VALUES (19, 1, 0) -- Manager xem Dashboard
+    INTO ACCOUNT_ASSIGN_ROLE (AccountID, RoleID, IsDeleted) VALUES (11, 1, 0)
 SELECT 1 FROM DUAL;
