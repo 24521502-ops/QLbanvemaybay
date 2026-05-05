@@ -265,3 +265,24 @@ CREATE TABLE PASSENGER (
     CHECK (Gender IN ('Male','Female','Other'))
 );
 
+
+-- =========================================================
+--            TẠO CÁC VIEW HIỂN THỊ GIAO DIỆN
+-- =========================================================
+
+CREATE OR REPLACE VIEW VW_FLIGHT_LIST AS
+SELECT 
+    f.FlightID,
+    f.FlightNumber,
+    dep.IATACode || ' -> ' || arr.IATACode AS Route_IATA,
+    f.DepartureTime,
+    f.ArrivalTime,
+    a.Model AS AircraftModel,
+    f.Gate,
+    f.FlightStatus
+FROM FLIGHT f
+JOIN ROUTE r ON f.RouteID = r.RouteID
+JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
+JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
+JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID;
+
