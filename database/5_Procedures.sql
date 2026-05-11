@@ -300,8 +300,6 @@ BEGIN
         );
     END IF;
 
-    -- Hash Password (ĐÃ SỬA LỖI Ở ĐÂY)
-    -- Lấy giá trị ORA_HASH thông qua bảng DUAL thay vì gán trực tiếp bằng PL/SQL
     SELECT TO_CHAR(ORA_HASH(p_Password)) 
     INTO v_HashedPassword 
     FROM DUAL;
