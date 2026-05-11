@@ -287,7 +287,9 @@ BEGIN
     SELECT COUNT(*) INTO v_CheckEmail FROM USERS WHERE Email = p_Email;
     IF v_CheckEmail > 0 THEN RAISE_APPLICATION_ERROR(-20010, 'Lỗi: Email này đã được đăng ký!'); END IF;
 
-    v_HashedPassword := STANDARD_HASH(p_Password, 'SHA256');
+    SELECT TO_CHAR(ORA_HASH(p_Password)) 
+    INTO v_HashedPassword 
+    FROM DUAL;
 
     -- 2. Tạo User (Lấy UserID)
     INSERT INTO USERS (FullName, Email) VALUES (p_FullName, p_Email) RETURNING UserID INTO v_UserID;
