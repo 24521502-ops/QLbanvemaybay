@@ -271,3 +271,6 @@ JOIN ROUTE r ON f.RouteID = r.RouteID
 JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
 JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
 JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID;
+
+select * from passenger;
+

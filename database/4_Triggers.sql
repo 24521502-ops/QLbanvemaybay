@@ -134,7 +134,7 @@ BEGIN
         'Thời gian đến phải lớn hơn thời gian đi!');
     END IF;
 END;
-
+/
 
 --8. Trigger: Máy bay sử dụng cho chuyến bay phải thuộc cùng hãng (RB61)
 CREATE OR REPLACE TRIGGER TRG_Check_Airline_Aircraft 
@@ -158,6 +158,7 @@ CREATE OR REPLACE TRIGGER TRG_CHECK_AIRCRAFT_OVERLAP
 BEFORE INSERT OR UPDATE ON FLIGHT
 FOR EACH ROW
 DECLARE
+    PRAGMA AUTONOMOUS_TRANSACTION;
     v_Count NUMBER;
 BEGIN
     -- Đã sửa số 0 thành chuỗi '0' trong hàm NVL
@@ -169,6 +170,8 @@ BEGIN
     IF v_Count > 0 THEN
         RAISE_APPLICATION_ERROR(-20004, 'Lỗi: Máy bay bị trùng lịch bay.');
     END IF;
+    
+    COMMIT;
 END;
 /
 
@@ -207,7 +210,7 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20005, 'RB60: Lỗi! Số tiền thanh toán (' || :NEW.Amount || ') không được vượt quá tổng tiền của Booking (' || v_TotalAmount || ').');
     END IF;
 END;
-
+/
 
 -- ================================= Bảng USERS =================================
 
@@ -218,7 +221,7 @@ FOR EACH ROW
 BEGIN
     :NEW.Updated_At := SYSDATE;
 END;
-
+/
 
 
 
@@ -244,3 +247,4 @@ BEGIN
         END IF;
     END IF;
 END;
+/
