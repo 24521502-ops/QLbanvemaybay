@@ -1,25 +1,6 @@
 
 -- ================================= Bảng TICKET =================================
 
---1.Trigger kiểm tra không được trùng ghế trong 1 chuyến bay (RB58)----
-CREATE OR REPLACE TRIGGER TRG_No_Duplicate_Seat
-BEFORE INSERT OR UPDATE ON TICKET
-FOR EACH ROW
-DECLARE
-    v_count NUMBER;
-BEGIN
-    SELECT COUNT(*) INTO v_count
-    FROM TICKET
-    WHERE FlightID = :NEW.FlightID
-      AND SeatID   = :NEW.SeatID;
-
-    IF v_count > 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 
-        'Ghế này đã được đặt trong chuyến bay!');
-    END IF;
-END;
-/
-
 --2.Trigger kiểm tra số vé không vượt quá số ghế (RB65)//
 CREATE OR REPLACE TRIGGER TRG_PREVENT_OVERBOOKING
 BEFORE INSERT ON TICKET
