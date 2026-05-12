@@ -653,3 +653,28 @@ BEGIN
     COMMIT;
 END;
 /
+    
+CREATE OR REPLACE PROCEDURE SP_CANCEL_TICKET_FINAL (
+    p_TicketID IN VARCHAR2
+) AS
+    v_BookingID VARCHAR2(20);
+    v_CustomerID VARCHAR2(20);
+    v_RefundAmount NUMBER;
+BEGIN
+    SELECT t.BookingID, b.CustomerID INTO v_BookingID, v_CustomerID
+    FROM TICKET t JOIN BOOKING b ON t.BookingID = b.BookingID
+    WHERE t.TicketID = p_TicketID;
+
+    v_RefundAmount := FUNC_CALCULATE_REFUND(p_TicketID);
+
+    UPDATE TICKET SET TicketStatus = 'CANCELLED' WHERE TicketID = p_TicketID;
+
+    IF v_RefundAmount > 0 THEN
+        INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
+        VALUES (v_CustomerID, v_BookingID, 'REFUND', v_RefundAmount, 'Hoàn tiền vé ' || p_TicketID);
+        
+        UPDATE BOOKING SET TotalAmount = TotalAmount - v_RefundAmount WHERE BookingID = v_BookingID;
+    END IF;
+    COMMIT;
+END;
+/
