@@ -1,8 +1,6 @@
 
 -- ================================= Bảng TICKET =================================
 
---1.Trigger kiểm tra không được trùng ghế trong 1 chuyến bay (RB58)----
-
 --2.Trigger kiểm tra số vé không vượt quá số ghế (RB65)//
 CREATE OR REPLACE TRIGGER TRG_PREVENT_OVERBOOKING
 BEFORE INSERT ON TICKET
