@@ -29,8 +29,6 @@ public class regesterGUI extends JFrame {
 
     // ──── Colors (dark theme bên trái) ────
     private static final Color COLOR_LEFT_BG = new Color(0x1A1A2E);
-    private static final Color COLOR_PRIMARY = new Color(0x1B2631); // Navy đậm
-    private static final Color COLOR_ACCENT = new Color(0x1B2631); // Nút đăng ký
     private static final Color COLOR_BTN = new Color(0x1C2833);
     private static final Color COLOR_BG = new Color(0xFFFFFF);
     private static final Color COLOR_FIELD_BG = new Color(0xF4F6F7);
@@ -87,7 +85,7 @@ public class regesterGUI extends JFrame {
                 if (bgImage != null) {
                     g2.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
                 } else {
-                    GradientPaint gp = new GradientPaint(0, 0, new Color(0x1A1A2E), 0, getHeight(),
+                    GradientPaint gp = new GradientPaint(0, 0, COLOR_LEFT_BG, 0, getHeight(),
                             new Color(0x16213E));
                     g2.setPaint(gp);
                     g2.fillRect(0, 0, getWidth(), getHeight());

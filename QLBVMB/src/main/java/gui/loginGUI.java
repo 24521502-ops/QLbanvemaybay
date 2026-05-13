@@ -263,14 +263,9 @@ public class loginGUI extends JFrame {
         }
     }
 
-    /**
-     * Mở cửa sổ chính sau khi đăng nhập (TODO: kết nối với MainGUI).
-     */
     private void openMainWindow(AccountDTO account) {
-        // TODO: new MainGUI(account); 
-        JOptionPane.showMessageDialog(this,
-                "Tính năng đang phát triển.\nSẽ mở giao diện chính ở đây.",
-                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+        new MainGUI(account);
+        dispose();
     }
 
     private void openRegister() {
