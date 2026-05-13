@@ -5,7 +5,6 @@ import bus.BaoCaoTKBUS;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.geom.GeneralPath;
 
 import java.text.NumberFormat;
@@ -26,9 +25,18 @@ public class BaoCaoTKGUI extends JPanel {
 
     private static class AirlineItem {
         String id, name;
-        AirlineItem(String id, String name) { this.id = id; this.name = name; }
-        @Override public String toString() { return name; }
+
+        AirlineItem(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
     }
+
     private static final Font F_TITLE = new Font("Segoe UI", Font.BOLD, 20);
     private static final Font F_BODY = new Font("Segoe UI", Font.PLAIN, 12);
     private static final Font F_KPI = new Font("Segoe UI", Font.BOLD, 19);
@@ -138,7 +146,9 @@ public class BaoCaoTKGUI extends JPanel {
             for (Object[] row : airlines) {
                 model.addElement(new AirlineItem(row[0].toString(), row[1].toString()));
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         cboHangBay = new JComboBox<>(model);
         cboHangBay.setFont(F_BODY);
@@ -148,7 +158,8 @@ public class BaoCaoTKGUI extends JPanel {
         cboHangBay.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
         // Xóa viền bằng UI tùy chỉnh
         cboHangBay.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
-            @Override protected JButton createArrowButton() {
+            @Override
+            protected JButton createArrowButton() {
                 JButton b = new JButton("∨");
                 b.setFont(new Font("Segoe UI", Font.PLAIN, 9));
                 b.setForeground(GRAY);
@@ -157,7 +168,9 @@ public class BaoCaoTKGUI extends JPanel {
                 b.setFocusPainted(false);
                 return b;
             }
-            @Override public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
+
+            @Override
+            public void paintCurrentValueBackground(Graphics g, Rectangle bounds, boolean hasFocus) {
                 // Không vẽ nền
             }
         });
@@ -212,15 +225,6 @@ public class BaoCaoTKGUI extends JPanel {
         return btn;
     }
 
-    private JTextField mkDateField(String txt) {
-        JTextField f = new JTextField(txt, 9);
-        f.setFont(F_BODY);
-        f.setPreferredSize(new Dimension(95, 30));
-        f.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(0xD1D5DB)),
-                new EmptyBorder(3, 7, 3, 7)));
-        return f;
-    }
 
     // ── BODY ─────────────────────────────────────────────────
     /** Tạo nút icon lịch mở popup chọn ngày gắn vào txtField */
@@ -235,44 +239,22 @@ public class BaoCaoTKGUI extends JPanel {
         return btn;
     }
 
-    /** Popup chọn ngày đơn giản dùng JSpinner ân tácđộng vào textfield */
+    /** Popup chọn ngày hiện đại với lưới lịch */
     private void showDatePicker(JButton source, JTextField target) {
-        // Parse ngày hiện tại trong field
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        Date initDate;
-        try { initDate = sdf.parse(target.getText()); }
-        catch (Exception ex) { initDate = new Date(); }
-
-        JSpinner spinner = new JSpinner(new SpinnerDateModel(initDate, null, null, Calendar.DAY_OF_MONTH));
-        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "dd/MM/yyyy");
-        spinner.setEditor(editor);
-        spinner.setFont(F_BODY);
-        spinner.setPreferredSize(new Dimension(130, 30));
-
         JPopupMenu popup = new JPopupMenu();
         popup.setBorder(BorderFactory.createLineBorder(new Color(0xD1D5DB)));
-        JPanel pane = new JPanel(new BorderLayout(4, 4));
-        pane.setBorder(new EmptyBorder(8, 10, 8, 10));
-        pane.setBackground(Color.WHITE);
-        JLabel lbl = new JLabel("Chọn ngày:");
-        lbl.setFont(F_SMALL.deriveFont(Font.BOLD));
-        lbl.setForeground(DARK);
+        popup.setBackground(Color.WHITE);
 
-        JButton ok = new JButton("OK");
-        ok.setFont(F_SMALL.deriveFont(Font.BOLD));
-        ok.setBackground(BLUE); ok.setForeground(Color.WHITE);
-        ok.setBorderPainted(false); ok.setFocusPainted(false);
-        ok.setPreferredSize(new Dimension(50, 26));
-        ok.addActionListener(ev -> {
-            Date picked = (Date) spinner.getValue();
-            target.setText(sdf.format(picked));
-            popup.setVisible(false);
-        });
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date initDate;
+        try {
+            initDate = sdf.parse(target.getText());
+        } catch (Exception ex) {
+            initDate = new Date();
+        }
 
-        pane.add(lbl, BorderLayout.NORTH);
-        pane.add(spinner, BorderLayout.CENTER);
-        pane.add(ok, BorderLayout.EAST);
-        popup.add(pane);
+        CalendarPanel calPanel = new CalendarPanel(initDate, target, popup);
+        popup.add(calPanel);
         popup.show(source, 0, source.getHeight() + 2);
     }
 
@@ -294,33 +276,18 @@ public class BaoCaoTKGUI extends JPanel {
         lblCB = mkKpiVal("0");
         lblOcc = mkKpiVal("0%");
 
-        row.add(mkCard("Tổng doanh thu (VND)", lblDT, "$",
+        row.add(mkCard("Tổng doanh thu (VND)", lblDT, new DollarIcon(),
                 new JLabel("Từ các booking đã xác nhận")));
-        row.add(mkCard("Tổng số đặt chỗ", lblDC, "✉",
+        row.add(mkCard("Tổng số đặt chỗ", lblDC, new EnvelopeIcon(),
                 new JLabel("Tất cả các booking")));
-        row.add(mkCard("Chuyến bay hoàn thành", lblCB, "✈",
+        row.add(mkCard("Chuyến bay hoàn thành", lblCB, new PlaneIcon(),
                 new JLabel("Trong khoảng thời gian chọn")));
-        row.add(mkCard("Tỷ lệ lấp đầy ghế", lblOcc, "📊",
+        row.add(mkCard("Tỷ lệ lấp đầy ghế", lblOcc, new PercentIcon(),
                 new JLabel("Toàn hệ thống (trừ vé hủy)")));
         return row;
     }
 
-
-
     /** Trend footer tĩnh (fallback) */
-    private JPanel mkTrendFooter(String text, boolean up) {
-        JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
-        p.setOpaque(false);
-        JLabel ico = new JLabel(up ? "↗" : "↘");
-        ico.setFont(F_SMALL.deriveFont(Font.BOLD));
-        ico.setForeground(BLUE);
-        JLabel lbl = new JLabel(text);
-        lbl.setFont(F_SMALL.deriveFont(Font.BOLD));
-        lbl.setForeground(BLUE);
-        p.add(ico);
-        p.add(lbl);
-        return p;
-    }
 
     private JLabel mkKpiVal(String txt) {
         JLabel l = new JLabel(txt);
@@ -330,7 +297,7 @@ public class BaoCaoTKGUI extends JPanel {
     }
 
     /** Card với footer là JComponent tùy ý (JPanel, JLabel,...) */
-    private JPanel mkCard(String label, JLabel val, String icon, JComponent footer) {
+    private JPanel mkCard(String label, JLabel val, Object icon, JComponent footer) {
         JPanel c = mkCardBase();
         c.setLayout(new BorderLayout(0, 8));
 
@@ -344,7 +311,8 @@ public class BaoCaoTKGUI extends JPanel {
 
         // Icon đặt trong khung nhỏ bo góc
         JPanel iconBox = new JPanel(new GridBagLayout()) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(0xEBF5FF));
@@ -354,9 +322,14 @@ public class BaoCaoTKGUI extends JPanel {
         };
         iconBox.setOpaque(false);
         iconBox.setPreferredSize(new Dimension(30, 30));
-        JLabel ico = new JLabel(icon);
-        ico.setFont(F_BODY.deriveFont(Font.BOLD, 13f));
-        ico.setForeground(BLUE);
+        JLabel ico = new JLabel();
+        if (icon instanceof Icon) {
+            ico.setIcon((Icon) icon);
+        } else {
+            ico.setText(String.valueOf(icon));
+            ico.setFont(F_BODY.deriveFont(Font.BOLD, 13f));
+            ico.setForeground(BLUE);
+        }
         iconBox.add(ico);
 
         top.add(lbl, BorderLayout.WEST);
@@ -364,37 +337,17 @@ public class BaoCaoTKGUI extends JPanel {
 
         c.add(top, BorderLayout.NORTH);
         c.add(val, BorderLayout.CENTER);
-        if (footer != null) c.add(footer, BorderLayout.SOUTH);
+        if (footer != null) {
+            if (footer instanceof JLabel) {
+                footer.setFont(F_SMALL);
+                footer.setForeground(GRAY);
+            }
+            c.add(footer, BorderLayout.SOUTH);
+        }
         return c;
     }
 
-    /** Overload: footer là JLabel đơn giản có màu */
-    private JPanel mkCard(String label, JLabel val, String icon, JLabel sub) {
-        sub.setFont(F_SMALL);
-        sub.setForeground(GRAY);
-        return mkCard(label, val, icon, (JComponent) sub);
-    }
 
-    private JPanel mkCardBar(String label, JLabel val, String icon, JProgressBar bar) {
-        JPanel c = mkCardBase();
-        c.setLayout(new BorderLayout(0, 6));
-
-        JPanel top = new JPanel(new BorderLayout());
-        top.setOpaque(false);
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(F_SMALL);
-        lbl.setForeground(GRAY);
-        JLabel ico = new JLabel(icon);
-        ico.setFont(F_BODY);
-        ico.setForeground(BLUE);
-        top.add(lbl, BorderLayout.WEST);
-        top.add(ico, BorderLayout.EAST);
-
-        c.add(top, BorderLayout.NORTH);
-        c.add(val, BorderLayout.CENTER);
-        c.add(bar, BorderLayout.SOUTH);
-        return c;
-    }
 
     private JPanel mkCardBase() {
         JPanel c = new JPanel() {
@@ -491,7 +444,8 @@ public class BaoCaoTKGUI extends JPanel {
 
                 // 3. Lấy dữ liệu biểu đồ (có lọc)
                 // Trend: lấy theo năm của ngày bắt đầu
-                Calendar cal = Calendar.getInstance(); cal.setTime(d1);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(d1);
                 double[] trend = bus.getDoanhThuTheoThang(cal.get(Calendar.YEAR), hangBay);
 
                 List<Object[]> statusStats = bus.getBookingStatusStats(d1, d2, hangBay);
@@ -501,6 +455,7 @@ public class BaoCaoTKGUI extends JPanel {
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             protected void done() {
                 try {
                     Object[] results = get();
@@ -509,7 +464,7 @@ public class BaoCaoTKGUI extends JPanel {
                     hangData = (List<Object[]>) results[2];
                     revByClassData = (List<Object[]>) results[3];
 
-                    NumberFormat nf = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+                    NumberFormat nf = NumberFormat.getNumberInstance(Locale.of("vi", "VN"));
 
                     lblDT.setText(nf.format(summary[0] != null ? summary[0] : 0));
                     lblDC.setText(nf.format(summary[1] != null ? summary[1] : 0));
@@ -669,13 +624,101 @@ public class BaoCaoTKGUI extends JPanel {
         }
     }
 
+    static class DollarIcon implements javax.swing.Icon {
+        public int getIconWidth() {
+            return 16;
+        }
+
+        public int getIconHeight() {
+            return 16;
+        }
+
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(BLUE);
+            g2.setStroke(new BasicStroke(2f));
+            g2.drawOval(x + 1, y + 1, 14, 14);
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            g2.drawString("$", x + 5, y + 12);
+            g2.dispose();
+        }
+    }
+
+    static class EnvelopeIcon implements javax.swing.Icon {
+        public int getIconWidth() {
+            return 16;
+        }
+
+        public int getIconHeight() {
+            return 16;
+        }
+
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(BLUE);
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawRect(x + 1, y + 3, 14, 10);
+            g2.drawLine(x + 1, y + 3, x + 8, y + 8);
+            g2.drawLine(x + 15, y + 3, x + 8, y + 8);
+            g2.dispose();
+        }
+    }
+
+    static class PlaneIcon implements javax.swing.Icon {
+        public int getIconWidth() {
+            return 16;
+        }
+
+        public int getIconHeight() {
+            return 16;
+        }
+
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(BLUE);
+            GeneralPath p = new GeneralPath();
+            p.moveTo(x + 2, y + 8);
+            p.lineTo(x + 14, y + 8);
+            p.lineTo(x + 10, y + 4);
+            p.lineTo(x + 6, y + 4);
+            p.closePath();
+            g2.fill(p);
+            g2.fillRect(x + 7, y + 2, 2, 12);
+            g2.dispose();
+        }
+    }
+
+    static class PercentIcon implements javax.swing.Icon {
+        public int getIconWidth() {
+            return 16;
+        }
+
+        public int getIconHeight() {
+            return 16;
+        }
+
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(BLUE);
+            g2.setStroke(new BasicStroke(1.8f));
+            g2.drawOval(x + 2, y + 2, 4, 4);
+            g2.drawOval(x + 10, y + 10, 4, 4);
+            g2.drawLine(x + 14, y + 2, x + 2, y + 14);
+            g2.dispose();
+        }
+    }
+
     // ══════════════════════════════════════════════════════════
     // INNER: Pie Chart – Doanh thu theo Hạng ghế
     // ══════════════════════════════════════════════════════════
     static class PieChart extends JPanel {
         private List<Object[]> data; // Object[]: {Seat_Class, Total_Revenue, Ticket_Count, Revenue_Percentage}
         private static final Color[] PIE_COLORS = {
-                new Color(0x1D6FA4), new Color(0x10B981),
+                new Color(0x1D6FA4), GREEN,
                 new Color(0xF59E0B), new Color(0xEF4444)
         };
 
@@ -764,7 +807,7 @@ public class BaoCaoTKGUI extends JPanel {
     // ══════════════════════════════════════════════════════════
     static class BarChart extends JPanel {
         private List<Object[]> data;
-        private static final Color[] BARS = { new Color(0x1F2937), BLUE, new Color(0x9CA3AF) };
+        private static final Color[] BARS = { GREEN, BLUE, new Color(0x9CA3AF), new Color(0xEF4444) };
 
         BarChart(List<Object[]> data) {
             this.data = data;
@@ -825,7 +868,7 @@ public class BaoCaoTKGUI extends JPanel {
     }
 
     // ══════════════════════════════════════════════════════════
-    //  INNER: Modern ScrollBar UI
+    // INNER: Modern ScrollBar UI
     // ══════════════════════════════════════════════════════════
     static class ModernScrollBarUI extends BasicScrollBarUI {
         @Override
@@ -833,17 +876,27 @@ public class BaoCaoTKGUI extends JPanel {
             super.installUI(c);
             scrollbar.setOpaque(false);
         }
+
         @Override
-        protected JButton createDecreaseButton(int orientation) { return createZeroButton(); }
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
         @Override
-        protected JButton createIncreaseButton(int orientation) { return createZeroButton(); }
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
         private JButton createZeroButton() {
             JButton b = new JButton();
             b.setPreferredSize(new Dimension(0, 0));
             return b;
         }
+
         @Override
-        protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {}
+        protected void paintTrack(Graphics g, JComponent c, Rectangle trackBounds) {
+        }
+
         @Override
         protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
             Graphics2D g2 = (Graphics2D) g.create();
@@ -854,6 +907,171 @@ public class BaoCaoTKGUI extends JPanel {
             int h = thumbBounds.height - 4;
             g2.fillRoundRect(thumbBounds.x + 4, thumbBounds.y + 2, w, h, 8, 8);
             g2.dispose();
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // INNER: Calendar Panel (Modern Date Picker)
+    // ══════════════════════════════════════════════════════════
+    static class CalendarPanel extends JPanel {
+        private Calendar calendar;
+        private JTextField targetField;
+        private JPopupMenu popup;
+        private JPanel daysPanel;
+        private JLabel monthLabel;
+        private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+        CalendarPanel(Date initialDate, JTextField target, JPopupMenu popup) {
+            this.calendar = Calendar.getInstance();
+            this.calendar.setTime(initialDate);
+            this.targetField = target;
+            this.popup = popup;
+
+            setLayout(new BorderLayout(0, 10));
+            setBackground(Color.WHITE);
+            setBorder(new EmptyBorder(10, 10, 10, 10));
+
+            // Header: Month/Year + Buttons
+            JPanel header = new JPanel(new BorderLayout());
+            header.setOpaque(false);
+
+            JButton btnPrev = mkNavBtn("<");
+            JButton btnNext = mkNavBtn(">");
+
+            monthLabel = new JLabel("", SwingConstants.CENTER);
+            monthLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            monthLabel.setForeground(DARK);
+
+            btnPrev.addActionListener(e -> {
+                calendar.add(Calendar.MONTH, -1);
+                updateCalendar();
+            });
+            btnNext.addActionListener(e -> {
+                calendar.add(Calendar.MONTH, 1);
+                updateCalendar();
+            });
+
+            header.add(btnPrev, BorderLayout.WEST);
+            header.add(monthLabel, BorderLayout.CENTER);
+            header.add(btnNext, BorderLayout.EAST);
+
+            // Weekdays Header
+            JPanel weekdays = new JPanel(new GridLayout(1, 7));
+            weekdays.setOpaque(false);
+            String[] days = { "CN", "T2", "T3", "T4", "T5", "T6", "T7" };
+            for (String d : days) {
+                JLabel l = new JLabel(d, SwingConstants.CENTER);
+                l.setFont(new Font("Segoe UI", Font.BOLD, 11));
+                l.setForeground(GRAY);
+                weekdays.add(l);
+            }
+
+            JPanel center = new JPanel(new BorderLayout(0, 5));
+            center.setOpaque(false);
+            center.add(weekdays, BorderLayout.NORTH);
+
+            daysPanel = new JPanel(new GridLayout(6, 7, 2, 2));
+            daysPanel.setOpaque(false);
+            center.add(daysPanel, BorderLayout.CENTER);
+
+            add(header, BorderLayout.NORTH);
+            add(center, BorderLayout.CENTER);
+
+            updateCalendar();
+        }
+
+        private JButton mkNavBtn(String t) {
+            JButton b = new JButton(t);
+            b.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            b.setFocusPainted(false);
+            b.setContentAreaFilled(false);
+            b.setBorderPainted(false);
+            b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            b.setForeground(GRAY);
+            return b;
+        }
+
+        private void updateCalendar() {
+            daysPanel.removeAll();
+
+            Calendar cal = (Calendar) calendar.clone();
+            cal.set(Calendar.DAY_OF_MONTH, 1);
+            int startDay = cal.get(Calendar.DAY_OF_WEEK); // 1 = Sunday
+            int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+            SimpleDateFormat monthSdf = new SimpleDateFormat("'Tháng' MM, yyyy", Locale.of("vi", "VN"));
+            monthLabel.setText(monthSdf.format(cal.getTime()));
+
+            // Days of previous month
+            cal.add(Calendar.MONTH, -1);
+            int prevMaxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+            for (int i = 1; i < startDay; i++) {
+                JComponent b = mkDayBtn(String.valueOf(prevMaxDay - startDay + i + 1), false);
+                daysPanel.add(b);
+            }
+
+            // Days of current month
+            cal.add(Calendar.MONTH, 1);
+            Calendar today = Calendar.getInstance();
+            for (int i = 1; i <= maxDay; i++) {
+                final int day = i;
+                JLabel l = (JLabel) mkDayBtn(String.valueOf(i), true);
+
+                // Highlight today
+                if (cal.get(Calendar.YEAR) == today.get(Calendar.YEAR) &&
+                        cal.get(Calendar.MONTH) == today.get(Calendar.MONTH) &&
+                        i == today.get(Calendar.DAY_OF_MONTH)) {
+                    l.setForeground(BLUE);
+                    l.setFont(l.getFont().deriveFont(Font.BOLD));
+                }
+
+                l.addMouseListener(new java.awt.event.MouseAdapter() {
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent e) {
+                        l.setOpaque(true);
+                        l.setBackground(new Color(0xEBF5FF));
+                        l.repaint();
+                    }
+
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent e) {
+                        l.setOpaque(false);
+                        l.repaint();
+                    }
+
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        Calendar result = (Calendar) calendar.clone();
+                        result.set(Calendar.DAY_OF_MONTH, day);
+                        targetField.setText(sdf.format(result.getTime()));
+                        popup.setVisible(false);
+                    }
+                });
+                daysPanel.add(l);
+            }
+
+            // Fill remaining slots to make it 6 rows
+            int currentCount = daysPanel.getComponentCount();
+            for (int i = 1; i <= 42 - currentCount; i++) {
+                JComponent b = mkDayBtn(String.valueOf(i), false);
+                daysPanel.add(b);
+            }
+
+            daysPanel.revalidate();
+            daysPanel.repaint();
+        }
+
+        private JComponent mkDayBtn(String text, boolean active) {
+            JLabel l = new JLabel(text, SwingConstants.CENTER);
+            l.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            l.setPreferredSize(new Dimension(35, 30));
+            if (active) {
+                l.setForeground(DARK);
+                l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            } else {
+                l.setForeground(new Color(0xD1D5DB));
+            }
+            return l;
         }
     }
 }
