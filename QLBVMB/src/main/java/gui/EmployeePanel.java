@@ -904,6 +904,11 @@ public class EmployeePanel extends JPanel {
             b.setContentAreaFilled(false);
             b.setFocusPainted(false);
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            
+            // Ngăn việc icon bị dịch chuyển khi nhấn
+            b.setPressedIcon(baseIcon);
+            b.setMargin(new Insets(0, 0, 0, 0));
+            b.setBorder(BorderFactory.createEmptyBorder());
 
             // Create a hover version of the icon by brightening the color slightly if
             // needed,
