@@ -1,7 +1,6 @@
 package dao;
 
 import dto.RoleGroupDTO;
-import dto.RoleGroupAssignRoleDTO;
 import util.DBConnection;
 
 import java.sql.*;
