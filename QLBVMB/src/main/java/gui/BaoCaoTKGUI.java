@@ -225,7 +225,6 @@ public class BaoCaoTKGUI extends JPanel {
         return btn;
     }
 
-
     // ── BODY ─────────────────────────────────────────────────
     /** Tạo nút icon lịch mở popup chọn ngày gắn vào txtField */
     private JButton mkCalBtn(JTextField target) {
@@ -346,8 +345,6 @@ public class BaoCaoTKGUI extends JPanel {
         }
         return c;
     }
-
-
 
     private JPanel mkCardBase() {
         JPanel c = new JPanel() {
