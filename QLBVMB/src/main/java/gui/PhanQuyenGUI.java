@@ -25,6 +25,11 @@ public class PhanQuyenGUI extends JPanel {
     private JLabel lblPageInfo;
     private JPanel paginationPanel;
 
+    // Dashboard labels
+    private JLabel lblTotalRoles;
+    private JLabel lblTotalUsers;
+    private JLabel lblLargestGroup;
+
     // Table colors
     private static final Color ROW_EVEN = Color.WHITE;
     private static final Color ROW_ODD = new Color(249, 250, 251);
@@ -70,6 +75,13 @@ public class PhanQuyenGUI extends JPanel {
         // === CONTENT WRAPPER ===
         JPanel contentWrapper = new JPanel(new BorderLayout(0, 16));
         contentWrapper.setOpaque(false);
+
+        // ===== DASHBOARD PANELS =====
+        JPanel dashboardPanel = createDashboardPanel();
+        contentWrapper.add(dashboardPanel, BorderLayout.NORTH);
+
+        JPanel mainWrapper = new JPanel(new BorderLayout(0, 16));
+        mainWrapper.setOpaque(false);
 
         // ===== FILTER CARD =====
         JPanel filterCard = new JPanel() {
@@ -145,7 +157,7 @@ public class PhanQuyenGUI extends JPanel {
         });
         filterCard.add(btnRefresh);
 
-        contentWrapper.add(filterCard, BorderLayout.NORTH);
+        mainWrapper.add(filterCard, BorderLayout.NORTH);
 
         // ===== TABLE CARD =====
         JPanel tableCard = new JPanel(new BorderLayout(0, 0)) {
@@ -272,7 +284,9 @@ public class PhanQuyenGUI extends JPanel {
         paginationPanel.add(pageButtons, BorderLayout.EAST);
         tableCard.add(paginationPanel, BorderLayout.SOUTH);
 
-        contentWrapper.add(tableCard, BorderLayout.CENTER);
+        mainWrapper.add(tableCard, BorderLayout.CENTER);
+
+        contentWrapper.add(mainWrapper, BorderLayout.CENTER);
         add(contentWrapper, BorderLayout.CENTER);
     }
 
@@ -280,6 +294,152 @@ public class PhanQuyenGUI extends JPanel {
         currentData = roleGroupBUS.getAll();
         currentPage = 1;
         refreshTable();
+        updateDashboards();
+    }
+
+    private void updateDashboards() {
+        List<RoleGroupDTO> allData = roleGroupBUS.getAll();
+        if (allData == null || allData.isEmpty()) {
+            lblTotalRoles.setText("0");
+            lblTotalUsers.setText("0");
+            lblLargestGroup.setText("N/A");
+            return;
+        }
+
+        int totalRoles = allData.size();
+        int totalUsers = 0;
+        int maxUsers = -1;
+        String largestGroup = "N/A";
+
+        for (RoleGroupDTO dto : allData) {
+            int users = roleGroupBUS.countUsers(dto.getRoleGroupID());
+            totalUsers += users;
+            if (users > maxUsers) {
+                maxUsers = users;
+                largestGroup = dto.getNameRoleGroup();
+            }
+        }
+
+        lblTotalRoles.setText(String.valueOf(totalRoles));
+        lblTotalUsers.setText(String.valueOf(totalUsers));
+        String lg = largestGroup != null ? largestGroup : "N/A";
+        lblLargestGroup.setText(lg);
+        lblLargestGroup.setToolTipText(lg);
+    }
+
+    private JPanel createDashboardPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 3, 20, 0));
+        panel.setOpaque(false);
+        // Đặt chiều cao cố định để không bị bóp méo nội dung
+        panel.setPreferredSize(new Dimension(0, 110));
+        
+        lblTotalRoles = new JLabel("0");
+        lblTotalUsers = new JLabel("0");
+        lblLargestGroup = new JLabel("N/A");
+        
+        panel.add(createKPICard("Tổng số vai trò", lblTotalRoles, new Color(59, 130, 246), new Color(219, 234, 254)));
+        panel.add(createKPICard("Tài khoản đã cấp", lblTotalUsers, new Color(16, 185, 129), new Color(209, 250, 229)));
+        panel.add(createKPICard("Nhóm phổ biến nhất", lblLargestGroup, new Color(245, 158, 11), new Color(254, 243, 199)));
+        
+        return panel;
+    }
+
+    private JPanel createKPICard(String title, JLabel lblValue, Color iconColor, Color iconBg) {
+        JPanel card = new JPanel(new BorderLayout(14, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                // Nền thẻ
+                g2.setColor(Color.WHITE);
+                g2.fill(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 16, 16));
+                
+                // Viền thẻ
+                g2.setColor(AppColor.BORDER);
+                g2.draw(new java.awt.geom.RoundRectangle2D.Double(0.5, 0.5, getWidth() - 1, getHeight() - 1, 16, 16));
+                
+                // Dải màu nhấn (accent line) bên trái để trông hiện đại hơn
+                g2.setColor(iconColor);
+                Shape oldClip = g2.getClip();
+                g2.clipRect(0, 0, 6, getHeight());
+                g2.fill(new java.awt.geom.RoundRectangle2D.Double(0, 0, 12, getHeight(), 16, 16));
+                g2.setClip(oldClip);
+
+                g2.dispose();
+            }
+        };
+        card.setOpaque(false);
+        card.setBorder(BorderFactory.createEmptyBorder(16, 22, 16, 16)); // Căn chỉnh để bù cho dải màu bên trái
+
+        JPanel iconPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                int cx = getWidth() / 2;
+                int cy = getHeight() / 2;
+                
+                // Nền bo góc (hình 1) cố định kích thước để không bị kéo giãn thành con nhộng
+                g2.setColor(iconBg);
+                g2.fillRoundRect(0, cy - 26, 52, 52, 16, 16);
+                
+                g2.setColor(iconColor);
+                g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                
+                if (title.contains("vai trò")) {
+                    g2.drawRoundRect(cx - 11, cy - 11, 9, 9, 3, 3);
+                    g2.drawRoundRect(cx + 2, cy - 11, 9, 9, 3, 3);
+                    g2.drawRoundRect(cx - 11, cy + 2, 9, 9, 3, 3);
+                    g2.drawRoundRect(cx + 2, cy + 2, 9, 9, 3, 3);
+                } else if (title.contains("Tài khoản")) {
+                    g2.drawOval(cx - 6, cy - 11, 12, 12);
+                    g2.drawArc(cx - 12, cy + 5, 24, 16, 0, 180);
+                } else {
+                    g2.drawRoundRect(cx - 8, cy - 12, 16, 18, 3, 3);
+                    g2.drawArc(cx - 15, cy - 10, 7, 12, 90, 180);
+                    g2.drawArc(cx + 8, cy - 10, 7, 12, 270, 180);
+                    g2.drawLine(cx, cy + 6, cx, cy + 14);
+                    g2.drawLine(cx - 8, cy + 14, cx + 8, cy + 14);
+                }
+                g2.dispose();
+            }
+        };
+        iconPanel.setPreferredSize(new Dimension(52, 52));
+        iconPanel.setMaximumSize(new Dimension(52, 52));
+        iconPanel.setOpaque(false);
+        card.add(iconPanel, BorderLayout.WEST);
+
+        // Dùng GridBagLayout để nhóm chữ lại sát nhau và canh giữa theo chiều dọc
+        JPanel textPanel = new JPanel(new GridBagLayout());
+        textPanel.setOpaque(false);
+
+        JPanel innerTextPanel = new JPanel();
+        innerTextPanel.setLayout(new BoxLayout(innerTextPanel, BoxLayout.Y_AXIS));
+        innerTextPanel.setOpaque(false);
+
+        JLabel lblTitle = new JLabel(title);
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitle.setForeground(new Color(100, 116, 139)); // Slate 500
+        lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Chữ cực nhỏ (size 14) cho thẻ có chữ dài để không bao giờ bị lẹm
+        lblValue.setFont(new Font("Segoe UI", Font.BOLD, title.contains("Nhóm") ? 14 : 26));
+        lblValue.setForeground(new Color(15, 23, 42)); // Slate 900
+        lblValue.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        innerTextPanel.add(lblTitle);
+        innerTextPanel.add(Box.createVerticalStrut(2)); // Khoảng cách rất nhỏ giữa title và value
+        innerTextPanel.add(lblValue);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        textPanel.add(innerTextPanel, gbc);
+
+        card.add(textPanel, BorderLayout.CENTER);
+        return card;
     }
 
     private void applyFilters() {
