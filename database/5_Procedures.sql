@@ -275,35 +275,62 @@ END;
 
 
 -- ================================= ĐĂNG KÝ TÀI KHOẢN AN TOÀN (Sửa lại chuẩn Database Mới) =================================
+-- ================================= ĐĂNG KÝ TÀI KHOẢN AN TOÀN =================================
 CREATE OR REPLACE PROCEDURE SP_REGISTER_ACCOUNT (
-    p_FullName IN VARCHAR2, p_Email IN VARCHAR2, p_Phone IN VARCHAR2, p_Password IN VARCHAR2
+    p_FullName IN VARCHAR2,
+    p_Email IN VARCHAR2,
+    p_Phone IN VARCHAR2,
+    p_Password IN VARCHAR2
 ) AS
     v_UserID VARCHAR2(20);
     v_AccountID VARCHAR2(20);
     v_HashedPassword VARCHAR2(256);
     v_CheckEmail NUMBER;
 BEGIN
-    -- 1. Check trùng Email
-    SELECT COUNT(*) INTO v_CheckEmail FROM USERS WHERE Email = p_Email;
-    IF v_CheckEmail > 0 THEN RAISE_APPLICATION_ERROR(-20010, 'Lỗi: Email này đã được đăng ký!'); END IF;
+    -- Check Email
+    SELECT COUNT(*)
+    INTO v_CheckEmail
+    FROM USERS
+    WHERE Email = p_Email;
+
+    IF v_CheckEmail > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20010,
+            'Lỗi: Email này đã được đăng ký!'
+        );
+    END IF;
 
     SELECT TO_CHAR(ORA_HASH(p_Password)) 
     INTO v_HashedPassword 
     FROM DUAL;
 
-    -- 2. Tạo User (Lấy UserID)
-    INSERT INTO USERS (FullName, Email) VALUES (p_FullName, p_Email) RETURNING UserID INTO v_UserID;
+    -- Insert User
+    INSERT INTO USERS (FullName, Email)
+    VALUES (p_FullName, p_Email)
+    RETURNING UserID INTO v_UserID;
 
-    -- 3. Tạo Account dựa trên UserID (Lấy AccountID)
-    INSERT INTO ACCOUNT (UserID, UserName, Password) VALUES (v_UserID, p_Email, v_HashedPassword) RETURNING AccountID INTO v_AccountID;
+    -- Insert Account
+    INSERT INTO ACCOUNT (UserID, UserName, Password)
+    VALUES (v_UserID, p_Email, v_HashedPassword)
+    RETURNING AccountID INTO v_AccountID;
 
-    -- 4. Tạo thông tin Customer rỗng ban đầu gắn với Account (để lưu Phone)
-    INSERT INTO CUSTOMER (AccountID, FullName, Phone, Email) VALUES (v_AccountID, p_FullName, p_Phone, p_Email);
+    -- Insert Customer
+    INSERT INTO CUSTOMER (
+        AccountID,
+        FullName,
+        Phone,
+        Email
+    )
+    VALUES (
+        v_AccountID,
+        p_FullName,
+        p_Phone,
+        p_Email
+    );
 
     COMMIT;
 END;
 /
-
 -- ================================= Bảng CUSTOMER =================================
 -- Thêm hồ sơ khách hàng mới
 CREATE OR REPLACE PROCEDURE SP_ADD_CUSTOMER (

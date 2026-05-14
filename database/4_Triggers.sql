@@ -139,6 +139,7 @@ CREATE OR REPLACE TRIGGER TRG_CHECK_AIRCRAFT_OVERLAP
 BEFORE INSERT OR UPDATE ON FLIGHT
 FOR EACH ROW
 DECLARE
+    PRAGMA AUTONOMOUS_TRANSACTION;
     v_Count NUMBER;
 BEGIN
     -- Đã sửa số 0 thành chuỗi '0' trong hàm NVL
@@ -150,6 +151,8 @@ BEGIN
     IF v_Count > 0 THEN
         RAISE_APPLICATION_ERROR(-20004, 'Lỗi: Máy bay bị trùng lịch bay.');
     END IF;
+    
+    COMMIT;
 END;
 /
 
