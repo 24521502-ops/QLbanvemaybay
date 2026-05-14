@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatLightLaf;
 import util.AppColor;
 
 import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
@@ -13,12 +12,12 @@ import java.awt.geom.*;
  * MainFrame - Khung chính của ứng dụng Aviation Manager
  * Gồm: Sidebar (trái), TopBar (trên), ContentArea (giữa)
  */
+
 public class MainFrame extends JFrame {
 
     private JPanel contentPanel;
     private JPanel sidebarPanel;
     private JButton selectedMenuButton;
-    private String currentUser = "Admin";
 
     // Sidebar dimensions
     private static final int SIDEBAR_WIDTH = 220;
@@ -26,18 +25,18 @@ public class MainFrame extends JFrame {
 
     // Menu items config: {text, iconType}
     private static final String[][] MENU_ITEMS = {
-        {"Chuyến bay", "flight"},
-        {"Đặt chỗ", "booking"},
-        {"Vé", "ticket"},
-        {"Nhân viên", "employee"},
-        {"Khách hàng", "customer"},
-        {"Báo cáo", "report"},
-        {"Phân quyền", "permission"},
-        {"Dữ liệu gốc", "data"}
+            { "Chuyến bay", "flight" },
+            { "Đặt chỗ", "booking" },
+            { "Vé", "ticket" },
+            { "Nhân viên", "employee" },
+            { "Khách hàng", "customer" },
+            { "Báo cáo", "report" },
+            { "Phân quyền", "permission" },
+            { "Dữ liệu gốc", "data" }
     };
 
     public MainFrame() {
-        setTitle("Aviation Manager - SkyAdmin");
+        setTitle("Aviation Manager - TIU AIRLINES");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1100, 700));
         setSize(1280, 780);
@@ -71,59 +70,184 @@ public class MainFrame extends JFrame {
 
     // ==================== SIDEBAR ====================
     private JPanel createSidebar() {
-        JPanel sidebar = new JPanel(new BorderLayout(0, 0));
+        JPanel sidebar = new JPanel(new BorderLayout(0, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                // Nền xanh navy đậm (Dark navy blue)
+                g2.setColor(new Color(10, 15, 36));
+                g2.fillRect(0, 0, getWidth(), getHeight());
+
+                // Giả lập vân kim loại phay xước dạng tròn (Circular brushed metal texture)
+                RadialGradientPaint rgp = new RadialGradientPaint(
+                        new Point(getWidth() / 2, getHeight() / 4),
+                        Math.max(getWidth(), getHeight()) * 0.8f,
+                        new float[] { 0.0f, 0.5f, 1.0f },
+                        new Color[] { new Color(45, 60, 95, 100), new Color(20, 30, 55, 60),
+                                new Color(10, 15, 36, 0) });
+                g2.setPaint(rgp);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+
+                // Viền highlight tinh tế ở cạnh phải
+                g2.setColor(new Color(255, 255, 255, 15));
+                g2.drawLine(getWidth() - 1, 0, getWidth() - 1, getHeight());
+
+                g2.dispose();
+            }
+        };
         sidebar.setPreferredSize(new Dimension(SIDEBAR_WIDTH, 0));
-        sidebar.setBackground(AppColor.SIDEBAR_BG);
+        sidebar.setOpaque(false);
 
         // --- Logo Section ---
         JPanel logoPanel = new JPanel(new BorderLayout(12, 0));
         logoPanel.setOpaque(false);
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 16, 20));
 
-        // Airplane icon
+        // Logo Emblem: Glossy blue airplane + blue ring + gold swoosh + sparkles
         JLabel lblIcon = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                // Circle background
-                g2.setColor(new Color(56, 189, 248)); // Sky 400
-                g2.fillOval(0, 0, 40, 40);
-                // Airplane icon
-                g2.setColor(Color.WHITE);
-                g2.setStroke(new BasicStroke(1.8f));
-                int cx = 20, cy = 20;
-                // Simple airplane shape
-                GeneralPath plane = new GeneralPath();
-                plane.moveTo(cx - 4, cy + 8);
-                plane.lineTo(cx, cy - 10);
-                plane.lineTo(cx + 4, cy + 8);
-                plane.closePath();
-                g2.fill(plane);
-                // Wings
-                g2.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                g2.drawLine(cx - 12, cy + 2, cx + 12, cy + 2);
-                // Tail
-                g2.drawLine(cx - 5, cy + 7, cx + 5, cy + 7);
+                g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+                int s = 44; // Tổng kích thước vùng vẽ
+                int cx = s / 2;
+                int cy = s / 2;
+                AffineTransform saved = g2.getTransform();
+
+                // ============================================================
+                // LAYER 1: Golden-yellow curved swoosh (behind everything)
+                // Wraps around the bottom-left of the blue ring, crossing behind the plane
+                // ============================================================
+                g2.setPaint(new LinearGradientPaint(2, cy + 4, s - 6, cy - 8,
+                        new float[] { 0.0f, 0.5f, 1.0f },
+                        new Color[] { new Color(255, 210, 50), new Color(255, 185, 0), new Color(210, 140, 0) }));
+                g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                // Vẽ vòng cung vàng từ góc dưới-trái bao quanh phía dưới ring xanh
+                Arc2D goldArc = new Arc2D.Double(cx - 19, cy - 10, 34, 28, 200, 170, Arc2D.OPEN);
+                g2.draw(goldArc);
+
+                // ============================================================
+                // LAYER 2: Thick circular ring (light-blue → dark-blue gradient)
+                // ============================================================
+                int ringInset = 5;
+                int ringDia = s - ringInset * 2;
+                g2.setPaint(new LinearGradientPaint(ringInset, ringInset, ringInset + ringDia, ringInset + ringDia,
+                        new float[] { 0.0f, 0.5f, 1.0f },
+                        new Color[] { new Color(100, 210, 255), new Color(30, 120, 220), new Color(0, 60, 170) }));
+                g2.setStroke(new BasicStroke(3.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawOval(ringInset, ringInset, ringDia, ringDia);
+
+                // Glossy highlight trên ring (vòng sáng nhẹ ở nửa trên)
+                g2.setStroke(new BasicStroke(1.0f));
+                g2.setColor(new Color(255, 255, 255, 55));
+                g2.drawArc(ringInset + 2, ringInset + 2, ringDia - 4, ringDia - 4, 30, 120);
+
+                // ============================================================
+                // LAYER 3: 3 tiny four-point star sparkles trên vòng ring
+                // ============================================================
+                drawFourPointStar(g2, 12, 7, 3); // Top-left trên ring
+                drawFourPointStar(g2, 36, 14, 2); // Right trên ring
+                drawFourPointStar(g2, 8, 32, 2); // Bottom-left trên ring
+
+                // ============================================================
+                // LAYER 4: Glossy Royal Blue Airplane (topmost, soaring upward-right)
+                // ============================================================
+                g2.rotate(Math.toRadians(-30), cx, cy); // Xoay để bay chéo lên phải
+
+                // Gradient glossy xanh dương hoàng gia
+                g2.setPaint(new LinearGradientPaint(cx - 8, cy - 10, cx + 6, cy + 8,
+                        new float[] { 0.0f, 0.35f, 0.7f, 1.0f },
+                        new Color[] {
+                                new Color(200, 240, 255), // highlight sáng
+                                new Color(60, 160, 255), // royal blue sáng
+                                new Color(20, 100, 220), // royal blue trung
+                                new Color(0, 50, 150) // royal blue sẫm
+                        }));
+
+                // Thân máy bay (mũi nhọn, dáng thanh thoát)
+                GeneralPath body = new GeneralPath();
+                body.moveTo(cx - 12, cy + 1); // Mũi (trái = hướng bay)
+                body.quadTo(cx - 5, cy - 4, cx + 2, cy - 1);
+                body.quadTo(cx + 6, cy + 1, cx + 10, cy + 2); // Đuôi sau
+                body.quadTo(cx + 6, cy + 4, cx + 2, cy + 4);
+                body.quadTo(cx - 5, cy + 5, cx - 12, cy + 1);
+                body.closePath();
+                g2.fill(body);
+
+                // Cánh chính (mở rộng từ giữa thân ra 2 bên)
+                GeneralPath mainWing = new GeneralPath();
+                mainWing.moveTo(cx - 4, cy);
+                mainWing.lineTo(cx + 1, cy - 9); // Mút cánh trên
+                mainWing.lineTo(cx + 3, cy - 1);
+                mainWing.closePath();
+                g2.fill(mainWing);
+
+                GeneralPath mainWing2 = new GeneralPath();
+                mainWing2.moveTo(cx - 4, cy + 2);
+                mainWing2.lineTo(cx + 1, cy + 10); // Mút cánh dưới
+                mainWing2.lineTo(cx + 3, cy + 3);
+                mainWing2.closePath();
+                g2.fill(mainWing2);
+
+                // Cánh đuôi
+                GeneralPath tailWing = new GeneralPath();
+                tailWing.moveTo(cx + 8, cy + 1);
+                tailWing.lineTo(cx + 12, cy - 4); // Cánh đuôi dựng đứng lên
+                tailWing.lineTo(cx + 11, cy + 1);
+                tailWing.closePath();
+                g2.fill(tailWing);
+
+                // Đường highlight bóng trên thân (glass cockpit)
+                g2.setColor(new Color(255, 255, 255, 160));
+                g2.setStroke(new BasicStroke(0.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g2.drawLine(cx - 10, cy, cx - 6, cy);
+
+                // Đường highlight dọc thân trên
+                g2.setColor(new Color(255, 255, 255, 50));
+                g2.drawLine(cx - 6, cy - 1, cx + 6, cy);
+
+                g2.setTransform(saved);
                 g2.dispose();
             }
+
+            /** Vẽ ngôi sao 4 cánh (four-point sparkle) */
+            private void drawFourPointStar(Graphics2D g2, int sx, int sy, int r) {
+                g2.setColor(new Color(255, 255, 255, 230));
+                GeneralPath star = new GeneralPath();
+                star.moveTo(sx, sy - r); // Đỉnh trên
+                star.quadTo(sx + 0.5, sy - 0.5, sx + r, sy); // Cánh phải
+                star.quadTo(sx + 0.5, sy + 0.5, sx, sy + r); // Đỉnh dưới
+                star.quadTo(sx - 0.5, sy + 0.5, sx - r, sy); // Cánh trái
+                star.quadTo(sx - 0.5, sy - 0.5, sx, sy - r); // Về đỉnh trên
+                star.closePath();
+                g2.fill(star);
+                // Lõi sáng trắng trung tâm
+                g2.setColor(Color.WHITE);
+                g2.fillOval(sx - 1, sy - 1, 2, 2);
+            }
         };
-        lblIcon.setPreferredSize(new Dimension(40, 40));
+        lblIcon.setPreferredSize(new Dimension(44, 44));
         logoPanel.add(lblIcon, BorderLayout.WEST);
 
         JPanel logoTextPanel = new JPanel();
         logoTextPanel.setLayout(new BoxLayout(logoTextPanel, BoxLayout.Y_AXIS));
         logoTextPanel.setOpaque(false);
 
-        JLabel lblTitle = new JLabel("SkyAdmin");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        JLabel lblTitle = new JLabel("TIU AIRLINES");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 17));
         lblTitle.setForeground(Color.WHITE);
         lblTitle.setAlignmentX(Component.LEFT_ALIGNMENT);
         logoTextPanel.add(lblTitle);
 
-        JLabel lblSub = new JLabel("Aviation System");
-        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblSub.setForeground(new Color(148, 163, 184)); // Slate 400
+        // Wide letter spacing for modern corporate subtext look
+        JLabel lblSub = new JLabel("A V I A T I O N  S Y S T E M");
+        lblSub.setFont(new Font("Segoe UI", Font.BOLD, 8));
+        lblSub.setForeground(new Color(110, 140, 170)); // light blue-grey
         lblSub.setAlignmentX(Component.LEFT_ALIGNMENT);
         logoTextPanel.add(lblSub);
 
@@ -163,10 +287,6 @@ public class MainFrame extends JFrame {
         bottomPanel.add(sep);
         bottomPanel.add(Box.createVerticalStrut(8));
 
-        JButton btnSettings = createMenuButton("Settings", "settings");
-        bottomPanel.add(btnSettings);
-        bottomPanel.add(Box.createVerticalStrut(2));
-
         JButton btnLogout = createMenuButton("Logout", "logout");
         bottomPanel.add(btnLogout);
 
@@ -195,9 +315,8 @@ public class MainFrame extends JFrame {
         topBar.setPreferredSize(new Dimension(0, TOPBAR_HEIGHT));
         topBar.setBackground(AppColor.SURFACE);
         topBar.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
-            BorderFactory.createEmptyBorder(0, 24, 0, 24)
-        ));
+                BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
+                BorderFactory.createEmptyBorder(0, 24, 0, 24)));
 
         // Left: Title
         JLabel lblAppTitle = new JLabel("Aviation Manager");
@@ -232,9 +351,8 @@ public class MainFrame extends JFrame {
         txtSearch.setPreferredSize(new Dimension(300, 36));
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
-            BorderFactory.createEmptyBorder(4, 34, 4, 12)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
+                BorderFactory.createEmptyBorder(4, 34, 4, 12)));
         txtSearch.setBackground(new Color(249, 250, 251)); // Gray 50
         searchPanel.add(txtSearch);
         topBar.add(searchPanel, BorderLayout.CENTER);
@@ -262,9 +380,16 @@ public class MainFrame extends JFrame {
             {
                 addMouseListener(new MouseAdapter() {
                     @Override
-                    public void mouseEntered(MouseEvent e) { isHovered = true; repaint(); }
+                    public void mouseEntered(MouseEvent e) {
+                        isHovered = true;
+                        repaint();
+                    }
+
                     @Override
-                    public void mouseExited(MouseEvent e) { isHovered = false; repaint(); }
+                    public void mouseExited(MouseEvent e) {
+                        isHovered = false;
+                        repaint();
+                    }
                 });
             }
 
@@ -275,24 +400,56 @@ public class MainFrame extends JFrame {
 
                 boolean isSelected = (MainFrame.this.selectedMenuButton == this);
 
-                // Background
                 if (isSelected) {
-                    g2.setColor(AppColor.SIDEBAR_ACTIVE);
-                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 8, 8));
+                    // Electric blue and purple aura (Glow phát sáng)
+                    g2.setPaint(new LinearGradientPaint(
+                            0, 0, getWidth(), 0,
+                            new float[] { 0.0f, 0.4f, 1.0f },
+                            new Color[] { new Color(0, 240, 255, 45), new Color(138, 43, 226, 25),
+                                    new Color(0, 0, 0, 0) }));
+                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 12, 12));
+
+                    // Glassmorphism box (Hộp hiệu ứng kính trong suốt)
+                    g2.setColor(new Color(255, 255, 255, 10)); // Nền kính mờ
+                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 12, 12));
+                    g2.setColor(new Color(255, 255, 255, 25)); // Viền highlight của kính
+                    g2.draw(new RoundRectangle2D.Double(0, 0, getWidth() - 1, getHeight() - 1, 12, 12));
+
+                    // Glowing neon blue vertical indicator bar (Thanh chỉ báo neon)
+                    Color neonBlue = new Color(0, 255, 255);
+                    for (int i = 0; i < 5; i++) { // Vẽ nhiều lớp để tạo hiệu ứng phát sáng mờ (glow)
+                        g2.setColor(new Color(neonBlue.getRed(), neonBlue.getGreen(), neonBlue.getBlue(), 50 - i * 10));
+                        g2.fill(new RoundRectangle2D.Double(2 - i, 8 - i, 4 + i * 2, getHeight() - 16 + i * 2, 4, 4));
+                    }
+                    g2.setColor(Color.WHITE); // Lõi sáng nhất
+                    g2.fill(new RoundRectangle2D.Double(2, 8, 2, getHeight() - 16, 2, 2));
+
+                    // Floating light particles (Các hạt sáng li ti bay lơ lửng)
+                    g2.setColor(new Color(0, 255, 255, 200));
+                    g2.fillOval(getWidth() - 30, 12, 2, 2);
+                    g2.fillOval(getWidth() - 15, 28, 1, 1);
+                    g2.setColor(new Color(138, 43, 226, 200));
+                    g2.fillOval(40, getHeight() - 8, 2, 2);
+
                 } else if (isHovered) {
-                    g2.setColor(AppColor.SIDEBAR_HOVER);
-                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 8, 8));
+                    // Glassmorphism nhẹ khi hover
+                    g2.setColor(new Color(255, 255, 255, 15));
+                    g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 12, 12));
                 }
 
-                // Icon
+                // Icon (Elegant thin line icons - Nét mỏng thanh lịch)
                 g2.setColor(isSelected ? Color.WHITE : new Color(148, 163, 184));
-                drawMenuIcon(g2, iconType, 14, (getHeight() - 18) / 2, 18);
+                drawMenuIcon(g2, iconType, 16, (getHeight() - 18) / 2, 18);
 
-                // Text
+                // Text (Clean white sans-serif)
                 g2.setColor(isSelected ? Color.WHITE : new Color(203, 213, 225));
-                g2.setFont(getFont());
+                if (isSelected) {
+                    g2.setFont(getFont().deriveFont(Font.BOLD));
+                } else {
+                    g2.setFont(getFont());
+                }
                 FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(getText(), 44, (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
+                g2.drawString(getText(), 48, (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
 
                 g2.dispose();
             }
@@ -316,7 +473,8 @@ public class MainFrame extends JFrame {
     }
 
     private void setSelectedButton(JButton btn) {
-        if (selectedMenuButton != null) selectedMenuButton.repaint();
+        if (selectedMenuButton != null)
+            selectedMenuButton.repaint();
         selectedMenuButton = btn;
         btn.repaint();
     }
@@ -329,19 +487,34 @@ public class MainFrame extends JFrame {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(AppColor.TEXT_SECONDARY);
                 int cx = getWidth() / 2, cy = getHeight() / 2;
-                g2.setStroke(new BasicStroke(1.5f));
+                g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 if ("bell".equals(type)) {
-                    // Bell shape
-                    g2.drawArc(cx - 7, cy - 8, 14, 14, 0, 180);
-                    g2.drawLine(cx - 7, cy - 1, cx - 9, cy + 5);
-                    g2.drawLine(cx + 7, cy - 1, cx + 9, cy + 5);
-                    g2.drawLine(cx - 9, cy + 5, cx + 9, cy + 5);
-                    g2.fillOval(cx - 2, cy + 6, 4, 3);
+                    // Dáng chuông cổ điển với đường cong mềm mại ở đáy (flare)
+                    GeneralPath bell = new GeneralPath();
+                    bell.moveTo(cx - 8, cy + 6); // Điểm bắt đầu ở mép trái đáy
+                    bell.quadTo(cx - 5, cy + 6, cx - 5, cy + 2); // Cong mềm lên eo trái
+                    bell.lineTo(cx - 5, cy - 1); // Nét thẳng đứng ở eo
+                    // Mái vòm tròn trịa (tâm ở cx, cy-1; bán kính 5)
+                    bell.append(new Arc2D.Double(cx - 5, cy - 6, 10, 10, 180, -180, Arc2D.OPEN), true);
+                    bell.lineTo(cx + 5, cy + 2); // Nét thẳng đứng eo phải
+                    bell.quadTo(cx + 5, cy + 6, cx + 8, cy + 6); // Cong mềm ra mép phải đáy
+                    bell.closePath(); // Đóng hình bằng đường ngang đáy
+                    g2.draw(bell);
+
+                    // Quả lắc chuông (Clapper) nằm ngay dưới đáy
+                    g2.fillOval(cx - 2, cy + 6, 4, 4);
                 } else if ("help".equals(type)) {
+                    // --- Icon dấu chấm hỏi nằm ngay trọng tâm và thẩm mỹ hơn ---
+                    g2.setColor(new Color(90, 105, 125));
                     g2.drawOval(cx - 9, cy - 9, 18, 18);
-                    g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                    g2.setFont(new Font("Segoe UI", Font.BOLD, 15));
+
                     FontMetrics fm = g2.getFontMetrics();
-                    g2.drawString("?", cx - fm.stringWidth("?") / 2, cy + fm.getAscent() / 2 - 1);
+                    int textWidth = fm.stringWidth("?");
+                    int textX = cx - (textWidth / 2);
+                    int textY = cy + (fm.getAscent() - fm.getDescent()) / 2 - 1;
+
+                    g2.drawString("?", textX, textY);
                 }
                 g2.dispose();
             }
@@ -380,7 +553,7 @@ public class MainFrame extends JFrame {
 
     // ==================== MENU ICON DRAWING ====================
     private void drawMenuIcon(Graphics2D g2, String type, int x, int y, int size) {
-        g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int cx = x + size / 2;
         int cy = y + size / 2;
 
