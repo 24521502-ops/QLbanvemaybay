@@ -107,25 +107,40 @@ public class loginGUI extends JFrame {
 
         // Logo + tên app
         JLabel lblLogo = new JLabel();
-        try {
-            URL iconUrl = getClass().getResource("/icon/iconmaybay.png");
-            if (iconUrl != null) {
-                ImageIcon originalIcon = new ImageIcon(iconUrl);
-                Image srcImg = originalIcon.getImage();
-                java.awt.image.BufferedImage resizedImg = new java.awt.image.BufferedImage(30, 30, java.awt.image.BufferedImage.TYPE_INT_ARGB);
-                Graphics2D g2Img = resizedImg.createGraphics();
-                g2Img.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                g2Img.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                g2Img.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2Img.drawImage(srcImg, 0, 0, 30, 30, null);
-                g2Img.dispose();
-                lblLogo.setIcon(new ImageIcon(resizedImg));
-            } else {
-                lblLogo.setText("✈");
+        Icon planeIcon = new Icon() {
+            @Override
+            public void paintIcon(Component c, Graphics g, int x, int y) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.translate(x, y);
+                g2.setColor(Color.WHITE);
+                g2.rotate(Math.toRadians(-45), 15, 15);
+                java.awt.geom.Path2D p = new java.awt.geom.Path2D.Double();
+                p.moveTo(25, 15);
+                p.curveTo(25, 13, 23, 13, 20, 14);
+                p.lineTo(10, 5);
+                p.lineTo(7, 5);
+                p.lineTo(13, 14);
+                p.lineTo(5, 14);
+                p.lineTo(2, 10);
+                p.lineTo(0, 10);
+                p.lineTo(2, 15);
+                p.lineTo(0, 20);
+                p.lineTo(2, 20);
+                p.lineTo(5, 16);
+                p.lineTo(13, 16);
+                p.lineTo(7, 25);
+                p.lineTo(10, 25);
+                p.lineTo(20, 16);
+                p.curveTo(23, 17, 25, 17, 25, 15);
+                p.closePath();
+                g2.fill(p);
+                g2.dispose();
             }
-        } catch (Exception e) {
-            lblLogo.setText("✈");
-        }
+            @Override public int getIconWidth() { return 30; }
+            @Override public int getIconHeight() { return 30; }
+        };
+        lblLogo.setIcon(planeIcon);
         lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblLogo.setForeground(Color.WHITE);
         lblLogo.setBounds(24, 390, 40, 30);
@@ -174,14 +189,14 @@ public class loginGUI extends JFrame {
 
         // ─── Tên đăng nhập ───
         panel.add(makeLabel("TÊN ĐĂNG NHẬP (EMAIL)", cx, y, fw));
-        txtUserName = createStyledField("email@example.com", "/icon/icmail.png");
+        txtUserName = createStyledField("email@example.com", "EMAIL");
         txtUserName.setBounds(cx, y + 20, fw, 42);
         panel.add(txtUserName);
         y += 80;
 
         // ─── Mật khẩu ───
         panel.add(makeLabel("MẬT KHẨU", cx, y, fw));
-        txtPassword = createStyledPassword("/icon/icmk.png");
+        txtPassword = createStyledPassword("PASSWORD");
         txtPassword.setBounds(cx, y + 20, fw, 42);
         panel.add(txtPassword);
         y += 72;
@@ -293,16 +308,44 @@ public class loginGUI extends JFrame {
         return lbl;
     }
 
-    private JTextField createStyledField(String placeholder, String iconPath) {
-        JTextField field = new JTextField() {
-            private Image iconImage;
-            {
-                URL url = getClass().getResource(iconPath);
-                if (url != null) {
-                    iconImage = new ImageIcon(url).getImage();
-                }
-            }
+    private void drawVectorIcon(Graphics2D g2, String type, int x, int y, int size, boolean isFocused) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        
+        g2.setColor(isFocused ? COLOR_LINK : COLOR_SUBTEXT);
+        
+        int pad = 2;
+        int w = size - pad * 2;
+        int h = size - pad * 2;
+        int cx = x + pad;
+        int cy = y + pad;
 
+        if ("EMAIL".equals(type)) {
+            g2.drawRoundRect(cx, cy + 2, w, h - 5, 3, 3);
+            java.awt.geom.Path2D path = new java.awt.geom.Path2D.Double();
+            path.moveTo(cx, cy + 4);
+            path.lineTo(cx + w / 2.0, cy + h / 2.0 + 1);
+            path.lineTo(cx + w, cy + 4);
+            g2.draw(path);
+        } else if ("PASSWORD".equals(type) || "CONFIRM_PASSWORD".equals(type)) {
+            g2.drawRoundRect(cx + 2, cy + 7, w - 4, h - 8, 2, 2);
+            g2.drawArc(cx + 4, cy + 1, w - 8, 12, 0, 180);
+            g2.fillOval(cx + w / 2 - 1, cy + h / 2 + 2, 2, 2);
+            g2.drawLine(cx + w / 2, cy + h / 2 + 4, cx + w / 2, cy + h - 2);
+        } else if ("USER".equals(type)) {
+            g2.drawOval(cx + 3, cy + 1, w - 6, w - 6);
+            java.awt.geom.Path2D path = new java.awt.geom.Path2D.Double();
+            path.moveTo(cx, cy + h);
+            path.quadTo(cx + w / 2.0, cy + h - 8, cx + w, cy + h);
+            g2.draw(path);
+        } else if ("PHONE".equals(type)) {
+            g2.drawRoundRect(cx + 4, cy, w - 8, h, 4, 4);
+            g2.drawLine(cx + w / 2 - 2, cy + h - 3, cx + w / 2 + 2, cy + h - 3);
+        }
+    }
+
+    private JTextField createStyledField(String placeholder, String iconType) {
+        JTextField field = new JTextField() {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -310,17 +353,14 @@ public class loginGUI extends JFrame {
                 g2.setColor(getBackground());
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 super.paintComponent(g);
-                if (iconImage != null) {
-                    int iconSize = 20;
-                    int iconY = (getHeight() - iconSize) / 2;
-                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                    if (getText().equals(placeholder) || getText().trim().isEmpty()) {
-                        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
-                    }
-                    g2.drawImage(iconImage, 12, iconY, iconSize, iconSize, this);
-                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+                
+                int iconSize = 20;
+                int iconY = (getHeight() - iconSize) / 2;
+                
+                if (getText().equals(placeholder) || getText().trim().isEmpty()) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
                 }
+                drawVectorIcon(g2, iconType, 12, iconY, iconSize, hasFocus() || (!getText().equals(placeholder) && !getText().isEmpty()));
                 g2.dispose();
             }
 
@@ -328,7 +368,7 @@ public class loginGUI extends JFrame {
             protected void paintBorder(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(COLOR_BORDER);
+                g2.setColor(hasFocus() ? COLOR_LINK : COLOR_BORDER);
                 g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 g2.dispose();
             }
@@ -345,27 +385,21 @@ public class loginGUI extends JFrame {
                     field.setText("");
                     field.setForeground(COLOR_TEXT);
                 }
+                field.repaint();
             }
             @Override public void focusLost(FocusEvent e) {
                 if (field.getText().trim().isEmpty()) {
                     field.setText(placeholder);
                     field.setForeground(COLOR_SUBTEXT);
                 }
+                field.repaint();
             }
         });
         return field;
     }
 
-    private JPasswordField createStyledPassword(String iconPath) {
+    private JPasswordField createStyledPassword(String iconType) {
         JPasswordField field = new JPasswordField() {
-            private Image iconImage;
-            {
-                URL url = getClass().getResource(iconPath);
-                if (url != null) {
-                    iconImage = new ImageIcon(url).getImage();
-                }
-            }
-
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -373,17 +407,14 @@ public class loginGUI extends JFrame {
                 g2.setColor(getBackground());
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 super.paintComponent(g);
-                if (iconImage != null) {
-                    int iconSize = 20;
-                    int iconY = (getHeight() - iconSize) / 2;
-                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                    g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                    if (getPassword().length == 0) {
-                        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
-                    }
-                    g2.drawImage(iconImage, 12, iconY, iconSize, iconSize, this);
-                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
+                
+                int iconSize = 20;
+                int iconY = (getHeight() - iconSize) / 2;
+                
+                if (getPassword().length == 0) {
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
                 }
+                drawVectorIcon(g2, iconType, 12, iconY, iconSize, hasFocus() || getPassword().length > 0);
                 g2.dispose();
             }
 
@@ -391,7 +422,7 @@ public class loginGUI extends JFrame {
             protected void paintBorder(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(COLOR_BORDER);
+                g2.setColor(hasFocus() ? COLOR_LINK : COLOR_BORDER);
                 g2.draw(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 g2.dispose();
             }
@@ -401,6 +432,10 @@ public class loginGUI extends JFrame {
         field.setFont(FONT_FIELD);
         field.setBorder(new EmptyBorder(8, 40, 8, 12));
         field.setEchoChar('●');
+        field.addFocusListener(new FocusAdapter() {
+            @Override public void focusGained(FocusEvent e) { field.repaint(); }
+            @Override public void focusLost(FocusEvent e) { field.repaint(); }
+        });
         return field;
     }
 
