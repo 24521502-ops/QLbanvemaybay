@@ -1,9 +1,10 @@
-package bus;
+package bus.QuanLyPhanQuyenBUS;
 
-import dao.RoleGroupDAO;
 import dto.RoleGroupDTO;
 
 import java.util.List;
+
+import dao.QuanLyPhanQuyenDAO.RoleGroupDAO;
 
 public class RoleGroupBUS {
     private final RoleGroupDAO dao = new RoleGroupDAO();

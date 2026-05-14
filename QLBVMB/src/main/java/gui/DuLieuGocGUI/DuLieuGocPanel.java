@@ -1,15 +1,16 @@
-package gui;
+package gui.DuLieuGocGUI;
 
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
+
 import java.awt.*;
 
 /**
  * Panel "Dữ liệu gốc" - Quản lý các danh mục dữ liệu cốt lõi:
  * - Tab 1: Sân bay (AirportGUI)
- * - Tab 2: Hãng hàng không (AirlineGUI) 
+ * - Tab 2: Hãng hàng không (AirlineGUI)
  * - Tab 3: Loại máy bay (AircraftGUI)
  */
 public class DuLieuGocPanel extends JPanel {
@@ -61,7 +62,7 @@ public class DuLieuGocPanel extends JPanel {
 
             @Override
             protected void paintTabBorder(Graphics g, int tabPlacement, int tabIndex,
-                                          int x, int y, int w, int h, boolean isSelected) {
+                    int x, int y, int w, int h, boolean isSelected) {
                 if (isSelected) {
                     Graphics2D g2 = (Graphics2D) g;
                     g2.setColor(AppColor.PRIMARY);
@@ -71,7 +72,7 @@ public class DuLieuGocPanel extends JPanel {
 
             @Override
             protected void paintTabBackground(Graphics g, int tabPlacement, int tabIndex,
-                                               int x, int y, int w, int h, boolean isSelected) {
+                    int x, int y, int w, int h, boolean isSelected) {
                 g.setColor(AppColor.BACKGROUND);
                 g.fillRect(x, y, w, h);
             }
@@ -83,13 +84,13 @@ public class DuLieuGocPanel extends JPanel {
 
             @Override
             protected void paintFocusIndicator(Graphics g, int tabPlacement, Rectangle[] rects,
-                                                int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected) {
+                    int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected) {
                 // Không vẽ focus indicator
             }
 
             @Override
             protected void paintText(Graphics g, int tabPlacement, Font font, FontMetrics metrics,
-                                      int tabIndex, String title, Rectangle textRect, boolean isSelected) {
+                    int tabIndex, String title, Rectangle textRect, boolean isSelected) {
                 Graphics2D g2 = (Graphics2D) g;
                 g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
                 g2.setFont(font);
@@ -110,9 +111,8 @@ public class DuLieuGocPanel extends JPanel {
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBackground(AppColor.SURFACE);
         wrapper.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
-            BorderFactory.createEmptyBorder(0, 0, 0, 0)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
+                BorderFactory.createEmptyBorder(0, 0, 0, 0)));
         wrapper.add(content, BorderLayout.CENTER);
         return wrapper;
     }

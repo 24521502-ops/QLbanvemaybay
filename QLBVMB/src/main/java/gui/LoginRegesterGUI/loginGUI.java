@@ -1,6 +1,6 @@
-package gui;
+package gui.LoginRegesterGUI;
 
-import bus.loginBUS;
+import bus.LoginRegesterBUS.loginBUS;
 import dto.AccountDTO;
 
 import javax.swing.*;
@@ -279,7 +279,8 @@ public class loginGUI extends JFrame {
     }
 
     private void openMainWindow(AccountDTO account) {
-        new MainGUI(account);
+        gui.FrameAdmin.FrameAdmin frame = new gui.FrameAdmin.FrameAdmin(account);
+        frame.setVisible(true);
         dispose();
     }
 

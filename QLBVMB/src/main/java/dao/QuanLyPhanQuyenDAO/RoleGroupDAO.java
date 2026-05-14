@@ -1,4 +1,4 @@
-package dao;
+package dao.QuanLyPhanQuyenDAO;
 
 import dto.RoleGroupDTO;
 import util.DBConnection;
@@ -14,8 +14,8 @@ public class RoleGroupDAO {
         List<RoleGroupDTO> list = new ArrayList<>();
         String sql = "SELECT RoleGroupID, NameRoleGroup, Created_At, Updated_At, IsDeleted FROM ROLE_GROUP WHERE IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 RoleGroupDTO dto = new RoleGroupDTO();
                 dto.setRoleGroupID(rs.getString("RoleGroupID"));
@@ -35,7 +35,7 @@ public class RoleGroupDAO {
     public RoleGroupDTO getByID(String roleGroupID) {
         String sql = "SELECT RoleGroupID, NameRoleGroup, Created_At, Updated_At, IsDeleted FROM ROLE_GROUP WHERE RoleGroupID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleGroupID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -58,7 +58,7 @@ public class RoleGroupDAO {
     public boolean insert(RoleGroupDTO dto) {
         String sql = "INSERT INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, Created_At, Updated_At, IsDeleted) VALUES (?, ?, SYSDATE, SYSDATE, 0)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dto.getRoleGroupID());
             ps.setString(2, dto.getNameRoleGroup());
             return ps.executeUpdate() > 0;
@@ -72,7 +72,7 @@ public class RoleGroupDAO {
     public boolean update(RoleGroupDTO dto) {
         String sql = "UPDATE ROLE_GROUP SET NameRoleGroup = ?, Updated_At = SYSDATE WHERE RoleGroupID = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, dto.getNameRoleGroup());
             ps.setString(2, dto.getRoleGroupID());
             return ps.executeUpdate() > 0;
@@ -86,7 +86,7 @@ public class RoleGroupDAO {
     public boolean delete(String roleGroupID) {
         String sql = "UPDATE ROLE_GROUP SET IsDeleted = 1, Updated_At = SYSDATE WHERE RoleGroupID = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleGroupID);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -99,7 +99,7 @@ public class RoleGroupDAO {
     public int countUsers(String roleGroupID) {
         String sql = "SELECT COUNT(*) AS cnt FROM ACCOUNT_ASSIGN_ROLE_GROUP WHERE RoleGroupID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleGroupID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -117,7 +117,7 @@ public class RoleGroupDAO {
         List<String> list = new ArrayList<>();
         String sql = "SELECT RoleID FROM ROLE_GROUP_ASSIGN_ROLE WHERE RoleGroupID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleGroupID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -135,7 +135,7 @@ public class RoleGroupDAO {
         // Kiểm tra xem đã tồn tại chưa (có thể đã bị xóa mềm)
         String checkSql = "SELECT IsDeleted FROM ROLE_GROUP_ASSIGN_ROLE WHERE RoleGroupID = ? AND RoleID = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
+                PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
             checkPs.setString(1, roleGroupID);
             checkPs.setString(2, roleID);
             try (ResultSet rs = checkPs.executeQuery()) {
@@ -156,7 +156,7 @@ public class RoleGroupDAO {
         // Chưa tồn tại, insert mới
         String insertSql = "INSERT INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, Created_At, Updated_At, IsDeleted) VALUES (?, ?, SYSDATE, SYSDATE, 0)";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertSql)) {
+                PreparedStatement ps = conn.prepareStatement(insertSql)) {
             ps.setString(1, roleGroupID);
             ps.setString(2, roleID);
             return ps.executeUpdate() > 0;
@@ -170,7 +170,7 @@ public class RoleGroupDAO {
     public boolean removeAllRoles(String roleGroupID) {
         String sql = "UPDATE ROLE_GROUP_ASSIGN_ROLE SET IsDeleted = 1, Updated_At = SYSDATE WHERE RoleGroupID = ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleGroupID);
             ps.executeUpdate();
             return true;
@@ -184,8 +184,8 @@ public class RoleGroupDAO {
     public String generateNewID() {
         String sql = "SELECT 'RG' || LPAD(NVL(MAX(TO_NUMBER(SUBSTR(RoleGroupID, 3))), 0) + 1, 2, '0') AS NewID FROM ROLE_GROUP";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getString("NewID");
             }
@@ -200,7 +200,7 @@ public class RoleGroupDAO {
         List<RoleGroupDTO> list = new ArrayList<>();
         String sql = "SELECT RoleGroupID, NameRoleGroup, Created_At, Updated_At, IsDeleted FROM ROLE_GROUP WHERE IsDeleted = 0 AND LOWER(NameRoleGroup) LIKE ?";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword.toLowerCase() + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

@@ -1,4 +1,4 @@
-package dao;
+package dao.QuanLyNhanVienDAO;
 
 import dto.EmployeeDTO;
 import util.DBConnection;
@@ -16,8 +16,8 @@ public class EmployeeDAO {
         List<EmployeeDTO> list = new ArrayList<>();
         String sql = "SELECT EmployeeID, AccountID, FullName, Position, Phone, Email FROM EMPLOYEE ORDER BY EmployeeID";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 EmployeeDTO emp = new EmployeeDTO();
                 emp.setEmployeeID(rs.getString("EmployeeID"));
@@ -42,7 +42,7 @@ public class EmployeeDAO {
         List<EmployeeDTO> list = new ArrayList<>();
         String sql = "SELECT EmployeeID, AccountID, FullName, Position, Phone, Email FROM EMPLOYEE WHERE Position = ? ORDER BY EmployeeID";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, position);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -70,7 +70,7 @@ public class EmployeeDAO {
         List<EmployeeDTO> list = new ArrayList<>();
         String sql = "SELECT EmployeeID, AccountID, FullName, Position, Phone, Email FROM EMPLOYEE WHERE UPPER(FullName) LIKE UPPER(?) ORDER BY EmployeeID";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%" + keyword + "%");
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -98,8 +98,8 @@ public class EmployeeDAO {
         List<String> positions = new ArrayList<>();
         String sql = "SELECT DISTINCT Position FROM EMPLOYEE WHERE Position IS NOT NULL ORDER BY Position";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 positions.add(rs.getString("Position"));
             }
@@ -116,9 +116,10 @@ public class EmployeeDAO {
     public int countAll() {
         String sql = "SELECT COUNT(*) FROM EMPLOYEE";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt(1);
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next())
+                return rs.getInt(1);
         } catch (SQLException e) {
             System.err.println("EmployeeDAO.countAll() error: " + e.getMessage());
             e.printStackTrace();
@@ -132,7 +133,7 @@ public class EmployeeDAO {
     public boolean add(EmployeeDTO emp) {
         String sql = "{CALL SP_ADD_EMPLOYEE(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             CallableStatement cs = conn.prepareCall(sql)) {
+                CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, emp.getAccountID());
             cs.setString(2, emp.getFullName());
             cs.setString(3, emp.getPosition());
@@ -153,7 +154,7 @@ public class EmployeeDAO {
     public boolean update(EmployeeDTO emp) {
         String sql = "{CALL SP_UPDATE_EMPLOYEE(?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             CallableStatement cs = conn.prepareCall(sql)) {
+                CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, emp.getEmployeeID());
             cs.setString(2, emp.getPosition());
             cs.setString(3, emp.getPhone());
@@ -173,7 +174,7 @@ public class EmployeeDAO {
     public boolean delete(String employeeID) {
         String sql = "{CALL SP_DELETE_EMPLOYEE(?)}";
         try (Connection conn = DBConnection.getConnection();
-             CallableStatement cs = conn.prepareCall(sql)) {
+                CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, employeeID);
             cs.execute();
             return true;

@@ -1,4 +1,4 @@
-package dao;
+package dao.QuanLyPhanQuyenDAO;
 
 import dto.FunctionDTO;
 import util.DBConnection;
@@ -14,8 +14,8 @@ public class FunctionDAO {
         List<FunctionDTO> list = new ArrayList<>();
         String sql = "SELECT FunctionID, NameFunction, Created_At, Updated_At, IsDeleted FROM \"FUNCTION\" WHERE IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 FunctionDTO dto = new FunctionDTO();
                 dto.setFunctionID(rs.getString("FunctionID"));
@@ -35,7 +35,7 @@ public class FunctionDAO {
     public FunctionDTO getByID(String functionID) {
         String sql = "SELECT FunctionID, NameFunction, Created_At, Updated_At, IsDeleted FROM \"FUNCTION\" WHERE FunctionID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, functionID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

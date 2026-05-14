@@ -1,6 +1,6 @@
-package gui;
+﻿package gui.LoginRegesterGUI;
 
-import bus.regesterBUS;
+import bus.LoginRegesterBUS.regesterBUS;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

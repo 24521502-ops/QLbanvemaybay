@@ -1,9 +1,10 @@
-package bus;
+package bus.DuLieuGocBUS;
 
-import dao.AirportDAO;
 import dto.AirportDTO;
 
 import java.util.List;
+
+import dao.DuLieuGocDAO.AirportDAO;
 
 public class AirportBUS {
     private final AirportDAO dao = new AirportDAO();
@@ -20,18 +21,22 @@ public class AirportBUS {
     }
 
     public boolean insert(AirportDTO dto) {
-        if (dto.getAirportID() == null || dto.getAirportID().trim().isEmpty()) return false;
-        if (dto.getAirportName() == null || dto.getAirportName().trim().isEmpty()) return false;
+        if (dto.getAirportID() == null || dto.getAirportID().trim().isEmpty())
+            return false;
+        if (dto.getAirportName() == null || dto.getAirportName().trim().isEmpty())
+            return false;
         return dao.insert(dto);
     }
 
     public boolean update(AirportDTO dto) {
-        if (dto.getAirportID() == null || dto.getAirportID().trim().isEmpty()) return false;
+        if (dto.getAirportID() == null || dto.getAirportID().trim().isEmpty())
+            return false;
         return dao.update(dto);
     }
 
     public boolean delete(String airportID) {
-        if (airportID == null || airportID.trim().isEmpty()) return false;
+        if (airportID == null || airportID.trim().isEmpty())
+            return false;
         return dao.delete(airportID);
     }
 

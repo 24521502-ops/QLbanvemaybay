@@ -1,13 +1,15 @@
-package gui;
+package gui.QuanLyPhanQuyenGUI;
 
-import bus.FunctionBUS;
-import bus.RoleBUS;
-import bus.RoleGroupBUS;
 import dto.FunctionDTO;
 import dto.RoleDTO;
 import dto.RoleGroupDTO;
 import util.AppColor;
 import javax.swing.*;
+
+import bus.QuanLyPhanQuyenBUS.FunctionBUS;
+import bus.QuanLyPhanQuyenBUS.RoleBUS;
+import bus.QuanLyPhanQuyenBUS.RoleGroupBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;

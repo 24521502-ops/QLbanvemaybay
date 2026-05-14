@@ -1,6 +1,5 @@
-package gui.QuanLyChuyenBay;
+package gui.QuanLyChuyenBayGUI;
 
-import bus.ChuyenBayBUS;
 import dto.FlightDTO;
 import java.awt.*;
 import java.sql.Connection;
@@ -9,26 +8,28 @@ import java.sql.Statement;
 import java.util.UUID;
 import javax.swing.*;
 import javax.swing.border.*;
+
+import bus.QuanLyChuyenBayBUS.ChuyenBayBUS;
 import util.DBConnection;
 
 public class AddFlightDialog extends javax.swing.JDialog {
 
-    private static final Color PRIMARY           = new Color(0, 37, 71);      
-    private static final Color SURFACE_LOW       = new Color(240, 244, 248);  
-    private static final Color SURFACE_LOWEST    = Color.WHITE;
-    private static final Color SURFACE_CONTAINER = new Color(234, 238, 242);  
-    private static final Color OUTLINE_VARIANT   = new Color(195, 198, 207);  
-    private static final Color ON_SURFACE_VAR    = new Color(67, 71, 78);     
+    private static final Color PRIMARY = new Color(0, 37, 71);
+    private static final Color SURFACE_LOW = new Color(240, 244, 248);
+    private static final Color SURFACE_LOWEST = Color.WHITE;
+    private static final Color SURFACE_CONTAINER = new Color(234, 238, 242);
+    private static final Color OUTLINE_VARIANT = new Color(195, 198, 207);
+    private static final Color ON_SURFACE_VAR = new Color(67, 71, 78);
 
-    private static final Font FONT_TITLE  = new Font("Inter", Font.BOLD, 22);
-    private static final Font FONT_CAP    = new Font("Inter", Font.BOLD, 11);
-    private static final Font FONT_INPUT  = new Font("Inter", Font.PLAIN, 14);
-    private static final Font FONT_BTN    = new Font("Inter", Font.BOLD, 13);
+    private static final Font FONT_TITLE = new Font("Inter", Font.BOLD, 22);
+    private static final Font FONT_CAP = new Font("Inter", Font.BOLD, 11);
+    private static final Font FONT_INPUT = new Font("Inter", Font.PLAIN, 14);
+    private static final Font FONT_BTN = new Font("Inter", Font.BOLD, 13);
 
     private QuanLyChuyenBayPanel parentPanel;
     private JTextField txtSoHieu, txtGate;
     private JComboBox<String> cbHangBay, cbTauBay, cbSanBayDi, cbSanBayDen;
-    
+
     // Đã thay JTextField thành JSpinner để chọn Ngày Giờ
     private JSpinner spnKhoiHanh, spnHaCanh;
 
@@ -36,7 +37,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
         super(parent, modal);
         this.parentPanel = panel;
         initComponents();
-        loadDropdownData(); 
+        loadDropdownData();
         setLocationRelativeTo(parent);
     }
 
@@ -50,8 +51,9 @@ public class AddFlightDialog extends javax.swing.JDialog {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(SURFACE_LOWEST);
         headerPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 40)),
-                new EmptyBorder(20, 24, 20, 24))); 
+                BorderFactory.createMatteBorder(0, 0, 1, 0,
+                        new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 40)),
+                new EmptyBorder(20, 24, 20, 24)));
 
         JLabel lblTitle = new JLabel("Thêm chuyến bay mới");
         lblTitle.setFont(FONT_TITLE);
@@ -97,7 +99,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footerPanel.setBackground(SURFACE_CONTAINER);
-        footerPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 40)));
+        footerPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
+                new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 40)));
 
         JButton btnSkip = makeCancelButton("Hủy");
         btnSkip.addActionListener(e -> dispose());
@@ -121,19 +124,23 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
     private void loadDropdownData() {
         try (Connection conn = DBConnection.getConnection();
-             Statement stmt = conn.createStatement()) {
-            
+                Statement stmt = conn.createStatement()) {
+
             ResultSet rsAirline = stmt.executeQuery("SELECT AirlineID, AirlineName FROM AIRLINE");
-            while (rsAirline.next()) { cbHangBay.addItem(rsAirline.getString(1) + " - " + rsAirline.getString(2)); }
-            
+            while (rsAirline.next()) {
+                cbHangBay.addItem(rsAirline.getString(1) + " - " + rsAirline.getString(2));
+            }
+
             ResultSet rsAircraft = stmt.executeQuery("SELECT AircraftID, Model FROM AIRCRAFT");
-            while (rsAircraft.next()) { cbTauBay.addItem(rsAircraft.getString(1) + " - " + rsAircraft.getString(2)); }
-            
+            while (rsAircraft.next()) {
+                cbTauBay.addItem(rsAircraft.getString(1) + " - " + rsAircraft.getString(2));
+            }
+
             ResultSet rsAirport = stmt.executeQuery("SELECT AirportID, AirportName FROM AIRPORT");
-            while (rsAirport.next()) { 
+            while (rsAirport.next()) {
                 String ap = rsAirport.getString(1) + " - " + rsAirport.getString(2);
-                cbSanBayDi.addItem(ap); 
-                cbSanBayDen.addItem(ap); 
+                cbSanBayDi.addItem(ap);
+                cbSanBayDen.addItem(ap);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,18 +149,21 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
         try {
-            if (txtSoHieu.getText().trim().isEmpty() || cbHangBay.getSelectedItem() == null || cbSanBayDi.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            if (txtSoHieu.getText().trim().isEmpty() || cbHangBay.getSelectedItem() == null
+                    || cbSanBayDi.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin!", "Cảnh báo",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            
+
             String hangBayID = cbHangBay.getSelectedItem().toString().split(" - ")[0];
             String tauBayID = cbTauBay.getSelectedItem().toString().split(" - ")[0];
             String sbDiID = cbSanBayDi.getSelectedItem().toString().split(" - ")[0];
             String sbDenID = cbSanBayDen.getSelectedItem().toString().split(" - ")[0];
 
             if (sbDiID.equals(sbDenID)) {
-                JOptionPane.showMessageDialog(this, "Sân bay đi và đến không được trùng nhau!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Sân bay đi và đến không được trùng nhau!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -163,24 +173,27 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
             // Ràng buộc sơ bộ: Giờ hạ cánh phải sau giờ khởi hành
             if (arrDate.before(depDate) || arrDate.equals(depDate)) {
-                JOptionPane.showMessageDialog(this, "Thời gian hạ cánh phải sau thời gian khởi hành!", "Lỗi logic", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Thời gian hạ cánh phải sau thời gian khởi hành!", "Lỗi logic",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             String randomID = "FL" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
 
             FlightDTO newFlight = new FlightDTO(
-                randomID, txtSoHieu.getText().trim(), hangBayID, 
-                tauBayID, null, 
-                depDate, arrDate, txtGate.getText().trim(), "SCHEDULED"
-            );
+                    randomID, txtSoHieu.getText().trim(), hangBayID,
+                    tauBayID, null,
+                    depDate, arrDate, txtGate.getText().trim(), "SCHEDULED");
 
             if (new ChuyenBayBUS().themChuyenBay(newFlight, sbDiID, sbDenID)) {
-                JOptionPane.showMessageDialog(this, "Thêm chuyến bay thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                if(parentPanel != null) parentPanel.loadDataToTable(); 
+                JOptionPane.showMessageDialog(this, "Thêm chuyến bay thành công!", "Thành công",
+                        JOptionPane.INFORMATION_MESSAGE);
+                if (parentPanel != null)
+                    parentPanel.loadDataToTable();
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Thêm thất bại. Số hiệu này có thể đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Thêm thất bại. Số hiệu này có thể đã tồn tại!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi định dạng ngày giờ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -193,16 +206,17 @@ public class AddFlightDialog extends javax.swing.JDialog {
         JSpinner spinner = new JSpinner(model);
         JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "yyyy-MM-dd HH:mm:ss");
         spinner.setEditor(editor);
-        
+
         // Làm đẹp cho giống JTextField
         JFormattedTextField tf = editor.getTextField();
         tf.setFont(FONT_INPUT);
         tf.setBackground(SURFACE_LOW);
         tf.setForeground(ON_SURFACE_VAR);
         tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 80)),
+                BorderFactory.createLineBorder(
+                        new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 80)),
                 new EmptyBorder(8, 12, 8, 12)));
-        
+
         return spinner;
     }
 
@@ -210,16 +224,16 @@ public class AddFlightDialog extends javax.swing.JDialog {
         JPanel block = new JPanel();
         block.setLayout(new BoxLayout(block, BoxLayout.Y_AXIS));
         block.setOpaque(false);
-        block.setAlignmentX(Component.LEFT_ALIGNMENT); 
+        block.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JLabel lbl = new JLabel(labelText);
         lbl.setFont(FONT_CAP);
         lbl.setForeground(ON_SURFACE_VAR);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT); 
-        
-        field.setAlignmentX(Component.LEFT_ALIGNMENT); 
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        field.setAlignmentX(Component.LEFT_ALIGNMENT);
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        
+
         block.add(lbl);
         block.add(Box.createVerticalStrut(4));
         block.add(field);
@@ -231,7 +245,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
         tf.setFont(FONT_INPUT);
         tf.setBackground(SURFACE_LOW);
         tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 80)),
+                BorderFactory.createLineBorder(
+                        new Color(OUTLINE_VARIANT.getRed(), OUTLINE_VARIANT.getGreen(), OUTLINE_VARIANT.getBlue(), 80)),
                 new EmptyBorder(8, 12, 8, 12)));
         tf.putClientProperty("JTextField.placeholderText", placeholder);
         return tf;
@@ -246,7 +261,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
     private JButton makePrimaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(PRIMARY);
@@ -260,9 +276,9 @@ public class AddFlightDialog extends javax.swing.JDialog {
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // CHỈNH Ở ĐÂY: Ép chiều rộng 150 để bằng nút Hủy
-        btn.setPreferredSize(new Dimension(150, 36)); 
+        btn.setPreferredSize(new Dimension(150, 36));
         return btn;
     }
 
@@ -272,7 +288,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0, 0, new Color(186, 26, 26), getWidth(), getHeight(), new Color(140, 15, 15));
+                GradientPaint gp = new GradientPaint(0, 0, new Color(186, 26, 26), getWidth(), getHeight(),
+                        new Color(140, 15, 15));
                 g2.setPaint(gp);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
                 g2.dispose();
@@ -285,9 +302,9 @@ public class AddFlightDialog extends javax.swing.JDialog {
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // CHỈNH Ở ĐÂY: Để 150 cho đồng bộ với nút Thêm
-        btn.setPreferredSize(new Dimension(150, 36)); 
+        btn.setPreferredSize(new Dimension(150, 36));
         return btn;
     }
 }

@@ -1,6 +1,6 @@
 package text;
 
-import gui.loginGUI;
+import gui.LoginRegesterGUI.loginGUI;
 
 import javax.swing.*;
 
@@ -12,9 +12,9 @@ import javax.swing.*;
 public class mainlogin {
 
     public static void main(String[] args) {
-        // Áp dụng Look and Feel hệ thống để trông đẹp hơn trên Windows
+        // Áp dụng FlatLaf để hỗ trợ placeholderText, leadingIcon, roundRect...
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            com.formdev.flatlaf.FlatLightLaf.setup();
         } catch (Exception e) {
             e.printStackTrace();
         }

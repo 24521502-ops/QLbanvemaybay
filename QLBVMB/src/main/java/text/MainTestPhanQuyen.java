@@ -1,7 +1,8 @@
 package text;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import gui.PhanQuyenGUI;
+
+import gui.QuanLyPhanQuyenGUI.PhanQuyenGUI;
 
 import javax.swing.*;
 import java.awt.*;

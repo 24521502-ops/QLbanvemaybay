@@ -1,8 +1,8 @@
 package text;
 
-import gui.BaoCaoTKGUI;
-
 import javax.swing.*;
+
+import gui.BaoCaoThongKeGUI.BaoCaoTKGUI;
 
 public class MainTextBCTK {
     public static void main(String[] args) {

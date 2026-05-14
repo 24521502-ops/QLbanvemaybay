@@ -1,10 +1,11 @@
-package gui.QuanLyVe;
+package gui.QuanLyVeGUI;
 
-import bus.VeBUS;
 import java.awt.*;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+
+import bus.QuanLyVeBUS.VeBUS;
 import util.AppColor;
 
 public class ChinhSuaVeDialog extends JDialog {
@@ -23,7 +24,7 @@ public class ChinhSuaVeDialog extends JDialog {
 
     private void initComponents() {
         setTitle("Cập nhật / Đổi ghế");
-        setSize(550, 450); 
+        setSize(550, 450);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(AppColor.BACKGROUND);
@@ -49,17 +50,17 @@ public class ChinhSuaVeDialog extends JDialog {
         // 1. Tên Hành khách (Khóa - Không được sửa)
         mainPanel.add(createInputGroup("Hành khách (Cố định):", fullName, false));
         mainPanel.add(Box.createVerticalStrut(15));
-        
+
         // 2. Chỗ ngồi / Hạng ghế (Combo Box ĐỘNG LẤY TỪ DB)
         JLabel lblHangGhe = new JLabel("Chọn chỗ ngồi mới (Chỉ hiện ghế trống):");
         lblHangGhe.setFont(new Font("Inter", Font.BOLD, 13));
         lblHangGhe.setForeground(AppColor.TEXT_SECONDARY);
-        
+
         cbxHangGhe = new JComboBox<>();
         cbxHangGhe.setFont(new Font("Inter", Font.PLAIN, 14));
         cbxHangGhe.setPreferredSize(new Dimension(400, 38));
         cbxHangGhe.setBackground(Color.WHITE);
-        
+
         // Đổ dữ liệu ghế trống vào ComboBox
         List<String> emptySeats = veBUS.layDanhSachGheTrong(currentFlightID);
         if (emptySeats.isEmpty()) {
@@ -70,7 +71,7 @@ public class ChinhSuaVeDialog extends JDialog {
                 cbxHangGhe.addItem(seat);
             }
         }
-        
+
         JPanel pnlHangGhe = new JPanel(new BorderLayout(0, 5));
         pnlHangGhe.setOpaque(false);
         pnlHangGhe.add(lblHangGhe, BorderLayout.NORTH);
@@ -90,34 +91,35 @@ public class ChinhSuaVeDialog extends JDialog {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
         footer.setBackground(AppColor.SURFACE);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, AppColor.BORDER));
-        
+
         JButton btnCancel = new JButton("Hủy bỏ");
         btnCancel.setFont(new Font("Inter", Font.BOLD, 14));
         btnCancel.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnCancel.addActionListener(e -> dispose());
-        
+
         JButton btnSave = new JButton("Lưu thay đổi");
         btnSave.setFont(new Font("Inter", Font.BOLD, 14));
         btnSave.setBackground(AppColor.PRIMARY);
         btnSave.setForeground(Color.WHITE);
         btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSave.setPreferredSize(new Dimension(140, 40));
-        
-        if (emptySeats.isEmpty()) btnSave.setEnabled(false); // Khóa nút lưu nếu hết ghế
-        
+
+        if (emptySeats.isEmpty())
+            btnSave.setEnabled(false); // Khóa nút lưu nếu hết ghế
+
         // GỌI PROCEDURE ORACLE TẠI ĐÂY
         btnSave.addActionListener(e -> {
             String selectedSeat = cbxHangGhe.getSelectedItem().toString();
             // Cắt chuỗi "ST01 - 1A - Thương gia" để lấy ra chữ "ST01"
             String newSeatID = selectedSeat.split(" - ")[0];
-            
+
             // Gọi xuống BUS để chạy Procedure
             boolean isSuccess = veBUS.doiVeNangHang(ticketID, currentFlightID, newSeatID);
-            
+
             if (isSuccess) {
-                JOptionPane.showMessageDialog(this, 
-                    "Đổi ghế thành công!\nGiá vé mới đã được cập nhật tự động vào hệ thống.", 
-                    "Hoàn tất", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Đổi ghế thành công!\nGiá vé mới đã được cập nhật tự động vào hệ thống.",
+                        "Hoàn tất", JOptionPane.INFORMATION_MESSAGE);
                 dispose();
             }
         });
@@ -133,13 +135,14 @@ public class ChinhSuaVeDialog extends JDialog {
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Inter", Font.BOLD, 13));
         lbl.setForeground(AppColor.TEXT_SECONDARY);
-        
+
         JTextField txt = new JTextField(value);
         txt.setFont(new Font("Inter", Font.PLAIN, 14));
         txt.setPreferredSize(new Dimension(400, 38));
         txt.setEditable(isEditable);
-        if (!isEditable) txt.setBackground(new Color(243, 244, 246));
-        
+        if (!isEditable)
+            txt.setBackground(new Color(243, 244, 246));
+
         panel.add(lbl, BorderLayout.NORTH);
         panel.add(txt, BorderLayout.CENTER);
         return panel;

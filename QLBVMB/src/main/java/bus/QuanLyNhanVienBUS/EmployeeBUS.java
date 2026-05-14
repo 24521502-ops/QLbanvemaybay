@@ -1,9 +1,10 @@
-package bus;
+package bus.QuanLyNhanVienBUS;
 
-import dao.EmployeeDAO;
 import dto.EmployeeDTO;
 
 import java.util.List;
+
+import dao.QuanLyNhanVienDAO.EmployeeDAO;
 
 public class EmployeeBUS {
 

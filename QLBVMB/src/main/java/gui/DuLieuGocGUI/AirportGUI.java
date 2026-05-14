@@ -1,11 +1,13 @@
-package gui;
+package gui.DuLieuGocGUI;
 
-import bus.AirportBUS;
 import dto.AirportDTO;
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
+import bus.DuLieuGocBUS.AirportBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -37,20 +39,18 @@ public class AirportGUI extends JPanel {
         JPanel topPanel = new JPanel(new BorderLayout(10, 0));
         topPanel.setBackground(AppColor.SURFACE);
         topPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
-            BorderFactory.createEmptyBorder(12, 16, 12, 16)
-        ));
+                BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
+                BorderFactory.createEmptyBorder(12, 16, 12, 16)));
 
         // Search field container
         JPanel searchBox = new JPanel(new BorderLayout(5, 0));
         searchBox.setBackground(AppColor.SURFACE);
         searchBox.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
-            BorderFactory.createEmptyBorder(4, 10, 4, 10)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
+                BorderFactory.createEmptyBorder(4, 10, 4, 10)));
         searchBox.setPreferredSize(new Dimension(250, 36));
 
-                JLabel lblSearchIcon = new JLabel() {
+        JLabel lblSearchIcon = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -65,6 +65,7 @@ public class AirportGUI extends JPanel {
                 g2.drawLine(cx + s - 2, cy + s - 2, cx + s + 3, cy + s + 3);
                 g2.dispose();
             }
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(24, 24);
@@ -86,6 +87,7 @@ public class AirportGUI extends JPanel {
                     txtSearch.setForeground(AppColor.TEXT_PRIMARY);
                 }
             }
+
             @Override
             public void focusLost(FocusEvent e) {
                 if (txtSearch.getText().isEmpty()) {
@@ -94,18 +96,30 @@ public class AirportGUI extends JPanel {
                 }
             }
         });
-        
-        searchTimer = new javax.swing.Timer(300, e -> { currentPage = 1; loadData(); });
+
+        searchTimer = new javax.swing.Timer(300, e -> {
+            currentPage = 1;
+            loadData();
+        });
         searchTimer.setRepeats(false);
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { triggerSearch(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { triggerSearch(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { triggerSearch(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                triggerSearch();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                triggerSearch();
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                triggerSearch();
+            }
         });
-        
+
         searchBox.add(txtSearch, BorderLayout.CENTER);
 
-        String[] sortOptions = {"Sắp xếp: Mặc định", "Mã sân bay (A-Z)", "Tên sân bay (A-Z)", "Thành phố (A-Z)", "Quốc gia (A-Z)"};
+        String[] sortOptions = { "Sắp xếp: Mặc định", "Mã sân bay (A-Z)", "Tên sân bay (A-Z)", "Thành phố (A-Z)",
+                "Quốc gia (A-Z)" };
         cboSort = new JComboBox<>(sortOptions);
         cboSort.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         cboSort.setPreferredSize(new Dimension(160, 36));
@@ -120,13 +134,19 @@ public class AirportGUI extends JPanel {
         btnRefresh.setFocusPainted(false);
         btnRefresh.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnRefresh.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
-            BorderFactory.createEmptyBorder(0, 15, 0, 15)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
+                BorderFactory.createEmptyBorder(0, 15, 0, 15)));
         btnRefresh.setPreferredSize(new Dimension(110, 36));
         btnRefresh.addMouseListener(new MouseAdapter() {
-            @Override public void mouseEntered(MouseEvent e) { btnRefresh.setBackground(new Color(249, 250, 251)); }
-            @Override public void mouseExited(MouseEvent e) { btnRefresh.setBackground(Color.WHITE); }
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnRefresh.setBackground(new Color(249, 250, 251));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnRefresh.setBackground(Color.WHITE);
+            }
         });
         btnRefresh.addActionListener(e -> {
             txtSearch.setText("Tìm kiếm sân bay...");
@@ -151,20 +171,22 @@ public class AirportGUI extends JPanel {
         btnPanel.add(btnAdd);
         topPanel.add(btnPanel, BorderLayout.EAST);
 
-                JPanel dashboardPanel = new JPanel(new GridLayout(1, 3, 16, 0));
+        JPanel dashboardPanel = new JPanel(new GridLayout(1, 3, 16, 0));
         dashboardPanel.setBackground(AppColor.SURFACE);
         dashboardPanel.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
-        
+
         JPanel card1 = createKPICard("TỔNG SÂN BAY", "0", 1, new Color(14, 165, 233));
         lblTotalCount = (JLabel) ((JPanel) card1.getComponent(1)).getComponent(0);
-        
+
         JPanel card2 = createKPICard("QUỐC GIA", "0", 2, new Color(16, 185, 129));
         lblStat2 = (JLabel) ((JPanel) card2.getComponent(1)).getComponent(0);
-        
+
         JPanel card3 = createKPICard("THÀNH PHỐ", "0", 4, new Color(245, 158, 11));
         lblStat3 = (JLabel) ((JPanel) card3.getComponent(1)).getComponent(0);
-        
-        dashboardPanel.add(card1); dashboardPanel.add(card2); dashboardPanel.add(card3);
+
+        dashboardPanel.add(card1);
+        dashboardPanel.add(card2);
+        dashboardPanel.add(card3);
 
         dashboardPanel.setOpaque(false);
         add(dashboardPanel, BorderLayout.NORTH);
@@ -175,10 +197,12 @@ public class AirportGUI extends JPanel {
         contentPanel.add(topPanel, BorderLayout.NORTH);
 
         // ===== CENTER: Table =====
-        String[] cols = {"MÃ SÂN BAY", "IATA", "TÊN SÂN BAY", "THÀNH PHỐ", "QUỐC GIA", "THAO TÁC"};
+        String[] cols = { "MÃ SÂN BAY", "IATA", "TÊN SÂN BAY", "THÀNH PHỐ", "QUỐC GIA", "THAO TÁC" };
         tableModel = new DefaultTableModel(cols, 0) {
             @Override
-            public boolean isCellEditable(int row, int column) { return column == 5; }
+            public boolean isCellEditable(int row, int column) {
+                return column == 5;
+            }
         };
         table = new JTable(tableModel);
         table.setRowHeight(48);
@@ -194,7 +218,8 @@ public class AirportGUI extends JPanel {
         // Header
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setBackground(AppColor.SURFACE);
                 setForeground(AppColor.TEXT_SECONDARY);
@@ -231,22 +256,28 @@ public class AirportGUI extends JPanel {
         // Zebra striping cho các cột thường
         DefaultTableCellRenderer zebraRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row, int col) {
+            public Component getTableCellRendererComponent(JTable t, Object val, boolean sel, boolean foc, int row,
+                    int col) {
                 super.getTableCellRendererComponent(t, val, sel, foc, row, col);
-                if (!sel) setBackground(row % 2 == 0 ? AppColor.SURFACE : new Color(249, 250, 251));
-                else setBackground(new Color(219, 234, 254));
+                if (!sel)
+                    setBackground(row % 2 == 0 ? AppColor.SURFACE : new Color(249, 250, 251));
+                else
+                    setBackground(new Color(219, 234, 254));
                 setForeground(AppColor.TEXT_PRIMARY);
                 setHorizontalAlignment(SwingConstants.LEFT);
                 setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 8));
-                
+
                 // In đậm cột mã và IATA
-                if (col == 0 || col == 1) setFont(new Font("Segoe UI", Font.BOLD, 13));
-                else setFont(new Font("Segoe UI", Font.PLAIN, 13));
-                
+                if (col == 0 || col == 1)
+                    setFont(new Font("Segoe UI", Font.BOLD, 13));
+                else
+                    setFont(new Font("Segoe UI", Font.PLAIN, 13));
+
                 return this;
             }
         };
-        for (int i = 0; i < 5; i++) table.getColumnModel().getColumn(i).setCellRenderer(zebraRenderer);
+        for (int i = 0; i < 5; i++)
+            table.getColumnModel().getColumn(i).setCellRenderer(zebraRenderer);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -257,9 +288,8 @@ public class AirportGUI extends JPanel {
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(AppColor.SURFACE);
         bottomPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(1, 0, 0, 0, AppColor.BORDER),
-            BorderFactory.createEmptyBorder(10, 16, 10, 16)
-        ));
+                BorderFactory.createMatteBorder(1, 0, 0, 0, AppColor.BORDER),
+                BorderFactory.createEmptyBorder(10, 16, 10, 16)));
 
         lblInfo = new JLabel();
         lblInfo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -276,51 +306,64 @@ public class AirportGUI extends JPanel {
 
     private void triggerSearch() {
         if (!txtSearch.getText().equals("Tìm kiếm sân bay...")) {
-            if (searchTimer.isRunning()) searchTimer.restart();
-            else searchTimer.start();
+            if (searchTimer.isRunning())
+                searchTimer.restart();
+            else
+                searchTimer.start();
         }
     }
 
     private void loadData() {
         String keyword = txtSearch.getText();
-        if (keyword.equals("Tìm kiếm sân bay...")) keyword = "";
+        if (keyword.equals("Tìm kiếm sân bay..."))
+            keyword = "";
         allData = bus.search(keyword);
-        if (cboSort != null && cboSort.getSelectedIndex() > 0) applySort();
-                if (lblTotalCount != null && allData != null) {
+        if (cboSort != null && cboSort.getSelectedIndex() > 0)
+            applySort();
+        if (lblTotalCount != null && allData != null) {
             updateDashboard();
         }
         SwingUtilities.invokeLater(this::refreshTable);
     }
 
     private void sortData() {
-        if (allData == null || allData.isEmpty()) return;
+        if (allData == null || allData.isEmpty())
+            return;
         if (cboSort.getSelectedIndex() == 0) {
             loadData();
         } else {
             applySort();
             currentPage = 1;
-                    if (lblTotalCount != null && allData != null) {
-            updateDashboard();
-        }
-        SwingUtilities.invokeLater(this::refreshTable);
+            if (lblTotalCount != null && allData != null) {
+                updateDashboard();
+            }
+            SwingUtilities.invokeLater(this::refreshTable);
         }
     }
 
     private void applySort() {
         int idx = cboSort.getSelectedIndex();
         switch (idx) {
-            case 1: allData.sort((a, b) -> a.getAirportID().compareToIgnoreCase(b.getAirportID())); break;
-            case 2: allData.sort((a, b) -> a.getAirportName().compareToIgnoreCase(b.getAirportName())); break;
-            case 3: allData.sort((a, b) -> {
-                String c1 = a.getCity() != null ? a.getCity() : "";
-                String c2 = b.getCity() != null ? b.getCity() : "";
-                return c1.compareToIgnoreCase(c2);
-            }); break;
-            case 4: allData.sort((a, b) -> {
-                String c1 = a.getCountry() != null ? a.getCountry() : "";
-                String c2 = b.getCountry() != null ? b.getCountry() : "";
-                return c1.compareToIgnoreCase(c2);
-            }); break;
+            case 1:
+                allData.sort((a, b) -> a.getAirportID().compareToIgnoreCase(b.getAirportID()));
+                break;
+            case 2:
+                allData.sort((a, b) -> a.getAirportName().compareToIgnoreCase(b.getAirportName()));
+                break;
+            case 3:
+                allData.sort((a, b) -> {
+                    String c1 = a.getCity() != null ? a.getCity() : "";
+                    String c2 = b.getCity() != null ? b.getCity() : "";
+                    return c1.compareToIgnoreCase(c2);
+                });
+                break;
+            case 4:
+                allData.sort((a, b) -> {
+                    String c1 = a.getCountry() != null ? a.getCountry() : "";
+                    String c2 = b.getCountry() != null ? b.getCountry() : "";
+                    return c1.compareToIgnoreCase(c2);
+                });
+                break;
         }
     }
 
@@ -328,15 +371,17 @@ public class AirportGUI extends JPanel {
         tableModel.setRowCount(0);
         int total = allData.size();
         int totalPages = Math.max(1, (int) Math.ceil((double) total / pageSize));
-        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage > totalPages)
+            currentPage = totalPages;
 
         int from = (currentPage - 1) * pageSize;
         int to = Math.min(from + pageSize, total);
 
         for (int i = from; i < to; i++) {
             AirportDTO dto = allData.get(i);
-            tableModel.addRow(new Object[]{
-                dto.getAirportID(), dto.getIataCode(), dto.getAirportName(), dto.getCity(), dto.getCountry(), "actions"
+            tableModel.addRow(new Object[] {
+                    dto.getAirportID(), dto.getIataCode(), dto.getAirportName(), dto.getCity(), dto.getCountry(),
+                    "actions"
             });
         }
 
@@ -348,12 +393,19 @@ public class AirportGUI extends JPanel {
         pagePanel.removeAll();
         JButton btnPrev = createPageButton("<");
         btnPrev.setEnabled(currentPage > 1);
-        btnPrev.addActionListener(e -> { currentPage--; refreshTable(); });
+        btnPrev.addActionListener(e -> {
+            currentPage--;
+            refreshTable();
+        });
         pagePanel.add(btnPrev);
 
         for (int i = 1; i <= totalPages; i++) {
             if (totalPages > 7 && i > 3 && i < totalPages - 1 && i != currentPage) {
-                if (i == 4) { JLabel d = new JLabel("..."); d.setForeground(AppColor.TEXT_SECONDARY); pagePanel.add(d); }
+                if (i == 4) {
+                    JLabel d = new JLabel("...");
+                    d.setForeground(AppColor.TEXT_SECONDARY);
+                    pagePanel.add(d);
+                }
                 continue;
             }
             final int p = i;
@@ -363,13 +415,19 @@ public class AirportGUI extends JPanel {
                 btn.setForeground(Color.WHITE);
                 btn.setBorder(BorderFactory.createLineBorder(AppColor.PRIMARY, 1, true));
             }
-            btn.addActionListener(e -> { currentPage = p; refreshTable(); });
+            btn.addActionListener(e -> {
+                currentPage = p;
+                refreshTable();
+            });
             pagePanel.add(btn);
         }
 
         JButton btnNext = createPageButton(">");
         btnNext.setEnabled(currentPage < totalPages);
-        btnNext.addActionListener(e -> { currentPage++; refreshTable(); });
+        btnNext.addActionListener(e -> {
+            currentPage++;
+            refreshTable();
+        });
         pagePanel.add(btnNext);
         pagePanel.revalidate();
         pagePanel.repaint();
@@ -382,7 +440,8 @@ public class AirportGUI extends JPanel {
 
     private void showEditDialog(int row) {
         int idx = (currentPage - 1) * pageSize + row;
-        if (idx >= allData.size()) return;
+        if (idx >= allData.size())
+            return;
         showCustomDialog("Cập nhật sân bay", "Chỉnh sửa thông tin sân bay đã chọn.", allData.get(idx), row);
     }
 
@@ -392,7 +451,7 @@ public class AirportGUI extends JPanel {
         dialog.setSize(580, 520);
         dialog.setLocationRelativeTo(this);
         dialog.getRootPane().setBorder(BorderFactory.createLineBorder(new Color(203, 213, 225), 1));
-        
+
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
 
@@ -400,24 +459,26 @@ public class AirportGUI extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240)),
-            BorderFactory.createEmptyBorder(20, 24, 20, 24)
-        ));
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240)),
+                BorderFactory.createEmptyBorder(20, 24, 20, 24)));
 
         // Header Draggable
         Point[] initialClick = new Point[1];
         header.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent e) { initialClick[0] = e.getPoint(); }
+            public void mousePressed(MouseEvent e) {
+                initialClick[0] = e.getPoint();
+            }
         });
         header.addMouseMotionListener(new MouseMotionAdapter() {
             public void mouseDragged(MouseEvent e) {
-                dialog.setLocation(dialog.getLocation().x + e.getX() - initialClick[0].x, dialog.getLocation().y + e.getY() - initialClick[0].y);
+                dialog.setLocation(dialog.getLocation().x + e.getX() - initialClick[0].x,
+                        dialog.getLocation().y + e.getY() - initialClick[0].y);
             }
         });
 
         JPanel titlePanel = new JPanel(new BorderLayout(16, 0));
         titlePanel.setBackground(Color.WHITE);
-        
+
         JLabel lblIcon = new JLabel("📍", SwingConstants.CENTER);
         lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
         lblIcon.setOpaque(true);
@@ -434,7 +495,8 @@ public class AirportGUI extends JPanel {
         JLabel lblSub = new JLabel(subtitle);
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblSub.setForeground(new Color(100, 116, 139));
-        textPanel.add(lblTitle); textPanel.add(lblSub);
+        textPanel.add(lblTitle);
+        textPanel.add(lblSub);
         titlePanel.add(textPanel, BorderLayout.CENTER);
 
         header.add(titlePanel, BorderLayout.CENTER);
@@ -444,12 +506,15 @@ public class AirportGUI extends JPanel {
             protected void paintComponent(java.awt.Graphics g) {
                 super.paintComponent(g);
                 java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
-                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isRollover() ? new java.awt.Color(239, 68, 68) : new java.awt.Color(100, 116, 139));
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(
+                        getModel().isRollover() ? new java.awt.Color(239, 68, 68) : new java.awt.Color(100, 116, 139));
                 int s = 12;
                 int x = (getWidth() - s) / 2;
                 int y = (getHeight() - s) / 2;
-                g2.setStroke(new java.awt.BasicStroke(2f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+                g2.setStroke(
+                        new java.awt.BasicStroke(2f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
                 g2.drawLine(x, y, x + s, y + s);
                 g2.drawLine(x + s, y, x, y + s);
                 g2.dispose();
@@ -470,7 +535,9 @@ public class AirportGUI extends JPanel {
         form.setBackground(Color.WHITE);
         form.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL; gbc.insets = new Insets(0, 0, 16, 0); gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 16, 0);
+        gbc.weightx = 1;
 
         JTextField txtID = new JTextField();
         JTextField txtIata = new JTextField();
@@ -479,7 +546,8 @@ public class AirportGUI extends JPanel {
         JTextField txtCountry = new JTextField();
 
         if (dto != null) {
-            txtID.setText(dto.getAirportID()); txtID.setEditable(false);
+            txtID.setText(dto.getAirportID());
+            txtID.setEditable(false);
             txtIata.setText(dto.getIataCode());
             txtName.setText(dto.getAirportName());
             txtCity.setText(dto.getCity());
@@ -491,17 +559,20 @@ public class AirportGUI extends JPanel {
         row1.setBackground(Color.WHITE);
         row1.add(createFieldPanel("MÃ SÂN BAY *", "#", txtID, "Ví dụ: AP01"));
         row1.add(createFieldPanel("MÃ IATA", "🔖", txtIata, "Ví dụ: SGN"));
-        gbc.gridy = 0; form.add(row1, gbc);
+        gbc.gridy = 0;
+        form.add(row1, gbc);
 
         // Row 2: TÊN SÂN BAY
-        gbc.gridy = 1; form.add(createFieldPanel("TÊN SÂN BAY *", "✈", txtName, "Nhập tên đầy đủ của sân bay"), gbc);
+        gbc.gridy = 1;
+        form.add(createFieldPanel("TÊN SÂN BAY *", "✈", txtName, "Nhập tên đầy đủ của sân bay"), gbc);
 
         // Row 3: THÀNH PHỐ | QUỐC GIA
         JPanel row3 = new JPanel(new GridLayout(1, 2, 16, 0));
         row3.setBackground(Color.WHITE);
         row3.add(createFieldPanel("THÀNH PHỐ *", "🏢", txtCity, "Tên thành phố"));
         row3.add(createFieldPanel("QUỐC GIA *", "🌍", txtCountry, "Quốc gia"));
-        gbc.gridy = 2; form.add(row3, gbc);
+        gbc.gridy = 2;
+        form.add(row3, gbc);
 
         mainPanel.add(form, BorderLayout.CENTER);
 
@@ -509,7 +580,7 @@ public class AirportGUI extends JPanel {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 16));
         footer.setBackground(Color.WHITE);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(226, 232, 240)));
-        
+
         JButton btnCancel = new JButton("Hủy");
         btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         btnCancel.setBackground(Color.WHITE);
@@ -529,14 +600,14 @@ public class AirportGUI extends JPanel {
         btnSave.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSave.addActionListener(e -> {
             AirportDTO newDto = new AirportDTO(
-                txtID.getText().trim(), txtName.getText().trim(),
-                txtCity.getText().trim(), txtCountry.getText().trim(), txtIata.getText().trim()
-            );
+                    txtID.getText().trim(), txtName.getText().trim(),
+                    txtCity.getText().trim(), txtCountry.getText().trim(), txtIata.getText().trim());
             boolean success = dto == null ? bus.insert(newDto) : bus.update(newDto);
             if (success) {
                 JOptionPane.showMessageDialog(dialog, "Thành công!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
-                if (dto == null) currentPage = 1;
+                if (dto == null)
+                    currentPage = 1;
                 loadData();
             } else {
                 JOptionPane.showMessageDialog(dialog, "Lỗi! Kiểm tra lại dữ liệu.", "Lỗi", JOptionPane.ERROR_MESSAGE);
@@ -553,17 +624,19 @@ public class AirportGUI extends JPanel {
 
     private void deleteRow(int row) {
         int idx = (currentPage - 1) * pageSize + row;
-        if (idx >= allData.size()) return;
+        if (idx >= allData.size())
+            return;
         AirportDTO dto = allData.get(idx);
         int confirm = JOptionPane.showConfirmDialog(this,
-            "Bạn có chắc muốn xóa sân bay \"" + dto.getAirportName() + "\"?",
-            "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Bạn có chắc muốn xóa sân bay \"" + dto.getAirportName() + "\"?",
+                "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (confirm == JOptionPane.YES_OPTION) {
             if (bus.delete(dto.getAirportID())) {
                 JOptionPane.showMessageDialog(this, "Xóa thành công!");
                 loadData();
             } else {
-                JOptionPane.showMessageDialog(this, "Xóa thất bại! Sân bay có thể đang được sử dụng.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Xóa thất bại! Sân bay có thể đang được sử dụng.", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -571,7 +644,7 @@ public class AirportGUI extends JPanel {
     private JPanel createFieldPanel(String labelStr, String iconStr, JTextField txt, String placeholder) {
         JPanel p = new JPanel(new BorderLayout(0, 8));
         p.setBackground(Color.WHITE);
-        
+
         JLabel lbl = new JLabel(labelStr);
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
         lbl.setForeground(new Color(71, 85, 105));
@@ -580,15 +653,14 @@ public class AirportGUI extends JPanel {
         JPanel inputWrap = new JPanel(new BorderLayout(8, 0));
         inputWrap.setBackground(new Color(248, 250, 252));
         inputWrap.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
-        
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+
         JLabel lblIcon = new JLabel(iconStr);
         lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
         lblIcon.setForeground(new Color(100, 116, 139));
         inputWrap.add(lblIcon, BorderLayout.WEST);
-        
+
         txt.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txt.setBackground(new Color(248, 250, 252));
         txt.setBorder(null);
@@ -600,25 +672,25 @@ public class AirportGUI extends JPanel {
         return p;
     }
 
-        private void updateDashboard() {
+    private void updateDashboard() {
         lblTotalCount.setText(String.valueOf(allData.size()));
-        long c2 = allData.stream().map(dto.AirportDTO::getCountry).filter(c -> c != null && !c.trim().isEmpty()).distinct().count();
+        long c2 = allData.stream().map(dto.AirportDTO::getCountry).filter(c -> c != null && !c.trim().isEmpty())
+                .distinct().count();
         lblStat2.setText(String.valueOf(c2));
-        long c3 = allData.stream().map(dto.AirportDTO::getCity).filter(c -> c != null && !c.trim().isEmpty()).distinct().count();
+        long c3 = allData.stream().map(dto.AirportDTO::getCity).filter(c -> c != null && !c.trim().isEmpty()).distinct()
+                .count();
         lblStat3.setText(String.valueOf(c3));
     }
 
     // ===== UI Helpers =====
-        
 
     private JPanel createKPICard(String title, String value, int iconType, Color color) {
         JPanel p = new JPanel(new BorderLayout(16, 0));
         p.setBackground(Color.WHITE);
         p.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-            BorderFactory.createEmptyBorder(16, 16, 16, 16)
-        ));
-        
+                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
+                BorderFactory.createEmptyBorder(16, 16, 16, 16)));
+
         JLabel lblIcon = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -626,7 +698,7 @@ public class AirportGUI extends JPanel {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), 25));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                
+
                 g2.setColor(color);
                 g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 if (iconType == 1) { // Chart
@@ -666,23 +738,33 @@ public class AirportGUI extends JPanel {
         JLabel lblTitle = new JLabel(title);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblTitle.setForeground(AppColor.TEXT_SECONDARY);
-        
-        textPanel.add(lblValue); textPanel.add(lblTitle);
+
+        textPanel.add(lblValue);
+        textPanel.add(lblTitle);
         p.add(textPanel, BorderLayout.CENTER);
         return p;
     }
-private JButton createStyledButton(String text, Color bg, Color fg) {
+
+    private JButton createStyledButton(String text, Color bg, Color fg) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setBackground(bg); btn.setForeground(fg);
-        btn.setFocusPainted(false); btn.setBorderPainted(false);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setPreferredSize(new Dimension(140, 36));
         btn.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) { if (bg.equals(AppColor.PRIMARY)) btn.setBackground(AppColor.PRIMARY_HOVER); }
+            public void mouseEntered(MouseEvent e) {
+                if (bg.equals(AppColor.PRIMARY))
+                    btn.setBackground(AppColor.PRIMARY_HOVER);
+            }
+
             @Override
-            public void mouseExited(MouseEvent e) { btn.setBackground(bg); }
+            public void mouseExited(MouseEvent e) {
+                btn.setBackground(bg);
+            }
         });
         return btn;
     }
@@ -691,7 +773,8 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
         JButton btn = new JButton(text);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         btn.setPreferredSize(new Dimension(32, 32));
-        btn.setBackground(AppColor.SURFACE); btn.setForeground(AppColor.TEXT_PRIMARY);
+        btn.setBackground(AppColor.SURFACE);
+        btn.setForeground(AppColor.TEXT_PRIMARY);
         btn.setFocusPainted(false);
         btn.setBorder(BorderFactory.createLineBorder(AppColor.BORDER, 1, true));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -700,17 +783,27 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
 
     // ===== Action renderers =====
     private static class EditIcon implements javax.swing.Icon {
-        @Override public int getIconWidth() { return 20; }
-        @Override public int getIconHeight() { return 20; }
-        @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
+        @Override
+        public int getIconWidth() {
+            return 20;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 20;
+        }
+
+        @Override
+        public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
             java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
             g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
             g2.translate(x, y);
             g2.setColor(new java.awt.Color(2, 132, 199)); // Modern blue
-            g2.setStroke(new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+            g2.setStroke(
+                    new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
             // draw pencil body
-            int[] px = {5, 12, 15, 8};
-            int[] py = {15, 8, 11, 18};
+            int[] px = { 5, 12, 15, 8 };
+            int[] py = { 15, 8, 11, 18 };
             g2.drawPolygon(px, py, 4);
             // draw pencil tip
             g2.drawLine(5, 15, 3, 17);
@@ -721,14 +814,24 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
     }
 
     private static class DeleteIcon implements javax.swing.Icon {
-        @Override public int getIconWidth() { return 20; }
-        @Override public int getIconHeight() { return 20; }
-        @Override public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
+        @Override
+        public int getIconWidth() {
+            return 20;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 20;
+        }
+
+        @Override
+        public void paintIcon(java.awt.Component c, java.awt.Graphics g, int x, int y) {
             java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
             g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
             g2.translate(x, y);
             g2.setColor(new java.awt.Color(239, 68, 68)); // Red
-            g2.setStroke(new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
+            g2.setStroke(
+                    new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_ROUND, java.awt.BasicStroke.JOIN_ROUND));
             g2.drawRect(5, 7, 10, 10);
             g2.drawLine(3, 7, 17, 7);
             g2.drawLine(8, 4, 12, 4);
@@ -739,14 +842,22 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
     }
 
     private class ActionCellRenderer extends javax.swing.JPanel implements javax.swing.table.TableCellRenderer {
-        public ActionCellRenderer() { setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 6, 8)); setOpaque(true); }
+        public ActionCellRenderer() {
+            setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 6, 8));
+            setOpaque(true);
+        }
+
         @Override
-        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable t, Object v, boolean sel, boolean foc, int row, int col) {
+        public java.awt.Component getTableCellRendererComponent(javax.swing.JTable t, Object v, boolean sel,
+                boolean foc, int row, int col) {
             removeAll();
-            setBackground(sel ? new java.awt.Color(219, 234, 254) : (row % 2 == 0 ? new java.awt.Color(255, 255, 255) : new java.awt.Color(249, 250, 251)));
-            add(makeBtn(true)); add(makeBtn(false));
+            setBackground(sel ? new java.awt.Color(219, 234, 254)
+                    : (row % 2 == 0 ? new java.awt.Color(255, 255, 255) : new java.awt.Color(249, 250, 251)));
+            add(makeBtn(true));
+            add(makeBtn(false));
             return this;
         }
+
         private javax.swing.JButton makeBtn(boolean isEdit) {
             javax.swing.JButton b = new javax.swing.JButton(isEdit ? new EditIcon() : new DeleteIcon());
             b.setPreferredSize(new java.awt.Dimension(32, 32));
@@ -758,16 +869,31 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
     }
 
     private class ActionCellEditor extends javax.swing.AbstractCellEditor implements javax.swing.table.TableCellEditor {
-        private final javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 6, 8));
+        private final javax.swing.JPanel panel = new javax.swing.JPanel(
+                new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 6, 8));
         private int editingRow;
+
         @Override
-        public java.awt.Component getTableCellEditorComponent(javax.swing.JTable t, Object v, boolean sel, int row, int col) {
-            editingRow = row; panel.removeAll(); panel.setBackground(new java.awt.Color(219, 234, 254));
-            javax.swing.JButton btnEdit = makeBtn(true); btnEdit.addActionListener(e -> { fireEditingStopped(); javax.swing.SwingUtilities.invokeLater(() -> showEditDialog(editingRow)); });
-            javax.swing.JButton btnDel = makeBtn(false); btnDel.addActionListener(e -> { fireEditingStopped(); javax.swing.SwingUtilities.invokeLater(() -> deleteRow(editingRow)); });
-            panel.add(btnEdit); panel.add(btnDel);
+        public java.awt.Component getTableCellEditorComponent(javax.swing.JTable t, Object v, boolean sel, int row,
+                int col) {
+            editingRow = row;
+            panel.removeAll();
+            panel.setBackground(new java.awt.Color(219, 234, 254));
+            javax.swing.JButton btnEdit = makeBtn(true);
+            btnEdit.addActionListener(e -> {
+                fireEditingStopped();
+                javax.swing.SwingUtilities.invokeLater(() -> showEditDialog(editingRow));
+            });
+            javax.swing.JButton btnDel = makeBtn(false);
+            btnDel.addActionListener(e -> {
+                fireEditingStopped();
+                javax.swing.SwingUtilities.invokeLater(() -> deleteRow(editingRow));
+            });
+            panel.add(btnEdit);
+            panel.add(btnDel);
             return panel;
         }
+
         private javax.swing.JButton makeBtn(boolean isEdit) {
             javax.swing.JButton b = new javax.swing.JButton(isEdit ? new EditIcon() : new DeleteIcon());
             b.setPreferredSize(new java.awt.Dimension(32, 32));
@@ -777,12 +903,10 @@ private JButton createStyledButton(String text, Color bg, Color fg) {
             b.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
             return b;
         }
-        @Override public Object getCellEditorValue() { return "actions"; }
+
+        @Override
+        public Object getCellEditorValue() {
+            return "actions";
+        }
     }
 }
-
-
-
-
-
-

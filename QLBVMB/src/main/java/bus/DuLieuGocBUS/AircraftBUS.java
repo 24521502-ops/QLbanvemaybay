@@ -1,9 +1,10 @@
-package bus;
+package bus.DuLieuGocBUS;
 
-import dao.AircraftDAO;
 import dto.AircraftDTO;
 
 import java.util.List;
+
+import dao.DuLieuGocDAO.AircraftDAO;
 
 public class AircraftBUS {
     private final AircraftDAO dao = new AircraftDAO();
@@ -20,18 +21,22 @@ public class AircraftBUS {
     }
 
     public boolean insert(AircraftDTO dto) {
-        if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty()) return false;
-        if (dto.getModel() == null || dto.getModel().trim().isEmpty()) return false;
+        if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty())
+            return false;
+        if (dto.getModel() == null || dto.getModel().trim().isEmpty())
+            return false;
         return dao.insert(dto);
     }
 
     public boolean update(AircraftDTO dto) {
-        if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty()) return false;
+        if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty())
+            return false;
         return dao.update(dto);
     }
 
     public boolean delete(String aircraftID) {
-        if (aircraftID == null || aircraftID.trim().isEmpty()) return false;
+        if (aircraftID == null || aircraftID.trim().isEmpty())
+            return false;
         return dao.delete(aircraftID);
     }
 

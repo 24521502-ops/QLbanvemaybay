@@ -1,15 +1,17 @@
 package text;
 
-import gui.DuLieuGocPanel;
-
 import javax.swing.*;
+
+import gui.DuLieuGocGUI.DuLieuGocPanel;
+
 import java.awt.*;
 
 public class maintextDLGoc {
     public static void main(String[] args) {
         System.out.println("=== KHỞI ĐỘNG HỆ THỐNG ===");
-        
-        // Thử cài đặt giao diện đẹp (FlatLaf) bằng Reflection để không lỗi nếu thiếu lib
+
+        // Thử cài đặt giao diện đẹp (FlatLaf) bằng Reflection để không lỗi nếu thiếu
+        // lib
         try {
             System.out.println("Đang cấu hình giao diện...");
             UIManager.setLookAndFeel("com.formdev.flatlaf.FlatLightLaf");

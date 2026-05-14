@@ -2,10 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package bus;
+package bus.QuanLyDatChoBUS;
 
-import dao.BookingDAO;
 import java.util.List;
+
+import dao.QuanLyDatChoDAO.BookingDAO;
 
 public class BookingBUS {
     private BookingDAO bookingDAO;
@@ -16,19 +17,23 @@ public class BookingBUS {
 
     public List<Object[]> layDanhSachDatCho() {
         List<Object[]> list = bookingDAO.layDanhSachDatCho();
-        
+
         for (Object[] row : list) {
             // Xử lý Hạng ghế (Cột số 5 giữ nguyên)
             String hangGhe = (String) row[5];
             if (hangGhe != null) {
-                if (hangGhe.equalsIgnoreCase("Economy")) row[5] = "Hạng Phổ thông";
-                else if (hangGhe.equalsIgnoreCase("Business")) row[5] = "Hạng Thương gia";
-                else if (hangGhe.equalsIgnoreCase("Premium Economy")) row[5] = "Hạng Phổ thông đặc biệt";
-                else if (hangGhe.equalsIgnoreCase("First Class")) row[5] = "Hạng nhất";
+                if (hangGhe.equalsIgnoreCase("Economy"))
+                    row[5] = "Hạng Phổ thông";
+                else if (hangGhe.equalsIgnoreCase("Business"))
+                    row[5] = "Hạng Thương gia";
+                else if (hangGhe.equalsIgnoreCase("Premium Economy"))
+                    row[5] = "Hạng Phổ thông đặc biệt";
+                else if (hangGhe.equalsIgnoreCase("First Class"))
+                    row[5] = "Hạng nhất";
             } else {
                 row[5] = "Chưa xếp ghế";
             }
-            
+
             // ĐÃ SỬA: Đổi row[7] thành row[8] cho Trạng thái
             String status = (String) row[8];
             if (status != null) {
@@ -43,7 +48,7 @@ public class BookingBUS {
         }
         return list;
     }
-    
+
     public List<String> layDanhSachKhachHang() {
         return bookingDAO.layDanhSachKhachHang();
     }
@@ -59,11 +64,11 @@ public class BookingBUS {
     public boolean taoDatChoMoi(String customerID, String employeeID, String flightID, String seatID) {
         return bookingDAO.taoDatChoMoi(customerID, employeeID, flightID, seatID);
     }
-    
+
     public boolean huyDatCho(String bookingID, String reason) {
         return bookingDAO.huyDatCho(bookingID, reason);
     }
-    
+
     public String layTicketIDTuBooking(String bookingID) {
         return bookingDAO.layTicketIDTuBooking(bookingID);
     }

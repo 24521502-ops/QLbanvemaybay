@@ -1,4 +1,4 @@
-package gui;
+package gui.FrameAdmin;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import util.AppColor;
@@ -8,16 +8,37 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 
+import gui.BaoCaoThongKeGUI.BaoCaoTKGUI;
+import gui.DuLieuGocGUI.DuLieuGocPanel;
+import gui.QuanLyChuyenBayGUI.QuanLyChuyenBayPanel;
+import gui.QuanLyDatChoGUI.QuanLyDatChoPanel;
+import gui.QuanLyKhachHangGUI.QuanLyKhachHangPanel;
+import gui.QuanLyNhanVienGUI.EmployeePanel;
+import gui.QuanLyPhanQuyenGUI.PhanQuyenGUI;
+import gui.QuanLyVeGUI.QuanLyVePanel;
+import dto.AccountDTO;
+
 /**
- * MainFrame - Khung chính của ứng dụng Aviation Manager
+ * FrameAdmin - Khung chính của ứng dụng Aviation Manager
  * Gồm: Sidebar (trái), TopBar (trên), ContentArea (giữa)
  */
 
-public class MainFrame extends JFrame {
+public class FrameAdmin extends JFrame {
 
     private JPanel contentPanel;
     private JPanel sidebarPanel;
     private JButton selectedMenuButton;
+    private AccountDTO currentAccount;
+
+    // Các module (Khởi tạo Lazy để tăng tốc khởi động)
+    private QuanLyChuyenBayPanel quanLyChuyenBayPanel;
+    private QuanLyDatChoPanel quanLyDatChoPanel;
+    private QuanLyVePanel quanLyVePanel;
+    private EmployeePanel employeePanel;
+    private QuanLyKhachHangPanel quanLyKhachHangPanel;
+    private BaoCaoTKGUI baoCaoTKGUI;
+    private PhanQuyenGUI phanQuyenGUI;
+    private DuLieuGocPanel duLieuGocPanel;
 
     // Sidebar dimensions
     private static final int SIDEBAR_WIDTH = 220;
@@ -25,17 +46,18 @@ public class MainFrame extends JFrame {
 
     // Menu items config: {text, iconType}
     private static final String[][] MENU_ITEMS = {
+            { "Dashboard", "dashboard" },
             { "Chuyến bay", "flight" },
             { "Đặt chỗ", "booking" },
             { "Vé", "ticket" },
             { "Nhân viên", "employee" },
             { "Khách hàng", "customer" },
-            { "Báo cáo", "report" },
             { "Phân quyền", "permission" },
             { "Dữ liệu gốc", "data" }
     };
 
-    public MainFrame() {
+    public FrameAdmin(AccountDTO account) {
+        this.currentAccount = account;
         setTitle("Aviation Manager - TIU AIRLINES");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setMinimumSize(new Dimension(1100, 700));
@@ -47,10 +69,6 @@ public class MainFrame extends JFrame {
     }
 
     private void initComponents() {
-        // ===== SIDEBAR =====
-        sidebarPanel = createSidebar();
-        add(sidebarPanel, BorderLayout.WEST);
-
         // ===== RIGHT SIDE (TopBar + Content) =====
         JPanel rightPanel = new JPanel(new BorderLayout(0, 0));
         rightPanel.setBackground(AppColor.BACKGROUND);
@@ -59,13 +77,19 @@ public class MainFrame extends JFrame {
         JPanel topBar = createTopBar();
         rightPanel.add(topBar, BorderLayout.NORTH);
 
-        // Content Area
+        // Content Area - Khởi tạo TRƯỚC sidebar vì selectDefaultMenu cần contentPanel
         contentPanel = new JPanel(new BorderLayout());
         contentPanel.setBackground(AppColor.BACKGROUND);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         rightPanel.add(contentPanel, BorderLayout.CENTER);
 
         add(rightPanel, BorderLayout.CENTER);
+
+        // ===== SIDEBAR (phải tạo SAU contentPanel) =====
+        sidebarPanel = createSidebar();
+        add(sidebarPanel, BorderLayout.WEST);
+
+        setVisible(true);
     }
 
     // ==================== SIDEBAR ====================
@@ -301,8 +325,9 @@ public class MainFrame extends JFrame {
     private void selectDefaultMenu(JPanel menuPanel) {
         for (Component c : menuPanel.getComponents()) {
             if (c instanceof JButton btn) {
-                if ("Báo cáo".equals(btn.getText().trim())) {
+                if ("Dashboard".equals(btn.getText().trim())) {
                     setSelectedButton(btn);
+                    onMenuClicked("Dashboard");
                     break;
                 }
             }
@@ -364,6 +389,14 @@ public class MainFrame extends JFrame {
 
         iconsPanel.add(createTopBarIcon("bell"));
         iconsPanel.add(createTopBarIcon("help"));
+        
+        // Hiển thị tên người dùng từ currentAccount
+        String name = (currentAccount != null) ? currentAccount.getUserName() : "Admin";
+        JLabel lblUser = new JLabel(name);
+        lblUser.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblUser.setForeground(AppColor.TEXT_PRIMARY);
+        iconsPanel.add(lblUser);
+        
         iconsPanel.add(createAvatarButton());
 
         topBar.add(iconsPanel, BorderLayout.EAST);
@@ -398,7 +431,7 @@ public class MainFrame extends JFrame {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-                boolean isSelected = (MainFrame.this.selectedMenuButton == this);
+                boolean isSelected = (FrameAdmin.this.selectedMenuButton == this);
 
                 if (isSelected) {
                     // Electric blue and purple aura (Glow phát sáng)
@@ -595,12 +628,13 @@ public class MainFrame extends JFrame {
                 g2.drawOval(cx + 1, y + 2, 6, 6);
                 g2.drawArc(cx - 1, y + 9, 10, 7, 0, 180);
             }
-            case "report" -> {
-                // Chart
-                g2.drawRect(x + 1, y + 1, size - 2, size - 2);
-                g2.fillRect(x + 4, y + 10, 3, 6);
-                g2.fillRect(x + 8, y + 6, 3, 10);
-                g2.fillRect(x + 12, y + 3, 3, 13);
+            case "dashboard" -> {
+                // Dashboard grid (4 ô vuông)
+                int half = (size - 4) / 2;
+                g2.fillRoundRect(x + 1, y + 1, half, half, 3, 3);
+                g2.fillRoundRect(x + half + 3, y + 1, half, half, 3, 3);
+                g2.fillRoundRect(x + 1, y + half + 3, half, half, 3, 3);
+                g2.drawRoundRect(x + half + 3, y + half + 3, half, half, 3, 3);
             }
             case "permission" -> {
                 // Key/Lock
@@ -643,8 +677,49 @@ public class MainFrame extends JFrame {
      * Gọi setContentPanel() để đổi panel ở giữa.
      */
     private void onMenuClicked(String menuText) {
-        // Placeholder - sẽ được kết nối với các Panel thực tế sau
-        System.out.println("Menu clicked: " + menuText);
+        switch (menuText) {
+            case "Chuyến bay":
+                if (quanLyChuyenBayPanel == null) quanLyChuyenBayPanel = new QuanLyChuyenBayPanel();
+                setContentPanel(quanLyChuyenBayPanel);
+                break;
+            case "Đặt chỗ":
+                if (quanLyDatChoPanel == null) quanLyDatChoPanel = new QuanLyDatChoPanel();
+                setContentPanel(quanLyDatChoPanel);
+                break;
+            case "Vé":
+                if (quanLyVePanel == null) quanLyVePanel = new QuanLyVePanel();
+                setContentPanel(quanLyVePanel);
+                break;
+            case "Nhân viên":
+                if (employeePanel == null) employeePanel = new EmployeePanel();
+                setContentPanel(employeePanel);
+                break;
+            case "Khách hàng":
+                if (quanLyKhachHangPanel == null) quanLyKhachHangPanel = new QuanLyKhachHangPanel();
+                setContentPanel(quanLyKhachHangPanel);
+                break;
+            case "Dashboard":
+                if (baoCaoTKGUI == null) baoCaoTKGUI = new BaoCaoTKGUI();
+                setContentPanel(baoCaoTKGUI);
+                break;
+            case "Phân quyền":
+                if (phanQuyenGUI == null) phanQuyenGUI = new PhanQuyenGUI();
+                setContentPanel(phanQuyenGUI);
+                break;
+            case "Dữ liệu gốc":
+                if (duLieuGocPanel == null) duLieuGocPanel = new DuLieuGocPanel();
+                setContentPanel(duLieuGocPanel);
+                break;
+            case "Logout":
+                int opt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Đăng xuất", JOptionPane.YES_NO_OPTION);
+                if (opt == JOptionPane.YES_OPTION) {
+                    new gui.LoginRegesterGUI.loginGUI();
+                    dispose();
+                }
+                break;
+            default:
+                System.out.println("Menu clicked: " + menuText);
+        }
     }
 
     /**
@@ -665,7 +740,6 @@ public class MainFrame extends JFrame {
         return contentPanel;
     }
 
-    // ==================== MAIN (for testing) ====================
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
@@ -673,7 +747,8 @@ public class MainFrame extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            MainFrame frame = new MainFrame();
+            // Mặc định truyền null khi chạy test
+            FrameAdmin frame = new FrameAdmin(null);
             frame.setVisible(true);
         });
     }

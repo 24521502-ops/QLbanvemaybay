@@ -1,4 +1,4 @@
-package dao;
+package dao.QuanLyPhanQuyenDAO;
 
 import dto.RoleDTO;
 import util.DBConnection;
@@ -14,8 +14,8 @@ public class RoleDAO {
         List<RoleDTO> list = new ArrayList<>();
         String sql = "SELECT RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, Created_At, Updated_At, IsDeleted FROM ROLE WHERE IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 RoleDTO dto = new RoleDTO();
                 dto.setRoleID(rs.getString("RoleID"));
@@ -41,7 +41,7 @@ public class RoleDAO {
         List<RoleDTO> list = new ArrayList<>();
         String sql = "SELECT RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, Created_At, Updated_At, IsDeleted FROM ROLE WHERE FunctionID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, functionID);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -69,7 +69,7 @@ public class RoleDAO {
     public RoleDTO getByID(String roleID) {
         String sql = "SELECT RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, Created_At, Updated_At, IsDeleted FROM ROLE WHERE RoleID = ? AND IsDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, roleID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {

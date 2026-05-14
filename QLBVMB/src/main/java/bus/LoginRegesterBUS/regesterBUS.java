@@ -1,7 +1,7 @@
-package bus;
+﻿package bus.LoginRegesterBUS;
 
-import dao.loginDAO;
-import dao.regesterDAO;
+import dao.LoginRegesterDAO.loginDAO;
+import dao.LoginRegesterDAO.regesterDAO;
 
 /**
  * Business logic layer cho chức năng đăng ký tài khoản.

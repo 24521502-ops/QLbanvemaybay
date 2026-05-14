@@ -1,6 +1,6 @@
-package bus;
+﻿package bus.LoginRegesterBUS;
 
-import dao.loginDAO;
+import dao.LoginRegesterDAO.loginDAO;
 import dto.AccountDTO;
 
 /**

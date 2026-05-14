@@ -1,6 +1,5 @@
-package gui.QuanLyKhachHang;
+package gui.QuanLyKhachHangGUI;
 
-import bus.CustomerBUS;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -8,7 +7,9 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
-import util.AppColor; 
+
+import bus.QuanLyKhachHangBUS.CustomerBUS;
+import util.AppColor;
 
 public class QuanLyKhachHangPanel extends JPanel {
 
@@ -28,10 +29,10 @@ public class QuanLyKhachHangPanel extends JPanel {
 
     private void initComponents() {
         setLayout(new BorderLayout(0, 20));
-        setBackground(AppColor.BACKGROUND); 
+        setBackground(AppColor.BACKGROUND);
         setBorder(new EmptyBorder(30, 40, 30, 40));
 
-        // 1. HEADER 
+        // 1. HEADER
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
 
@@ -40,10 +41,10 @@ public class QuanLyKhachHangPanel extends JPanel {
         titlePanel.setOpaque(false);
         JLabel lblTitle = new JLabel("Khách hàng");
         lblTitle.setFont(new Font("Inter", Font.BOLD, 28));
-        lblTitle.setForeground(AppColor.TEXT_PRIMARY); 
+        lblTitle.setForeground(AppColor.TEXT_PRIMARY);
         JLabel lblSub = new JLabel("Quản lý thông tin và liên hệ của tất cả hành khách.");
         lblSub.setFont(new Font("Inter", Font.PLAIN, 14));
-        lblSub.setForeground(AppColor.TEXT_SECONDARY); 
+        lblSub.setForeground(AppColor.TEXT_SECONDARY);
         titlePanel.add(lblTitle);
         titlePanel.add(Box.createVerticalStrut(5));
         titlePanel.add(lblSub);
@@ -54,54 +55,62 @@ public class QuanLyKhachHangPanel extends JPanel {
         JPanel toolbarPanel = new JPanel(new BorderLayout());
         toolbarPanel.setBackground(Color.WHITE);
         toolbarPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER), 
-            new EmptyBorder(10, 15, 10, 15)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER),
+                new EmptyBorder(10, 15, 10, 15)));
 
         JPanel leftFilter = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         leftFilter.setOpaque(false);
 
         txtTimKiem = createTextField("Nhập tên, email hoặc SĐT...");
-        txtTimKiem.setPreferredSize(new Dimension(280, 40)); 
+        txtTimKiem.setPreferredSize(new Dimension(280, 40));
         txtTimKiem.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { applyFilter(); }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                applyFilter();
+            }
         });
-        
-        cbxSapXep = new JComboBox<>(new String[]{
-            "Sắp xếp mặc định", 
-            "Tên khách hàng (A - Z)", 
-            "Tên khách hàng (Z - A)", 
-            "Mã KH (Mới nhất)", 
-            "Mã KH (Cũ nhất)"
+
+        cbxSapXep = new JComboBox<>(new String[] {
+                "Sắp xếp mặc định",
+                "Tên khách hàng (A - Z)",
+                "Tên khách hàng (Z - A)",
+                "Mã KH (Mới nhất)",
+                "Mã KH (Cũ nhất)"
         });
         cbxSapXep.setPreferredSize(new Dimension(180, 40));
         cbxSapXep.setBackground(Color.WHITE);
         cbxSapXep.setFont(new Font("Inter", Font.PLAIN, 13));
         cbxSapXep.addActionListener(e -> applySorting());
 
-        JButton btnRefresh = makeSecondaryButton("Làm mới"); 
+        JButton btnRefresh = makeSecondaryButton("Làm mới");
         btnRefresh.setPreferredSize(new Dimension(110, 40));
         btnRefresh.addActionListener(e -> {
-            txtTimKiem.setText(""); cbxSapXep.setSelectedIndex(0); 
-            loadData(); applyFilter(); applySorting();
+            txtTimKiem.setText("");
+            cbxSapXep.setSelectedIndex(0);
+            loadData();
+            applyFilter();
+            applySorting();
         });
 
         leftFilter.add(createFilterGroup("TÌM KIẾM CHUNG", txtTimKiem));
         leftFilter.add(createFilterGroup("SẮP XẾP THEO", cbxSapXep));
-        
-        JPanel pnlBtnRefresh = new JPanel(new BorderLayout()); pnlBtnRefresh.setOpaque(false);
-        pnlBtnRefresh.setBorder(new EmptyBorder(22, 5, 0, 0)); pnlBtnRefresh.add(btnRefresh, BorderLayout.CENTER);
+
+        JPanel pnlBtnRefresh = new JPanel(new BorderLayout());
+        pnlBtnRefresh.setOpaque(false);
+        pnlBtnRefresh.setBorder(new EmptyBorder(22, 5, 0, 0));
+        pnlBtnRefresh.add(btnRefresh, BorderLayout.CENTER);
         leftFilter.add(pnlBtnRefresh);
 
         JPanel rightAction = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         rightAction.setOpaque(false);
-        rightAction.setBorder(new EmptyBorder(22, 0, 0, 0)); 
-        
+        rightAction.setBorder(new EmptyBorder(22, 0, 0, 0));
+
         JButton btnAdd = makePrimaryButton("+ Thêm khách hàng");
         btnAdd.addActionListener(e -> {
             ThemKhachHangDialog dialog = new ThemKhachHangDialog((Frame) SwingUtilities.getWindowAncestor(this));
             dialog.setVisible(true);
-            loadData(); applyFilter();
+            loadData();
+            applyFilter();
         });
         rightAction.add(btnAdd);
 
@@ -114,14 +123,17 @@ public class QuanLyKhachHangPanel extends JPanel {
         topPanel.add(toolbarPanel, BorderLayout.CENTER);
         add(topPanel, BorderLayout.NORTH);
 
-        // 3. BẢNG DANH SÁCH 
+        // 3. BẢNG DANH SÁCH
         JPanel panelTableCard = new JPanel(new BorderLayout());
         panelTableCard.setBackground(Color.WHITE);
         panelTableCard.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
 
-        String[] cols = {"MÃ KH", "TÊN KHÁCH HÀNG", "EMAIL", "SỐ ĐIỆN THOẠI", "SỐ PASSPORT", "HÀNH ĐỘNG"};
+        String[] cols = { "MÃ KH", "TÊN KHÁCH HÀNG", "EMAIL", "SỐ ĐIỆN THOẠI", "SỐ PASSPORT", "HÀNH ĐỘNG" };
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 5; } 
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return c == 5;
+            }
         };
 
         table = new JTable(tableModel);
@@ -141,7 +153,7 @@ public class QuanLyKhachHangPanel extends JPanel {
         if (keyword.isEmpty()) {
             rowSorter.setRowFilter(null);
         } else {
-            rowSorter.setRowFilter(RowFilter.regexFilter("(?iu)" + keyword, 1, 2, 3, 4)); 
+            rowSorter.setRowFilter(RowFilter.regexFilter("(?iu)" + keyword, 1, 2, 3, 4));
         }
     }
 
@@ -149,25 +161,36 @@ public class QuanLyKhachHangPanel extends JPanel {
         int index = cbxSapXep.getSelectedIndex();
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
         switch (index) {
-            case 0: sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING)); break; 
-            case 1: sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING)); break;  
-            case 2: sortKeys.add(new RowSorter.SortKey(1, SortOrder.DESCENDING)); break; 
-            case 3: sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING)); break; 
-            case 4: sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING)); break;  
+            case 0:
+                sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
+                break;
+            case 1:
+                sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+                break;
+            case 2:
+                sortKeys.add(new RowSorter.SortKey(1, SortOrder.DESCENDING));
+                break;
+            case 3:
+                sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
+                break;
+            case 4:
+                sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+                break;
         }
-        rowSorter.setSortKeys(sortKeys); rowSorter.sort();
+        rowSorter.setSortKeys(sortKeys);
+        rowSorter.sort();
     }
 
     private void loadData() {
         tableModel.setRowCount(0);
         List<Object[]> list = customerBUS.layDanhSachKhachHang();
         for (Object[] row : list) {
-            tableModel.addRow(new Object[]{ row[0], row[1], row[2], row[3], row[4], "" });
+            tableModel.addRow(new Object[] { row[0], row[1], row[2], row[3], row[4], "" });
         }
     }
 
     private void customizeTable() {
-        table.setRowHeight(70); 
+        table.setRowHeight(70);
         table.setShowVerticalLines(false);
         table.setShowHorizontalLines(true);
         table.setGridColor(AppColor.BORDER);
@@ -176,25 +199,32 @@ public class QuanLyKhachHangPanel extends JPanel {
         JTableHeader header = table.getTableHeader();
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
         header.setBackground(Color.WHITE);
-        
+
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+            @Override
+            public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
                 super.getTableCellRendererComponent(t, v, s, f, r, c);
-                setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER), new EmptyBorder(0, 20, 0, 20)));
+                setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER), new EmptyBorder(0, 20, 0, 20)));
                 setForeground(AppColor.TEXT_SECONDARY);
                 setFont(new Font("Inter", Font.BOLD, 12));
                 return this;
             }
         };
-        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) table.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
+        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++)
+            table.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
 
         DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+            @Override
+            public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
                 super.getTableCellRendererComponent(t, v, s, f, r, c);
                 setBorder(new EmptyBorder(0, 20, 0, 20));
                 setForeground(AppColor.TEXT_PRIMARY);
                 setFont(new Font("Inter", Font.PLAIN, 14));
-                if (c == 0) { setFont(new Font("Inter", Font.BOLD, 14)); setForeground(AppColor.TEXT_SECONDARY); } 
+                if (c == 0) {
+                    setFont(new Font("Inter", Font.BOLD, 14));
+                    setForeground(AppColor.TEXT_SECONDARY);
+                }
                 return this;
             }
         };
@@ -217,56 +247,88 @@ public class QuanLyKhachHangPanel extends JPanel {
     }
 
     private JPanel createFilterGroup(String label, JComponent input) {
-        JPanel p = new JPanel(new BorderLayout(0, 5)); p.setOpaque(false);
-        JLabel lbl = new JLabel(label); lbl.setFont(new Font("Inter", Font.BOLD, 10)); lbl.setForeground(AppColor.TEXT_SECONDARY);
-        p.add(lbl, BorderLayout.NORTH); p.add(input, BorderLayout.CENTER); return p;
+        JPanel p = new JPanel(new BorderLayout(0, 5));
+        p.setOpaque(false);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Inter", Font.BOLD, 10));
+        lbl.setForeground(AppColor.TEXT_SECONDARY);
+        p.add(lbl, BorderLayout.NORTH);
+        p.add(input, BorderLayout.CENTER);
+        return p;
     }
 
     private JTextField createTextField(String placeholder) {
-        JTextField txt = new JTextField(); txt.setFont(new Font("Inter", Font.PLAIN, 13));
-        txt.putClientProperty("JTextField.placeholderText", placeholder); return txt;
+        JTextField txt = new JTextField();
+        txt.setFont(new Font("Inter", Font.PLAIN, 13));
+        txt.putClientProperty("JTextField.placeholderText", placeholder);
+        txt.putClientProperty("JTextField.leadingIcon", new SearchIcon());
+        return txt;
     }
 
     private JButton makePrimaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(AppColor.PRIMARY); 
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6); g2.dispose(); super.paintComponent(g);
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(AppColor.PRIMARY);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(Color.WHITE); 
-        btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
-        btn.setPreferredSize(new Dimension(170, 42)); return btn;
+        btn.setFont(new Font("Inter", Font.BOLD, 14));
+        btn.setForeground(Color.WHITE);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(170, 42));
+        return btn;
     }
 
     private JButton makeSecondaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(241, 245, 249)); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                g2.setColor(AppColor.BORDER); g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 6, 6); g2.dispose(); super.paintComponent(g);
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(241, 245, 249));
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.setColor(AppColor.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 6, 6);
+                g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 13)); btn.setForeground(AppColor.TEXT_PRIMARY); 
-        btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
+        btn.setFont(new Font("Inter", Font.BOLD, 13));
+        btn.setForeground(AppColor.TEXT_PRIMARY);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 
     class AvatarRenderer extends JPanel implements TableCellRenderer {
         private String fullName = "";
         private String initials = "";
-        private Color[] bgColors = {AppColor.INFO, AppColor.WARNING, AppColor.SUCCESS, AppColor.PRIMARY, new Color(167, 139, 250)};
+        private Color[] bgColors = { AppColor.INFO, AppColor.WARNING, AppColor.SUCCESS, AppColor.PRIMARY,
+                new Color(167, 139, 250) };
 
-        public AvatarRenderer() { setOpaque(true); }
+        public AvatarRenderer() {
+            setOpaque(true);
+        }
 
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
             if (value != null) {
                 fullName = value.toString();
                 String[] parts = fullName.trim().split("\\s+");
-                if (parts.length >= 2) initials = (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
-                else if (parts.length == 1 && !parts[0].isEmpty()) initials = parts[0].substring(0, 1).toUpperCase();
+                if (parts.length >= 2)
+                    initials = (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase();
+                else if (parts.length == 1 && !parts[0].isEmpty())
+                    initials = parts[0].substring(0, 1).toUpperCase();
             }
             return this;
         }
@@ -274,7 +336,8 @@ public class QuanLyKhachHangPanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            if (fullName.isEmpty()) return;
+            if (fullName.isEmpty())
+                return;
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -288,7 +351,8 @@ public class QuanLyKhachHangPanel extends JPanel {
             g2.setFont(new Font("Inter", Font.BOLD, 14));
             FontMetrics fm = g2.getFontMetrics();
             int stringWidth = fm.stringWidth(initials);
-            g2.drawString(initials, x + (circleSize - stringWidth) / 2, y + ((circleSize - fm.getHeight()) / 2) + fm.getAscent());
+            g2.drawString(initials, x + (circleSize - stringWidth) / 2,
+                    y + ((circleSize - fm.getHeight()) / 2) + fm.getAscent());
 
             g2.setColor(AppColor.TEXT_PRIMARY);
             g2.setFont(new Font("Inter", Font.BOLD, 15));
@@ -298,71 +362,142 @@ public class QuanLyKhachHangPanel extends JPanel {
     }
 
     class ActionRenderer extends JPanel implements TableCellRenderer {
-        public ActionRenderer() { setOpaque(true); }
-        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE); return this;
+        public ActionRenderer() {
+            setOpaque(true);
         }
-        @Override protected void paintComponent(Graphics g) {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            return this;
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
             g2.setColor(AppColor.TEXT_SECONDARY);
-            g2.drawString("✏️", 15, (getHeight() / 2) + 6); 
-            g2.drawString("🗑️", 45, (getHeight() / 2) + 6); 
+            g2.drawString("✏️", 15, (getHeight() / 2) + 6);
+            g2.drawString("🗑️", 45, (getHeight() / 2) + 6);
             g2.dispose();
         }
     }
 
     class ActionEditor extends AbstractCellEditor implements TableCellEditor, MouseListener {
-        private JPanel panel; private int currentRow;
-        public ActionEditor() { panel = new ActionRenderer(); panel.addMouseListener(this); }
-        @Override public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            currentRow = row; panel.setBackground(table.getSelectionBackground()); return panel;
-        }
-        @Override public Object getCellEditorValue() { return null; }
+        private JPanel panel;
+        private int currentRow;
 
-        @Override public void mouseClicked(MouseEvent e) {
+        public ActionEditor() {
+            panel = new ActionRenderer();
+            panel.addMouseListener(this);
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+                int column) {
+            currentRow = row;
+            panel.setBackground(table.getSelectionBackground());
+            return panel;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return null;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
             fireEditingStopped();
             int modelRow = table.convertRowIndexToModel(currentRow);
             String cusID = tableModel.getValueAt(modelRow, 0).toString();
             String name = tableModel.getValueAt(modelRow, 1).toString();
             String email = tableModel.getValueAt(modelRow, 2).toString();
             String phone = tableModel.getValueAt(modelRow, 3).toString();
-            
-            // LẤY THÊM DỮ LIỆU PASSPORT TỪ CỘT 4
-            String passport = tableModel.getValueAt(modelRow, 4).toString(); 
 
-            if (e.getX() >= 10 && e.getX() <= 35) { 
+            // LẤY THÊM DỮ LIỆU PASSPORT TỪ CỘT 4
+            String passport = tableModel.getValueAt(modelRow, 4).toString();
+
+            if (e.getX() >= 10 && e.getX() <= 35) {
                 // TRUYỀN ĐỦ 6 THAM SỐ VÀO ĐÂY ĐỂ HẾT LỖI
-                SuaKhachHangDialog editDialog = new SuaKhachHangDialog((Frame) SwingUtilities.getWindowAncestor(panel), cusID, name, phone, email, passport);
+                SuaKhachHangDialog editDialog = new SuaKhachHangDialog((Frame) SwingUtilities.getWindowAncestor(panel),
+                        cusID, name, phone, email, passport);
                 editDialog.setVisible(true);
-                loadData(); applyFilter();
-            } else if (e.getX() >= 40 && e.getX() <= 65) { 
-                int confirm = JOptionPane.showConfirmDialog(panel, "Bạn có chắc chắn muốn xóa khách hàng " + name + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+                loadData();
+                applyFilter();
+            } else if (e.getX() >= 40 && e.getX() <= 65) {
+                int confirm = JOptionPane.showConfirmDialog(panel, "Bạn có chắc chắn muốn xóa khách hàng " + name + "?",
+                        "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
                 if (confirm == JOptionPane.YES_OPTION) {
                     String result = customerBUS.xoaKhachHang(cusID);
                     if (result.equals("SUCCESS")) {
                         JOptionPane.showMessageDialog(panel, "Xóa khách hàng thành công!");
-                        loadData(); applyFilter();
+                        loadData();
+                        applyFilter();
                     } else if (result.equals("CONSTRAINT_ERROR")) {
-                        JOptionPane.showMessageDialog(panel, "KHÔNG THỂ XÓA!\nKhách hàng này đã từng mua vé hoặc có lịch sử giao dịch.", "Lỗi bảo vệ dữ liệu", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel,
+                                "KHÔNG THỂ XÓA!\nKhách hàng này đã từng mua vé hoặc có lịch sử giao dịch.",
+                                "Lỗi bảo vệ dữ liệu", JOptionPane.ERROR_MESSAGE);
                     } else {
-                        JOptionPane.showMessageDialog(panel, "Xóa thất bại do lỗi hệ thống.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(panel, "Xóa thất bại do lỗi hệ thống.", "Lỗi",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
             }
         }
-        @Override public void mousePressed(MouseEvent e) {} @Override public void mouseReleased(MouseEvent e) {} @Override public void mouseEntered(MouseEvent e) {} @Override public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
+    }
+
+    private static class SearchIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(AppColor.TEXT_SECONDARY);
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawOval(x + 4, y + 4, 8, 8);
+            g2.drawLine(x + 10, y + 10, x + 14, y + 14);
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 20;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 20;
+        }
     }
 
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf()); } catch (Exception ex) {}
+        try {
+            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
+        } catch (Exception ex) {
+        }
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Demo Quản Lý Khách Hàng - TIU AIRLINES");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(1200, 800); 
-            frame.setLocationRelativeTo(null); 
+            frame.setSize(1200, 800);
+            frame.setLocationRelativeTo(null);
             frame.add(new QuanLyKhachHangPanel());
             frame.setVisible(true);
         });

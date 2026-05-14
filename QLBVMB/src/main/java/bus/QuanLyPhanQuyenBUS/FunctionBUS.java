@@ -1,9 +1,10 @@
-package bus;
+package bus.QuanLyPhanQuyenBUS;
 
-import dao.FunctionDAO;
 import dto.FunctionDTO;
 
 import java.util.List;
+
+import dao.QuanLyPhanQuyenDAO.FunctionDAO;
 
 public class FunctionBUS {
     private final FunctionDAO dao = new FunctionDAO();

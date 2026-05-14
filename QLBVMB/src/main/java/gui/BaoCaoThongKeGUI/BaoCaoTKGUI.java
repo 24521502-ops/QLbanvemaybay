@@ -1,6 +1,4 @@
-package gui;
-
-import bus.BaoCaoTKBUS;
+package gui.BaoCaoThongKeGUI;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,6 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+
+import bus.BaoCaoThongKeBUS.BaoCaoTKBUS;
 
 public class BaoCaoTKGUI extends JPanel {
 
@@ -115,11 +115,20 @@ public class BaoCaoTKGUI extends JPanel {
         JPanel topRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         topRow.setOpaque(false);
 
-        // Date Tu Ngay & Den Ngay - Mặc định là ngày hiện tại
+        // Date Tu Ngay & Den Ngay - Lấy ngày xa nhất & gần nhất từ DB
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        String today = sdf.format(new Date());
+        String defaultTuNgay;
+        String defaultDenNgay;
+        try {
+            java.sql.Date[] dateRange = bus.getDateRange();
+            defaultTuNgay = sdf.format(dateRange[0]);
+            defaultDenNgay = sdf.format(dateRange[1]);
+        } catch (Exception ex) {
+            defaultTuNgay = "01/01/2000";
+            defaultDenNgay = sdf.format(new Date());
+        }
 
-        txtTuNgay = new JTextField(today, 8);
+        txtTuNgay = new JTextField(defaultTuNgay, 8);
         txtTuNgay.setBorder(null);
         txtTuNgay.setOpaque(false);
         txtTuNgay.setFont(F_BODY);
@@ -128,7 +137,7 @@ public class BaoCaoTKGUI extends JPanel {
         lblDash.setForeground(GRAY);
 
         // Date Den Ngay
-        txtDenNgay = new JTextField(today, 8);
+        txtDenNgay = new JTextField(defaultDenNgay, 8);
         txtDenNgay.setBorder(null);
         txtDenNgay.setOpaque(false);
         txtDenNgay.setFont(F_BODY);
@@ -781,8 +790,9 @@ public class BaoCaoTKGUI extends JPanel {
             int itemSpacing = 38;
             int totalLegendHeight = data.size() * itemSpacing;
             int ly = y0 + (diameter - totalLegendHeight) / 2 + 10;
-            if (ly < y0 + 5) ly = y0 + 5;
-            
+            if (ly < y0 + 5)
+                ly = y0 + 5;
+
             g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
             for (int i = 0; i < data.size(); i++) {
                 Object[] row = data.get(i);
@@ -942,6 +952,24 @@ public class BaoCaoTKGUI extends JPanel {
             monthLabel = new JLabel("", SwingConstants.CENTER);
             monthLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
             monthLabel.setForeground(DARK);
+            monthLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            monthLabel.setToolTipText("Nhấn để chọn tháng/năm");
+
+            // Click vào tháng/năm → mở picker trực tiếp
+            monthLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    showMonthYearPicker();
+                }
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    monthLabel.setForeground(BLUE);
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    monthLabel.setForeground(DARK);
+                }
+            });
 
             btnPrev.addActionListener(e -> {
                 calendar.add(Calendar.MONTH, -1);
@@ -979,6 +1007,81 @@ public class BaoCaoTKGUI extends JPanel {
             add(center, BorderLayout.CENTER);
 
             updateCalendar();
+        }
+
+        private void showMonthYearPicker() {
+            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Chọn Tháng / Năm", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+            dialog.setLayout(new BorderLayout(10, 10));
+            dialog.setUndecorated(false);
+            dialog.setResizable(false);
+
+            JPanel content = new JPanel(new GridBagLayout());
+            content.setBorder(new EmptyBorder(16, 20, 8, 20));
+            content.setBackground(Color.WHITE);
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(4, 6, 4, 6);
+
+            // Month spinner
+            String[] months = { "Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6",
+                                 "Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12" };
+            JComboBox<String> monthBox = new JComboBox<>(months);
+            monthBox.setSelectedIndex(calendar.get(Calendar.MONTH));
+            monthBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            monthBox.setPreferredSize(new Dimension(120, 32));
+
+            // Year spinner
+            int currentYear = calendar.get(Calendar.YEAR);
+            SpinnerNumberModel yearModel = new SpinnerNumberModel(currentYear, 1900, 2100, 1);
+            JSpinner yearSpinner = new JSpinner(yearModel);
+            yearSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            yearSpinner.setPreferredSize(new Dimension(80, 32));
+            // Remove thousands separator
+            JSpinner.NumberEditor editor = new JSpinner.NumberEditor(yearSpinner, "#");
+            yearSpinner.setEditor(editor);
+
+            gbc.gridx = 0; gbc.gridy = 0;
+            content.add(new JLabel("Tháng:"), gbc);
+            gbc.gridx = 1;
+            content.add(monthBox, gbc);
+            gbc.gridx = 0; gbc.gridy = 1;
+            content.add(new JLabel("Năm:"), gbc);
+            gbc.gridx = 1;
+            content.add(yearSpinner, gbc);
+
+            // Buttons
+            JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+            btnRow.setBackground(Color.WHITE);
+            btnRow.setBorder(new EmptyBorder(4, 0, 12, 8));
+
+            JButton btnOk = new JButton("Áp dụng");
+            btnOk.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            btnOk.setBackground(BLUE);
+            btnOk.setForeground(Color.WHITE);
+            btnOk.setFocusPainted(false);
+            btnOk.setBorderPainted(false);
+            btnOk.setOpaque(true);
+            btnOk.setPreferredSize(new Dimension(90, 30));
+            btnOk.addActionListener(ev -> {
+                calendar.set(Calendar.MONTH, monthBox.getSelectedIndex());
+                calendar.set(Calendar.YEAR, (Integer) yearSpinner.getValue());
+                updateCalendar();
+                dialog.dispose();
+            });
+
+            JButton btnCancel = new JButton("Huỷ");
+            btnCancel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            btnCancel.setFocusPainted(false);
+            btnCancel.setPreferredSize(new Dimension(70, 30));
+            btnCancel.addActionListener(ev -> dialog.dispose());
+
+            btnRow.add(btnCancel);
+            btnRow.add(btnOk);
+
+            dialog.add(content, BorderLayout.CENTER);
+            dialog.add(btnRow, BorderLayout.SOUTH);
+            dialog.pack();
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
         }
 
         private JButton mkNavBtn(String t) {

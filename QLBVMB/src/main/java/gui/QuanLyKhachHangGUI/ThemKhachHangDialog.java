@@ -1,12 +1,13 @@
-package gui.QuanLyKhachHang;
+package gui.QuanLyKhachHangGUI;
 
-import bus.CustomerBUS;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import util.AppColor; 
+
+import bus.QuanLyKhachHangBUS.CustomerBUS;
+import util.AppColor;
 
 public class ThemKhachHangDialog extends JDialog {
     private JTextField txtName, txtEmail, txtPhone, txtPassport, txtDOB;
@@ -41,7 +42,7 @@ public class ThemKhachHangDialog extends JDialog {
         body.setBorder(new EmptyBorder(10, 30, 20, 30));
 
         txtName = createTextField("Nhập họ tên (In hoa không dấu)...");
-        
+
         txtName.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -50,16 +51,16 @@ public class ThemKhachHangDialog extends JDialog {
                 txtName.setCaretPosition(pos); // Trả lại vị trí con trỏ để gõ mượt hơn
             }
         });
-        cbxGender = new JComboBox<>(new String[]{"Male", "Female", "Other"});
+        cbxGender = new JComboBox<>(new String[] { "Male", "Female", "Other" });
         cbxGender.setBackground(Color.WHITE);
-        
+
         txtDOB = createTextField("DD/MM/YYYY (VD: 25/12/1990)");
         txtPassport = createTextField("Nhập mã CCCD hoặc Hộ chiếu");
-        
+
         txtEmail = createTextField("email@domain.com");
         txtPhone = createTextField("VD: 0901234567");
-        
-        cbxNationality = new JComboBox<>(new String[]{"Vietnam", "USA", "Japan", "Korea", "Singapore", "Other"});
+
+        cbxNationality = new JComboBox<>(new String[] { "Vietnam", "USA", "Japan", "Korea", "Singapore", "Other" });
         cbxNationality.setBackground(Color.WHITE);
 
         body.add(createInputGroup("HỌ TÊN HÀNH KHÁCH", txtName));
@@ -83,7 +84,8 @@ public class ThemKhachHangDialog extends JDialog {
         JButton btnSave = makeCustomButton("Lưu hồ sơ", AppColor.PRIMARY, Color.WHITE);
         btnSave.addActionListener(e -> saveCustomer());
 
-        footer.add(btnCancel); footer.add(btnSave);
+        footer.add(btnCancel);
+        footer.add(btnSave);
         add(footer, BorderLayout.SOUTH);
     }
 
@@ -98,25 +100,29 @@ public class ThemKhachHangDialog extends JDialog {
 
         // 1. Kiểm tra rỗng
         if (name.isEmpty() || dob.isEmpty() || phone.isEmpty() || passport.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các trường bắt buộc (*)", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ các trường bắt buộc (*)", "Cảnh báo",
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         // 2. Bắt lỗi định dạng Ngày sinh (DD/MM/YYYY)
         if (!dob.matches("^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[012])/\\d{4}$")) {
-            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ!\nVui lòng nhập theo định dạng DD/MM/YYYY.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ngày sinh không hợp lệ!\nVui lòng nhập theo định dạng DD/MM/YYYY.",
+                    "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // 3. Bắt lỗi định dạng Số điện thoại (Chỉ cho phép số)
         if (!phone.matches("^[0-9]+$")) {
-            JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ!\nVui lòng chỉ nhập các ký tự số.", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Số điện thoại không hợp lệ!\nVui lòng chỉ nhập các ký tự số.",
+                    "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
         // 4. Bắt lỗi định dạng Email (Nếu có nhập)
         if (!email.isEmpty() && !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            JOptionPane.showMessageDialog(this, "Email không đúng định dạng!\nVí dụ đúng: name@gmail.com", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Email không đúng định dạng!\nVí dụ đúng: name@gmail.com",
+                    "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -125,16 +131,20 @@ public class ThemKhachHangDialog extends JDialog {
         // ========================================================
         String checkExist = customerBUS.kiemTraTrungLap(email, passport);
         if (checkExist.equals("BOTH")) {
-            JOptionPane.showMessageDialog(this, "Cả Email và CCCD/Passport đều đã tồn tại trong hệ thống!", "Lỗi trùng lặp", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Cả Email và CCCD/Passport đều đã tồn tại trong hệ thống!",
+                    "Lỗi trùng lặp", JOptionPane.ERROR_MESSAGE);
             return;
         } else if (checkExist.equals("EMAIL")) {
-            JOptionPane.showMessageDialog(this, "Email này đã được sử dụng bởi một khách hàng khác!", "Lỗi trùng lặp", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Email này đã được sử dụng bởi một khách hàng khác!", "Lỗi trùng lặp",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         } else if (checkExist.equals("PASSPORT")) {
-            JOptionPane.showMessageDialog(this, "Số CCCD/Passport này đã tồn tại trong hệ thống!", "Lỗi trùng lặp", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Số CCCD/Passport này đã tồn tại trong hệ thống!", "Lỗi trùng lặp",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         } else if (checkExist.equals("ERROR")) {
-            JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu khi kiểm tra thông tin.", "Lỗi hệ thống", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu khi kiểm tra thông tin.", "Lỗi hệ thống",
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -144,33 +154,49 @@ public class ThemKhachHangDialog extends JDialog {
             JOptionPane.showMessageDialog(this, "Tạo hồ sơ khách hàng thành công!");
             dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Lưu thất bại do lỗi hệ thống.", "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lưu thất bại do lỗi hệ thống.", "Lỗi Database",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private JPanel createInputGroup(String label, JComponent input) {
-        JPanel p = new JPanel(new BorderLayout(0, 8)); p.setBackground(Color.WHITE);
-        JLabel lbl = new JLabel(label); lbl.setFont(new Font("Inter", Font.BOLD, 12)); lbl.setForeground(AppColor.TEXT_SECONDARY);
-        p.add(lbl, BorderLayout.NORTH); input.setPreferredSize(new Dimension(0, 40)); p.add(input, BorderLayout.CENTER);
+        JPanel p = new JPanel(new BorderLayout(0, 8));
+        p.setBackground(Color.WHITE);
+        JLabel lbl = new JLabel(label);
+        lbl.setFont(new Font("Inter", Font.BOLD, 12));
+        lbl.setForeground(AppColor.TEXT_SECONDARY);
+        p.add(lbl, BorderLayout.NORTH);
+        input.setPreferredSize(new Dimension(0, 40));
+        p.add(input, BorderLayout.CENTER);
         return p;
     }
-    
+
     private JTextField createTextField(String placeholder) {
-        JTextField txt = new JTextField(); txt.putClientProperty("JTextField.placeholderText", placeholder);
-        txt.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(AppColor.BORDER), new EmptyBorder(0, 10, 0, 10)));
+        JTextField txt = new JTextField();
+        txt.putClientProperty("JTextField.placeholderText", placeholder);
+        txt.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(AppColor.BORDER),
+                new EmptyBorder(0, 10, 0, 10)));
         return txt;
     }
 
     private JButton makeCustomButton(String text, Color bgColor, Color fgColor) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(bgColor); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6); g2.dispose(); super.paintComponent(g);
+                g2.setColor(bgColor);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
+                g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(fgColor);
-        btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(140, 42)); return btn;
+        btn.setFont(new Font("Inter", Font.BOLD, 14));
+        btn.setForeground(fgColor);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(140, 42));
+        return btn;
     }
 }

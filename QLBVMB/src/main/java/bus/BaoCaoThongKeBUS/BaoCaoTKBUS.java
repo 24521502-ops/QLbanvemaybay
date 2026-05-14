@@ -1,9 +1,9 @@
-package bus;
-
-import dao.BaoCaoTKDAO;
+package bus.BaoCaoThongKeBUS;
 
 import java.sql.Date;
 import java.util.List;
+
+import dao.BaoCaoThongKeDAO.BaoCaoTKDAO;
 
 public class BaoCaoTKBUS {
 
@@ -26,9 +26,11 @@ public class BaoCaoTKBUS {
         List<Object[]> list = dao.getBookingStatusStats(tuNgay, denNgay, hangBay);
         // Tính % thực tế
         double total = 0;
-        for (Object[] row : list) total += (double) row[1];
+        for (Object[] row : list)
+            total += (double) row[1];
         if (total > 0) {
-            for (Object[] row : list) row[2] = ((double) row[1] / total) * 100.0;
+            for (Object[] row : list)
+                row[2] = ((double) row[1] / total) * 100.0;
         }
         return list;
     }
@@ -103,5 +105,9 @@ public class BaoCaoTKBUS {
 
     public List<String> getDanhSachTuyenBay() {
         return dao.getDanhSachTuyenBay();
+    }
+
+    public java.sql.Date[] getDateRange() {
+        return dao.getDateRange();
     }
 }

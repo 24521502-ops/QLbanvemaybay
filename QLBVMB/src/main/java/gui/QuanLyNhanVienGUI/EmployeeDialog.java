@@ -1,4 +1,4 @@
-package gui;
+package gui.QuanLyNhanVienGUI;
 
 import dto.EmployeeDTO;
 import util.AppColor;

@@ -1,11 +1,13 @@
-package gui;
+package gui.QuanLyPhanQuyenGUI;
 
-import bus.RoleGroupBUS;
 import dto.RoleGroupDTO;
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
+import bus.QuanLyPhanQuyenBUS.RoleGroupBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
@@ -110,9 +112,17 @@ public class PhanQuyenGUI extends JPanel {
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm kiếm vai trò...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { searchTimer.restart(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { searchTimer.restart(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { searchTimer.restart(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                searchTimer.restart();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                searchTimer.restart();
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                searchTimer.restart();
+            }
         });
         filterCard.add(txtSearch);
 
@@ -146,11 +156,17 @@ public class PhanQuyenGUI extends JPanel {
         btnRefresh.setPreferredSize(new Dimension(110, 36));
         btnRefresh.setMaximumSize(new Dimension(110, 36));
         btnRefresh.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) { btnRefresh.setBackground(new Color(248, 250, 252)); }
-            public void mouseExited(MouseEvent e) { btnRefresh.setBackground(Color.WHITE); }
+            public void mouseEntered(MouseEvent e) {
+                btnRefresh.setBackground(new Color(248, 250, 252));
+            }
+
+            public void mouseExited(MouseEvent e) {
+                btnRefresh.setBackground(Color.WHITE);
+            }
         });
         btnRefresh.addActionListener(e -> {
-            if (searchTimer != null) searchTimer.stop();
+            if (searchTimer != null)
+                searchTimer.stop();
             txtSearch.setText("");
             cboSort.setSelectedIndex(0);
             loadData();
@@ -178,9 +194,12 @@ public class PhanQuyenGUI extends JPanel {
         // Table
 
         // Table
-        String[] cols = {"Tên vai trò", "Mô tả", "Số người dùng", "Thao tác"};
+        String[] cols = { "Tên vai trò", "Mô tả", "Số người dùng", "Thao tác" };
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 3; }
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return c == 3;
+            }
         };
         table = new JTable(tableModel);
         table.setRowHeight(64);
@@ -276,9 +295,20 @@ public class PhanQuyenGUI extends JPanel {
         JPanel pageButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 0));
         pageButtons.setOpaque(false);
         JButton btnPrev = createSmallButton("‹");
-        btnPrev.addActionListener(e -> { if (currentPage > 1) { currentPage--; refreshTable(); } });
+        btnPrev.addActionListener(e -> {
+            if (currentPage > 1) {
+                currentPage--;
+                refreshTable();
+            }
+        });
         JButton btnNext = createSmallButton("›");
-        btnNext.addActionListener(e -> { int max = (int) Math.ceil((double) currentData.size() / pageSize); if (currentPage < max) { currentPage++; refreshTable(); } });
+        btnNext.addActionListener(e -> {
+            int max = (int) Math.ceil((double) currentData.size() / pageSize);
+            if (currentPage < max) {
+                currentPage++;
+                refreshTable();
+            }
+        });
         pageButtons.add(btnPrev);
         pageButtons.add(btnNext);
         paginationPanel.add(pageButtons, BorderLayout.EAST);
@@ -332,15 +362,16 @@ public class PhanQuyenGUI extends JPanel {
         panel.setOpaque(false);
         // Đặt chiều cao cố định để không bị bóp méo nội dung
         panel.setPreferredSize(new Dimension(0, 110));
-        
+
         lblTotalRoles = new JLabel("0");
         lblTotalUsers = new JLabel("0");
         lblLargestGroup = new JLabel("N/A");
-        
+
         panel.add(createKPICard("Tổng số vai trò", lblTotalRoles, new Color(59, 130, 246), new Color(219, 234, 254)));
         panel.add(createKPICard("Tài khoản đã cấp", lblTotalUsers, new Color(16, 185, 129), new Color(209, 250, 229)));
-        panel.add(createKPICard("Nhóm phổ biến nhất", lblLargestGroup, new Color(245, 158, 11), new Color(254, 243, 199)));
-        
+        panel.add(createKPICard("Nhóm phổ biến nhất", lblLargestGroup, new Color(245, 158, 11),
+                new Color(254, 243, 199)));
+
         return panel;
     }
 
@@ -353,11 +384,11 @@ public class PhanQuyenGUI extends JPanel {
                 // Nền thẻ
                 g2.setColor(Color.WHITE);
                 g2.fill(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 16, 16));
-                
+
                 // Viền thẻ
                 g2.setColor(AppColor.BORDER);
                 g2.draw(new java.awt.geom.RoundRectangle2D.Double(0.5, 0.5, getWidth() - 1, getHeight() - 1, 16, 16));
-                
+
                 // Dải màu nhấn (accent line) bên trái để trông hiện đại hơn
                 g2.setColor(iconColor);
                 Shape oldClip = g2.getClip();
@@ -376,17 +407,17 @@ public class PhanQuyenGUI extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                
+
                 int cx = getWidth() / 2;
                 int cy = getHeight() / 2;
-                
+
                 // Nền bo góc (hình 1) cố định kích thước để không bị kéo giãn thành con nhộng
                 g2.setColor(iconBg);
                 g2.fillRoundRect(0, cy - 26, 52, 52, 16, 16);
-                
+
                 g2.setColor(iconColor);
                 g2.setStroke(new BasicStroke(2.2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-                
+
                 if (title.contains("vai trò")) {
                     g2.drawRoundRect(cx - 11, cy - 11, 9, 9, 3, 3);
                     g2.drawRoundRect(cx + 2, cy - 11, 9, 9, 3, 3);
@@ -443,7 +474,8 @@ public class PhanQuyenGUI extends JPanel {
     }
 
     private void applyFilters() {
-        if (currentData == null) return;
+        if (currentData == null)
+            return;
         String kw = txtSearch.getText().trim();
         currentData = roleGroupBUS.search(kw);
         sortData();
@@ -452,7 +484,8 @@ public class PhanQuyenGUI extends JPanel {
     }
 
     private void sortData() {
-        if (currentData == null) return;
+        if (currentData == null)
+            return;
         boolean isAscending = cboSort.getSelectedIndex() == 0;
         currentData.sort((e1, e2) -> {
             String name1 = e1.getNameRoleGroup() != null ? e1.getNameRoleGroup() : "";
@@ -473,14 +506,16 @@ public class PhanQuyenGUI extends JPanel {
             RoleGroupDTO dto = currentData.get(i);
             int userCount = roleGroupBUS.countUsers(dto.getRoleGroupID());
             String desc = getDescriptionForGroup(dto.getNameRoleGroup());
-            tableModel.addRow(new Object[]{dto.getNameRoleGroup(), desc, userCount, dto.getRoleGroupID()});
+            tableModel.addRow(new Object[] { dto.getNameRoleGroup(), desc, userCount, dto.getRoleGroupID() });
         }
         int totalPages = (int) Math.ceil((double) currentData.size() / pageSize);
-        lblPageInfo.setText("Hiển thị " + (start + 1) + "-" + end + " / " + currentData.size() + " (Trang " + currentPage + "/" + totalPages + ")");
+        lblPageInfo.setText("Hiển thị " + (start + 1) + "-" + end + " / " + currentData.size() + " (Trang "
+                + currentPage + "/" + totalPages + ")");
     }
 
     private String getDescriptionForGroup(String name) {
-        if (name == null) return "";
+        if (name == null)
+            return "";
         return switch (name.toUpperCase()) {
             case "ADMIN_GROUP" -> "Toàn quyền truy cập hệ thống và cấu hình lõi.";
             case "STAFF_GROUP" -> "Quản lý lịch trình bay, phân công tổ bay.";
@@ -494,14 +529,18 @@ public class PhanQuyenGUI extends JPanel {
         Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         RoleGroupDialog dlg = new RoleGroupDialog(parentFrame, editDTO);
         dlg.setVisible(true);
-        if (dlg.isConfirmed()) loadData();
+        if (dlg.isConfirmed())
+            loadData();
     }
 
     private void deleteRoleGroup(String roleGroupID) {
-        int opt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa vai trò này?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        int opt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa vai trò này?", "Xác nhận xóa",
+                JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (opt == JOptionPane.YES_OPTION) {
-            if (roleGroupBUS.delete(roleGroupID)) loadData();
-            else JOptionPane.showMessageDialog(this, "Xóa thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            if (roleGroupBUS.delete(roleGroupID))
+                loadData();
+            else
+                JOptionPane.showMessageDialog(this, "Xóa thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -509,20 +548,22 @@ public class PhanQuyenGUI extends JPanel {
 
     private JButton createPrimaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                Color bg = getModel().isPressed() ? AppColor.PRIMARY_ACTIVE : getModel().isRollover() ? AppColor.PRIMARY_HOVER : AppColor.PRIMARY;
+                Color bg = getModel().isPressed() ? AppColor.PRIMARY_ACTIVE
+                        : getModel().isRollover() ? AppColor.PRIMARY_HOVER : AppColor.PRIMARY;
                 g2.setColor(bg);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 10, 10));
-                
+
                 g2.setColor(Color.WHITE);
                 g2.setFont(getFont());
                 FontMetrics fm = g2.getFontMetrics();
-                
+
                 int totalWidth = fm.stringWidth(text);
                 int startX = (getWidth() - totalWidth) / 2;
-                
+
                 Icon icon = getIcon();
                 if (icon != null) {
                     int gap = getIconTextGap();
@@ -531,44 +572,50 @@ public class PhanQuyenGUI extends JPanel {
                     icon.paintIcon(this, g2, startX, (getHeight() - icon.getIconHeight()) / 2);
                     startX += icon.getIconWidth() + gap;
                 }
-                
+
                 g2.drawString(text, startX, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
                 g2.dispose();
             }
         };
         btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setPreferredSize(new Dimension(180, 40));
-        btn.setBorderPainted(false); btn.setContentAreaFilled(false); btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
-
     private JButton createSmallButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
+            @Override
+            protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2.setColor(getModel().isRollover() ? new Color(243, 244, 246) : Color.WHITE);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 8, 8));
                 g2.setColor(AppColor.BORDER);
-                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth()-1, getHeight()-1, 8, 8));
+                g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth() - 1, getHeight() - 1, 8, 8));
                 g2.setColor(AppColor.TEXT_PRIMARY);
                 g2.setFont(new Font("Segoe UI", Font.BOLD, 18));
                 FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(text, (getWidth() - fm.stringWidth(text)) / 2, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+                g2.drawString(text, (getWidth() - fm.stringWidth(text)) / 2,
+                        (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
                 g2.dispose();
             }
         };
         btn.setPreferredSize(new Dimension(36, 36));
-        btn.setBorderPainted(false); btn.setContentAreaFilled(false); btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setContentAreaFilled(false);
+        btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
 
     // Badge renderer for user count
     class BadgeCellRenderer extends DefaultTableCellRenderer {
-        @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
+        @Override
+        public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
             JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 16));
             p.setOpaque(true);
             if (sel) {
@@ -577,7 +624,8 @@ public class PhanQuyenGUI extends JPanel {
                 p.setBackground(r % 2 == 0 ? ROW_EVEN : ROW_ODD);
             }
             JLabel badge = new JLabel(String.valueOf(v), SwingConstants.CENTER) {
-                @Override protected void paintComponent(Graphics g) {
+                @Override
+                protected void paintComponent(Graphics g) {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     g2.setColor(new Color(219, 234, 254));
@@ -615,8 +663,13 @@ public class PhanQuyenGUI extends JPanel {
 
     private static class EditIcon implements Icon {
         private final Color color;
-        public EditIcon(Color color) { this.color = color; }
-        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+
+        public EditIcon(Color color) {
+            this.color = color;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(color);
@@ -632,14 +685,27 @@ public class PhanQuyenGUI extends JPanel {
             g2.drawLine(11, 5, 14, 8);
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 18; }
-        @Override public int getIconHeight() { return 18; }
+
+        @Override
+        public int getIconWidth() {
+            return 18;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 18;
+        }
     }
 
     private static class DeleteIcon implements Icon {
         private final Color color;
-        public DeleteIcon(Color color) { this.color = color; }
-        @Override public void paintIcon(Component c, Graphics g, int x, int y) {
+
+        public DeleteIcon(Color color) {
+            this.color = color;
+        }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(color);
@@ -655,8 +721,16 @@ public class PhanQuyenGUI extends JPanel {
             g2.drawLine(11, 9, 11, 13);
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 18; }
-        @Override public int getIconHeight() { return 18; }
+
+        @Override
+        public int getIconWidth() {
+            return 18;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 18;
+        }
     }
 
     private class ActionRenderer extends DefaultTableCellRenderer {
@@ -673,13 +747,17 @@ public class PhanQuyenGUI extends JPanel {
             btnEdit.setMargin(new Insets(0, 0, 0, 0));
             btnEdit.setBorder(null);
             btnEdit.setPreferredSize(new Dimension(24, 24));
-            btnEdit.setBorderPainted(false); btnEdit.setContentAreaFilled(false); btnEdit.setFocusPainted(false);
-            
+            btnEdit.setBorderPainted(false);
+            btnEdit.setContentAreaFilled(false);
+            btnEdit.setFocusPainted(false);
+
             JButton btnDel = new JButton(new DeleteIcon(AppColor.TEXT_SECONDARY));
             btnDel.setMargin(new Insets(0, 0, 0, 0));
             btnDel.setBorder(null);
             btnDel.setPreferredSize(new Dimension(24, 24));
-            btnDel.setBorderPainted(false); btnDel.setContentAreaFilled(false); btnDel.setFocusPainted(false);
+            btnDel.setBorderPainted(false);
+            btnDel.setContentAreaFilled(false);
+            btnDel.setFocusPainted(false);
 
             panel.add(btnEdit);
             panel.add(btnDel);
@@ -701,7 +779,8 @@ public class PhanQuyenGUI extends JPanel {
             btnEdit.addActionListener(e -> {
                 fireEditingStopped();
                 RoleGroupDTO dto = roleGroupBUS.getByID(roleGroupID);
-                if (dto != null) openDialog(dto);
+                if (dto != null)
+                    openDialog(dto);
             });
 
             JButton btnDel = makeIconBtn(new DeleteIcon(AppColor.TEXT_SECONDARY));
@@ -730,6 +809,7 @@ public class PhanQuyenGUI extends JPanel {
                     b.setOpaque(true);
                     b.setBackground(new Color(226, 232, 240));
                 }
+
                 @Override
                 public void mouseExited(MouseEvent e) {
                     b.setOpaque(false);
@@ -757,8 +837,16 @@ public class PhanQuyenGUI extends JPanel {
             g2.drawLine(8, 8, 12, 12);
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 16; }
-        @Override public int getIconHeight() { return 16; }
+
+        @Override
+        public int getIconWidth() {
+            return 16;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 16;
+        }
     }
 
     private static class RefreshIcon implements Icon {
@@ -768,17 +856,25 @@ public class PhanQuyenGUI extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(AppColor.TEXT_SECONDARY);
             g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            
+
             // Vẽ vòng cung (hở góc trên bên phải)
             g2.drawArc(x + 3, y + 3, 10, 10, 0, -270);
-            
+
             // Vẽ mũi tên ở điểm cuối (vị trí 12h) hướng sang phải
             g2.drawPolyline(new int[] { x + 8, x + 11, x + 8 }, new int[] { y + 0, y + 3, y + 6 }, 3);
-            
+
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 16; }
-        @Override public int getIconHeight() { return 16; }
+
+        @Override
+        public int getIconWidth() {
+            return 16;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 16;
+        }
     }
 
     private static class PlusIcon implements Icon {
@@ -793,7 +889,15 @@ public class PhanQuyenGUI extends JPanel {
             g2.drawLine(8, 3, 8, 13);
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 16; }
-        @Override public int getIconHeight() { return 16; }
+
+        @Override
+        public int getIconWidth() {
+            return 16;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 16;
+        }
     }
 }

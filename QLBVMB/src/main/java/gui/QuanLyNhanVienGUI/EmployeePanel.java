@@ -1,11 +1,13 @@
-package gui;
+package gui.QuanLyNhanVienGUI;
 
-import bus.EmployeeBUS;
 import dto.EmployeeDTO;
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
+import bus.QuanLyNhanVienBUS.EmployeeBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
@@ -638,8 +640,6 @@ public class EmployeePanel extends JPanel {
         return btn;
     }
 
-
-
     private JButton createPageButton(String text) {
         JButton btn = new JButton(text) {
             @Override
@@ -904,7 +904,7 @@ public class EmployeePanel extends JPanel {
             b.setContentAreaFilled(false);
             b.setFocusPainted(false);
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            
+
             // Ngăn việc icon bị dịch chuyển khi nhấn
             b.setPressedIcon(baseIcon);
             b.setMargin(new Insets(0, 0, 0, 0));

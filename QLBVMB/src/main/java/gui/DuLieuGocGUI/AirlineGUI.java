@@ -1,11 +1,13 @@
-package gui;
+package gui.DuLieuGocGUI;
 
-import bus.AirlineBUS;
 import dto.AirlineDTO;
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
+import bus.DuLieuGocBUS.AirlineBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -47,7 +49,7 @@ public class AirlineGUI extends JPanel {
                 BorderFactory.createEmptyBorder(4, 10, 4, 10)));
         searchBox.setPreferredSize(new Dimension(260, 36));
 
-                JLabel lblSearchIcon = new JLabel() {
+        JLabel lblSearchIcon = new JLabel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -62,6 +64,7 @@ public class AirlineGUI extends JPanel {
                 g2.drawLine(cx + s - 2, cy + s - 2, cx + s + 3, cy + s + 3);
                 g2.dispose();
             }
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(24, 24);
@@ -905,5 +908,3 @@ public class AirlineGUI extends JPanel {
         }
     }
 }
-
-

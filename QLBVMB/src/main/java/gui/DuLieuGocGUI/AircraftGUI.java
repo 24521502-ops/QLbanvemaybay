@@ -1,11 +1,13 @@
-package gui;
+package gui.DuLieuGocGUI;
 
-import bus.AircraftBUS;
 import dto.AircraftDTO;
 import util.AppColor;
 
 import javax.swing.*;
 import javax.swing.table.*;
+
+import bus.DuLieuGocBUS.AircraftBUS;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;

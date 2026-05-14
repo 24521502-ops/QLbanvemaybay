@@ -1,7 +1,8 @@
 package text;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import gui.EmployeePanel;
+
+import gui.QuanLyNhanVienGUI.EmployeePanel;
 
 import javax.swing.*;
 
