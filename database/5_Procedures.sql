@@ -275,33 +275,62 @@ END;
 
 
 -- ================================= ĐĂNG KÝ TÀI KHOẢN AN TOÀN (Sửa lại chuẩn Database Mới) =================================
+-- ================================= ĐĂNG KÝ TÀI KHOẢN AN TOÀN =================================
 CREATE OR REPLACE PROCEDURE SP_REGISTER_ACCOUNT (
-    p_FullName IN VARCHAR2, p_Email IN VARCHAR2, p_Phone IN VARCHAR2, p_Password IN VARCHAR2
+    p_FullName IN VARCHAR2,
+    p_Email IN VARCHAR2,
+    p_Phone IN VARCHAR2,
+    p_Password IN VARCHAR2
 ) AS
     v_UserID VARCHAR2(20);
     v_AccountID VARCHAR2(20);
     v_HashedPassword VARCHAR2(256);
     v_CheckEmail NUMBER;
 BEGIN
-    -- 1. Check trùng Email
-    SELECT COUNT(*) INTO v_CheckEmail FROM USERS WHERE Email = p_Email;
-    IF v_CheckEmail > 0 THEN RAISE_APPLICATION_ERROR(-20010, 'Lỗi: Email này đã được đăng ký!'); END IF;
+    -- Check Email
+    SELECT COUNT(*)
+    INTO v_CheckEmail
+    FROM USERS
+    WHERE Email = p_Email;
 
-    v_HashedPassword := STANDARD_HASH(p_Password, 'SHA256');
+    IF v_CheckEmail > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20010,
+            'Lỗi: Email này đã được đăng ký!'
+        );
+    END IF;
 
-    -- 2. Tạo User (Lấy UserID)
-    INSERT INTO USERS (FullName, Email) VALUES (p_FullName, p_Email) RETURNING UserID INTO v_UserID;
+    SELECT TO_CHAR(ORA_HASH(p_Password)) 
+    INTO v_HashedPassword 
+    FROM DUAL;
 
-    -- 3. Tạo Account dựa trên UserID (Lấy AccountID)
-    INSERT INTO ACCOUNT (UserID, UserName, Password) VALUES (v_UserID, p_Email, v_HashedPassword) RETURNING AccountID INTO v_AccountID;
+    -- Insert User
+    INSERT INTO USERS (FullName, Email)
+    VALUES (p_FullName, p_Email)
+    RETURNING UserID INTO v_UserID;
 
-    -- 4. Tạo thông tin Customer rỗng ban đầu gắn với Account (để lưu Phone)
-    INSERT INTO CUSTOMER (AccountID, FullName, Phone, Email) VALUES (v_AccountID, p_FullName, p_Phone, p_Email);
+    -- Insert Account
+    INSERT INTO ACCOUNT (UserID, UserName, Password)
+    VALUES (v_UserID, p_Email, v_HashedPassword)
+    RETURNING AccountID INTO v_AccountID;
+
+    -- Insert Customer
+    INSERT INTO CUSTOMER (
+        AccountID,
+        FullName,
+        Phone,
+        Email
+    )
+    VALUES (
+        v_AccountID,
+        p_FullName,
+        p_Phone,
+        p_Email
+    );
 
     COMMIT;
 END;
 /
-
 -- ================================= Bảng CUSTOMER =================================
 -- Thêm hồ sơ khách hàng mới
 CREATE OR REPLACE PROCEDURE SP_ADD_CUSTOMER (
@@ -648,6 +677,31 @@ END;
 CREATE OR REPLACE PROCEDURE SP_REMOVE_GROUP_FROM_ACCOUNT (p_AccountID IN VARCHAR2, p_RoleGroupID IN VARCHAR2) AS
 BEGIN
     DELETE FROM ACCOUNT_ASSIGN_ROLE_GROUP WHERE AccountID = p_AccountID AND RoleGroupID = p_RoleGroupID;
+    COMMIT;
+END;
+/
+    
+CREATE OR REPLACE PROCEDURE SP_CANCEL_TICKET_FINAL (
+    p_TicketID IN VARCHAR2
+) AS
+    v_BookingID VARCHAR2(20);
+    v_CustomerID VARCHAR2(20);
+    v_RefundAmount NUMBER;
+BEGIN
+    SELECT t.BookingID, b.CustomerID INTO v_BookingID, v_CustomerID
+    FROM TICKET t JOIN BOOKING b ON t.BookingID = b.BookingID
+    WHERE t.TicketID = p_TicketID;
+
+    v_RefundAmount := FUNC_CALCULATE_REFUND(p_TicketID);
+
+    UPDATE TICKET SET TicketStatus = 'CANCELLED' WHERE TicketID = p_TicketID;
+
+    IF v_RefundAmount > 0 THEN
+        INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
+        VALUES (v_CustomerID, v_BookingID, 'REFUND', v_RefundAmount, 'Hoàn tiền vé ' || p_TicketID);
+        
+        UPDATE BOOKING SET TotalAmount = TotalAmount - v_RefundAmount WHERE BookingID = v_BookingID;
+    END IF;
     COMMIT;
 END;
 /
