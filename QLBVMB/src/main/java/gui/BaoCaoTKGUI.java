@@ -777,23 +777,27 @@ public class BaoCaoTKGUI extends JPanel {
             g2.fillOval(cx - hole / 2, cy - hole / 2 - 2, hole, hole);
 
             // Legend bên phải
-            int lx = x0 + diameter + 14;
-            int ly = y0 + 10;
-            g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            int lx = x0 + diameter + 24;
+            int itemSpacing = 38;
+            int totalLegendHeight = data.size() * itemSpacing;
+            int ly = y0 + (diameter - totalLegendHeight) / 2 + 10;
+            if (ly < y0 + 5) ly = y0 + 5;
+            
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
             for (int i = 0; i < data.size(); i++) {
                 Object[] row = data.get(i);
                 String cls = (String) row[0];
                 double pct = ((Number) row[1]).doubleValue() / total * 100; // Tính % từ tổng
 
                 g2.setColor(PIE_COLORS[i % PIE_COLORS.length]);
-                g2.fillRoundRect(lx, ly + i * 25, 12, 12, 4, 4);
+                g2.fillRoundRect(lx, ly + i * itemSpacing, 16, 16, 4, 4);
 
                 g2.setColor(DARK);
-                g2.drawString(cls, lx + 18, ly + i * 25 + 10);
-                g2.setFont(new Font("Segoe UI", Font.PLAIN, 10));
+                g2.drawString(cls, lx + 26, ly + i * itemSpacing + 13);
+                g2.setFont(new Font("Segoe UI", Font.PLAIN, 12));
                 g2.setColor(GRAY);
-                g2.drawString(String.format("%.1f%%", pct), lx + 18, ly + i * 25 + 21);
-                g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                g2.drawString(String.format("%.1f%%", pct), lx + 26, ly + i * itemSpacing + 29);
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
             }
             g2.dispose();
         }
