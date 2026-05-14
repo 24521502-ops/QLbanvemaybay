@@ -13,10 +13,13 @@ public class DBConnection {
     public static Connection getConnection() {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            return DriverManager.getConnection(URL, USER, PASS);
+            Connection conn = DriverManager.getConnection(URL, USER, PASS);
+            if (conn != null) {
+                System.out.println(">>> KẾT NỐI DATABASE THÀNH CÔNG!");
+            }
+            return conn;
         } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("Lỗi kết nối CSDL! Hãy kiểm tra lại DBConnection.java");
-            e.printStackTrace();
+            System.err.println("!!! LỖI KẾT NỐI CSDL: " + e.getMessage());
             return null;
         }
     }
