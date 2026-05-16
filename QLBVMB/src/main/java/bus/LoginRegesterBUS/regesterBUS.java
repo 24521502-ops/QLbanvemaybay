@@ -1,4 +1,4 @@
-﻿package bus.LoginRegesterBUS;
+package bus.LoginRegesterBUS;
 
 import dao.LoginRegesterDAO.loginDAO;
 import dao.LoginRegesterDAO.regesterDAO;

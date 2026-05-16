@@ -1,4 +1,4 @@
-﻿package dao.LoginRegesterDAO;
+package dao.LoginRegesterDAO;
 
 import util.DBConnection;
 
