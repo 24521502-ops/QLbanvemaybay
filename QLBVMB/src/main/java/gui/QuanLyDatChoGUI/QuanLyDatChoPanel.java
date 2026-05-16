@@ -1,8 +1,7 @@
 package gui.QuanLyDatChoGUI;
 
 import bus.QuanLyDatChoBUS.BookingBUS;
-import gui.QuanLyDatChoGUI.SuaDatChoDialog;
-import gui.QuanLyDatChoGUI.ThemDatChoDialog;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.RoundRectangle2D;
