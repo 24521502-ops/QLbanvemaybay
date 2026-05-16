@@ -21,6 +21,9 @@ public class QuanLyVePanel extends JPanel {
     private TableRowSorter<DefaultTableModel> rowSorter; 
     private VeBUS veBUS; 
 
+    // Màu Zebra chuẩn y hệt bản Quản lý Chuyến bay
+    private final Color ZEBRA_COLOR = new Color(252, 252, 253); 
+
     public QuanLyVePanel() {
         veBUS = new VeBUS();
         initComponents();
@@ -49,7 +52,6 @@ public class QuanLyVePanel extends JPanel {
         lblPaidTicket = new JLabel("0");
         lblCancelledTicket = new JLabel("0");
         
-        // Thêm tính năng click vào thẻ thống kê
         statsPanel.add(createClickableStatCard("TỔNG VÉ ĐÃ ĐẶT", lblTotalTicket, AppColor.PRIMARY, "ALL"));
         statsPanel.add(createClickableStatCard("ĐÃ THANH TOÁN (PAID)", lblPaidTicket, AppColor.SUCCESS, "PAID"));
         statsPanel.add(createClickableStatCard("ĐÃ HỦY (CANCELLED)", lblCancelledTicket, AppColor.ERROR, "CANCELLED"));
@@ -63,6 +65,7 @@ public class QuanLyVePanel extends JPanel {
         txtSearch.setPreferredSize(new Dimension(350, 42));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(AppColor.BORDER), new EmptyBorder(8, 15, 8, 15)));
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm theo mã vé, tên khách hàng...");
+        txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon()); 
         txtSearch.putClientProperty("JComponent.roundRect", true);
         txtSearch.addKeyListener(new KeyAdapter() {
             @Override
@@ -73,8 +76,8 @@ public class QuanLyVePanel extends JPanel {
             }
         });
 
-        JPanel pnlRightTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        pnlRightTools.setOpaque(false);
+        JPanel pnlLeftTools = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        pnlLeftTools.setOpaque(false);
 
         JButton btnRefresh = makeSecondaryButton("Làm mới");
         btnRefresh.addActionListener(e -> {
@@ -93,7 +96,6 @@ public class QuanLyVePanel extends JPanel {
         JMenuItem itemPriceDesc = createMenuItem("Giá vé (Giảm dần)");
         JMenuItem itemStatus = createMenuItem("Trạng thái vé");
         
-        // Cập nhật lại Index Sắp xếp: Giá vé là 6, Trạng thái là 7
         itemPriceAsc.addActionListener(e -> applySorting(6, SortOrder.ASCENDING));
         itemPriceDesc.addActionListener(e -> applySorting(6, SortOrder.DESCENDING));
         itemStatus.addActionListener(e -> applySorting(7, SortOrder.ASCENDING));
@@ -105,11 +107,11 @@ public class QuanLyVePanel extends JPanel {
 
         btnSort.addActionListener(e -> sortMenu.show(btnSort, 0, btnSort.getHeight() + 2));
 
-        pnlRightTools.add(txtSearch);
-        pnlRightTools.add(btnRefresh);
-        pnlRightTools.add(btnSort);
+        pnlLeftTools.add(txtSearch);
+        pnlLeftTools.add(btnRefresh);
+        pnlLeftTools.add(btnSort);
         
-        toolPanel.add(pnlRightTools, BorderLayout.EAST);
+        toolPanel.add(pnlLeftTools, BorderLayout.WEST);
         
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
@@ -119,9 +121,6 @@ public class QuanLyVePanel extends JPanel {
 
         add(topPanel, BorderLayout.NORTH);
 
-        // ==========================================
-        // 2. BẢNG DANH SÁCH VÉ (ĐÃ THÊM 2 CỘT MỚI)
-        // ==========================================
         JPanel panelTableCard = new JPanel(new BorderLayout());
         panelTableCard.setBackground(AppColor.SURFACE);
         panelTableCard.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
@@ -142,9 +141,6 @@ public class QuanLyVePanel extends JPanel {
 
         add(panelTableCard, BorderLayout.CENTER);
 
-        // ==========================================
-        // 3. FOOTER: NÚT HỦY VÉ
-        // ==========================================
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
         footerPanel.setOpaque(false);
         JButton btnRefund = makeDestructiveButton("Hoàn/Hủy vé");
@@ -158,7 +154,7 @@ public class QuanLyVePanel extends JPanel {
             
             int modelRow = table.convertRowIndexToModel(row);
             String ticketID = tableModel.getValueAt(modelRow, 0).toString(); 
-            String status = tableModel.getValueAt(modelRow, 7).toString(); // Cột trạng thái giờ là 7
+            String status = tableModel.getValueAt(modelRow, 7).toString(); 
 
             if (status.equalsIgnoreCase("Đã hủy") || status.equalsIgnoreCase("CANCELLED")) {
                 JOptionPane.showMessageDialog(this, "Vé này đã bị hủy từ trước rồi!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
@@ -210,7 +206,7 @@ public class QuanLyVePanel extends JPanel {
         for (Object[] row : listVe) {
             tableModel.addRow(row);
             total++;
-            String status = row[7] != null ? row[7].toString().toUpperCase() : ""; // Trạng thái ở cột 7
+            String status = row[7] != null ? row[7].toString().toUpperCase() : ""; 
             if (status.contains("XÁC NHẬN") || status.contains("LÊN MÁY BAY") || status.contains("PAID")) paid++;
             if (status.contains("HỦY") || status.contains("CANCELLED")) cancelled++;
         }
@@ -220,25 +216,33 @@ public class QuanLyVePanel extends JPanel {
         lblCancelledTicket.setText(String.valueOf(cancelled));
     }
 
+    // ===============================================
+    // LỘT XÁC GIAO DIỆN BẢNG Y HỆT QUẢN LÝ CHUYẾN BAY (ĐÃ SỬA LỖI ĐƯỜNG KẺ NGANG)
+    // ===============================================
     private void customizeTable() {
-        table.setRowHeight(65); 
-        table.setFont(new Font("Inter", Font.PLAIN, 14));
+        table.setRowHeight(55); 
+        table.setFont(new Font("Inter", Font.PLAIN, 14)); 
+        
+        // TẮT GRID MẶC ĐỊNH ĐỂ TỰ VẼ ĐƯỜNG KẺ XỊN HƠN
         table.setShowVerticalLines(false);
-        table.setShowHorizontalLines(true);
+        table.setShowHorizontalLines(false); 
         table.setGridColor(AppColor.BORDER);
-        table.setSelectionBackground(new Color(248, 250, 252)); 
-        table.setSelectionForeground(AppColor.TEXT_PRIMARY);
+        table.setIntercellSpacing(new Dimension(0, 0)); 
+        table.setSelectionBackground(new Color(243, 244, 246)); 
+        table.setSelectionForeground(AppColor.PRIMARY);
 
         JTableHeader header = table.getTableHeader();
-        header.setPreferredSize(new Dimension(header.getWidth(), 50));
+        header.setPreferredSize(new Dimension(header.getWidth(), 48));
         header.setBackground(AppColor.SURFACE);
+        header.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, AppColor.BORDER));
         
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER), new EmptyBorder(0, 20, 0, 20)));
+                setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15)); 
                 setForeground(AppColor.TEXT_SECONDARY);
-                setFont(new Font("Inter", Font.BOLD, 13));
+                setFont(new Font("Inter", Font.BOLD, 12));
+                setBackground(AppColor.SURFACE);
                 return this;
             }
         };
@@ -247,39 +251,52 @@ public class QuanLyVePanel extends JPanel {
         DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer() {
             @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
                 super.getTableCellRendererComponent(t, v, s, f, r, c);
-                setBorder(new EmptyBorder(0, 20, 0, 20));
+                setOpaque(true); 
+                
+                // VẼ ĐƯỜNG VIỀN 1PX DƯỚI ĐÁY MỖI Ô
+                setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
+                    new EmptyBorder(0, 15, 0, 15)
+                ));
+                
+                if (!s) {
+                    setBackground(r % 2 == 0 ? AppColor.SURFACE : ZEBRA_COLOR);
+                }
+
                 setForeground(AppColor.TEXT_PRIMARY);
-                setFont(new Font("Inter", Font.BOLD, 14)); 
+                
+                if (c == 0 || c == 1) {
+                    setFont(new Font("Inter", Font.BOLD, 14));
+                } else {
+                    setFont(new Font("Inter", Font.PLAIN, 14));
+                }
                 return this;
             }
         };
         
-        // Đặt Renderer cho từng cột
         table.getColumnModel().getColumn(0).setCellRenderer(defaultRenderer); 
         table.getColumnModel().getColumn(1).setCellRenderer(defaultRenderer); 
-        table.getColumnModel().getColumn(3).setCellRenderer(defaultRenderer); // Chuyến bay
-        table.getColumnModel().getColumn(4).setCellRenderer(defaultRenderer); // Ngày bay
-        table.getColumnModel().getColumn(6).setCellRenderer(defaultRenderer); // Giá vé
+        table.getColumnModel().getColumn(3).setCellRenderer(defaultRenderer); 
+        table.getColumnModel().getColumn(4).setCellRenderer(defaultRenderer); 
+        table.getColumnModel().getColumn(6).setCellRenderer(defaultRenderer); 
 
         table.getColumnModel().getColumn(2).setCellRenderer(new PassengerRenderer()); 
-        table.getColumnModel().getColumn(5).setCellRenderer(new BadgeRenderer()); // Hạng vé
-        table.getColumnModel().getColumn(7).setCellRenderer(new BadgeRenderer()); // Trạng thái
+        table.getColumnModel().getColumn(5).setCellRenderer(new BadgeRenderer()); 
+        table.getColumnModel().getColumn(7).setCellRenderer(new BadgeRenderer()); 
         table.getColumnModel().getColumn(8).setCellRenderer(new ActionRenderer());  
         table.getColumnModel().getColumn(8).setCellEditor(new ActionEditor());       
         
-        // Chỉnh độ rộng các cột cho cân đối (Nới rộng để không bị ... ở Tiêu đề)
-        table.getColumnModel().getColumn(0).setPreferredWidth(80);  // Số vé 
-        table.getColumnModel().getColumn(1).setPreferredWidth(100); // Mã đặt chỗ
-        table.getColumnModel().getColumn(2).setPreferredWidth(190); // Hành khách
-        table.getColumnModel().getColumn(3).setPreferredWidth(110); // Chuyến bay 
-        table.getColumnModel().getColumn(4).setPreferredWidth(110); // Ngày bay 
-        table.getColumnModel().getColumn(5).setPreferredWidth(130); // Hạng vé 
-        table.getColumnModel().getColumn(6).setPreferredWidth(140); // Giá vé 
-        table.getColumnModel().getColumn(7).setPreferredWidth(160); // Trạng thái 
-        table.getColumnModel().getColumn(8).setPreferredWidth(100); // Thao tác 
+        table.getColumnModel().getColumn(0).setPreferredWidth(80);  
+        table.getColumnModel().getColumn(1).setPreferredWidth(100); 
+        table.getColumnModel().getColumn(2).setPreferredWidth(190); 
+        table.getColumnModel().getColumn(3).setPreferredWidth(110); 
+        table.getColumnModel().getColumn(4).setPreferredWidth(110); 
+        table.getColumnModel().getColumn(5).setPreferredWidth(130); 
+        table.getColumnModel().getColumn(6).setPreferredWidth(140); 
+        table.getColumnModel().getColumn(7).setPreferredWidth(160); 
+        table.getColumnModel().getColumn(8).setPreferredWidth(100); 
     }
 
-    // --- Các Component hỗ trợ ---
     private JPanel createClickableStatCard(String title, JLabel lblCount, Color themeColor, String filterType) {
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(AppColor.SURFACE);
@@ -288,40 +305,37 @@ public class QuanLyVePanel extends JPanel {
         lblCount.setFont(new Font("Inter", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
         card.add(lblT, BorderLayout.NORTH); card.add(lblCount, BorderLayout.CENTER); 
         
-        // Sự kiện click để lọc
         card.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
+            @Override public void mouseClicked(MouseEvent e) {
                 if (filterType.equals("ALL")) rowSorter.setRowFilter(null);
                 else if (filterType.equals("PAID")) rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Xác nhận|Lên máy bay", 7));
                 else if (filterType.equals("CANCELLED")) rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Hủy", 7));
             }
-            @Override
-            public void mouseEntered(MouseEvent e) { 
+            @Override public void mouseEntered(MouseEvent e) { 
                 card.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
-                card.setBackground(new Color(248, 250, 252)); // Hiệu ứng sáng nhẹ khi di chuột
+                card.setBackground(ZEBRA_COLOR); 
             }
-            @Override
-            public void mouseExited(MouseEvent e) { 
+            @Override public void mouseExited(MouseEvent e) { 
                 card.setBackground(AppColor.SURFACE); 
             }
         });
         return card;
     }
 
-    private JPanel createStatCard(String title, JLabel lblCount, Color themeColor) {
-        return createClickableStatCard(title, lblCount, themeColor, "ALL");
-    }
-
     class PassengerRenderer extends JPanel implements TableCellRenderer {
         private String initials = "";
         private String fullName = "";
         private Color avatarBg = new Color(30, 41, 59);
-        public PassengerRenderer() { setOpaque(true); setBackground(Color.WHITE); }
+        
+        public PassengerRenderer() { 
+            setOpaque(true); 
+            // VẼ ĐƯỜNG VIỀN 1PX DƯỚI ĐÁY
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER));
+        }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : AppColor.SURFACE);
+            setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? AppColor.SURFACE : ZEBRA_COLOR));
             if (value != null) {
                 fullName = value.toString();
                 String[] words = fullName.split(" ");
@@ -342,37 +356,43 @@ public class QuanLyVePanel extends JPanel {
             int size = 36;
             int y = (getHeight() - size) / 2;
             g2.setColor(avatarBg);
-            g2.fill(new Ellipse2D.Double(20, y, size, size));
+            g2.fill(new Ellipse2D.Double(15, y, size, size)); 
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("Inter", Font.BOLD, 13));
             FontMetrics fm = g2.getFontMetrics();
-            int txtX = 20 + (size - fm.stringWidth(initials)) / 2;
+            int txtX = 15 + (size - fm.stringWidth(initials)) / 2;
             int txtY = y + ((size - fm.getHeight()) / 2) + fm.getAscent();
             g2.drawString(initials, txtX, txtY);
+            
             g2.setColor(AppColor.TEXT_PRIMARY);
-            g2.setFont(new Font("Inter", Font.PLAIN, 14));
-            g2.drawString(fullName, 20 + size + 15, y + 22);
+            g2.setFont(new Font("Inter", Font.PLAIN, 14)); 
+            g2.drawString(fullName, 15 + size + 15, y + 23);
             g2.dispose();
         }
     }
 
     class BadgeRenderer extends JPanel implements TableCellRenderer {
         private String text = "";
-        private Color bgColor = Color.WHITE;
-        private Color fgColor = Color.BLACK;
-        public BadgeRenderer() { setOpaque(true); }
+        private Color badgeBgColor = Color.WHITE;
+        private Color badgeFgColor = Color.BLACK;
+        
+        public BadgeRenderer() { 
+            setOpaque(true); 
+            // VẼ ĐƯỜNG VIỀN 1PX DƯỚI ĐÁY
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER));
+        }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : AppColor.SURFACE);
+            setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? AppColor.SURFACE : ZEBRA_COLOR));
             if (value != null) {
                 text = value.toString();
-                if (text.equalsIgnoreCase("Phổ thông") || text.equalsIgnoreCase("Phổ thông đặc biệt")) { bgColor = new Color(224, 231, 255); fgColor = new Color(55, 65, 81); } 
-                else if (text.equalsIgnoreCase("Thương gia") || text.equalsIgnoreCase("Hạng nhất")) { bgColor = new Color(219, 234, 254); fgColor = new Color(29, 78, 216); } 
-                else if (text.equalsIgnoreCase("Đã xác nhận") || text.equalsIgnoreCase("Đã lên máy bay")) { bgColor = new Color(209, 250, 229); fgColor = new Color(6, 95, 70); } 
-                else if (text.equalsIgnoreCase("Chờ thanh toán")) { bgColor = new Color(254, 243, 199); fgColor = new Color(146, 64, 14); } 
-                else if (text.equalsIgnoreCase("Đã hủy")) { bgColor = new Color(254, 226, 226); fgColor = new Color(153, 27, 27); }
-                else { bgColor = new Color(243, 244, 246); fgColor = new Color(75, 85, 99); }
+                if (text.equalsIgnoreCase("Phổ thông") || text.equalsIgnoreCase("Phổ thông đặc biệt")) { badgeBgColor = new Color(224, 231, 255); badgeFgColor = new Color(55, 65, 81); } 
+                else if (text.equalsIgnoreCase("Thương gia") || text.equalsIgnoreCase("Hạng nhất")) { badgeBgColor = new Color(219, 234, 254); badgeFgColor = new Color(29, 78, 216); } 
+                else if (text.equalsIgnoreCase("Đã xác nhận") || text.equalsIgnoreCase("Đã lên máy bay")) { badgeBgColor = new Color(209, 250, 229); badgeFgColor = new Color(6, 95, 70); } 
+                else if (text.equalsIgnoreCase("Chờ thanh toán")) { badgeBgColor = new Color(254, 243, 199); badgeFgColor = new Color(146, 64, 14); } 
+                else if (text.equalsIgnoreCase("Đã hủy")) { badgeBgColor = new Color(254, 226, 226); badgeFgColor = new Color(153, 27, 27); }
+                else { badgeBgColor = new Color(243, 244, 246); badgeFgColor = new Color(75, 85, 99); }
             } else { text = ""; }
             return this;
         }
@@ -388,21 +408,26 @@ public class QuanLyVePanel extends JPanel {
             int paddingX = 12, paddingY = 6;
             int width = fm.stringWidth(text) + paddingX * 2;
             int height = fm.getHeight() + paddingY * 2;
-            int x = 20; 
+            int x = 15; 
             int y = (getHeight() - height) / 2;
-            g2.setColor(bgColor);
+            g2.setColor(badgeBgColor);
             g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8));
-            g2.setColor(fgColor);
+            g2.setColor(badgeFgColor);
             g2.drawString(text, x + paddingX, y + fm.getAscent() + paddingY - 1);
             g2.dispose();
         }
     }
 
     class ActionRenderer extends JPanel implements TableCellRenderer {
-        public ActionRenderer() { setOpaque(true); }
+        public ActionRenderer() { 
+            setOpaque(true); 
+            // VẼ ĐƯỜNG VIỀN 1PX DƯỚI ĐÁY
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER));
+        }
+        
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : AppColor.SURFACE);
+            setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? AppColor.SURFACE : ZEBRA_COLOR));
             return this;
         }
         @Override
@@ -437,7 +462,7 @@ public class QuanLyVePanel extends JPanel {
             fireEditingStopped();
             int modelRow = table.convertRowIndexToModel(currentRow);
             
-            if (e.getX() >= 10 && e.getX() <= 35) { // Click Sửa
+            if (e.getX() >= 10 && e.getX() <= 35) { 
                 String status = tableModel.getValueAt(modelRow, 7).toString();
                 if (status.equalsIgnoreCase("Đã lên máy bay") || status.equalsIgnoreCase("CHECKED-IN")) {
                     JOptionPane.showMessageDialog(panel, "Hành khách đã lên máy bay!\nKhông thể chỉnh sửa hay nâng hạng nữa.", "Từ chối thao tác", JOptionPane.WARNING_MESSAGE);
@@ -451,7 +476,7 @@ public class QuanLyVePanel extends JPanel {
                 new ChinhSuaVeDialog((Frame) SwingUtilities.getWindowAncestor(panel), true, ticketID).setVisible(true);
                 loadRealData(); 
                 
-            } else if (e.getX() >= 40 && e.getX() <= 65) { // Click Xem
+            } else if (e.getX() >= 40 && e.getX() <= 65) { 
                 String ticketID = tableModel.getValueAt(modelRow, 0) != null ? tableModel.getValueAt(modelRow, 0).toString() : ""; 
                 new ChiTietVeDialog((Frame) SwingUtilities.getWindowAncestor(panel), true, ticketID).setVisible(true);
             }
@@ -460,17 +485,6 @@ public class QuanLyVePanel extends JPanel {
         @Override public void mouseReleased(MouseEvent e) {}
         @Override public void mouseEntered(MouseEvent e) {}
         @Override public void mouseExited(MouseEvent e) {}
-    }
-
-    private JButton makePrimaryButton(String text) {
-        JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(AppColor.PRIMARY); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8); g2.dispose(); super.paintComponent(g);
-            }
-        };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(130, 42)); return btn;
     }
 
     private JButton makeSecondaryButton(String text) {
@@ -494,6 +508,22 @@ public class QuanLyVePanel extends JPanel {
             }
         };
         btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(140, 42)); return btn;
+    }
+
+    private static class SearchIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(AppColor.TEXT_SECONDARY);
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawOval(x + 4, y + 4, 8, 8);
+            g2.drawLine(x + 10, y + 10, x + 14, y + 14);
+            g2.dispose();
+        }
+
+        @Override public int getIconWidth() { return 20; }
+        @Override public int getIconHeight() { return 20; }
     }
 
     public static void main(String[] args) {
