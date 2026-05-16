@@ -4,6 +4,7 @@ import dto.EmployeeDTO;
 import util.AppColor;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
 
 import bus.QuanLyNhanVienBUS.EmployeeBUS;
@@ -20,14 +21,12 @@ public class EmployeePanel extends JPanel {
     private JTable table;
     private DefaultTableModel tableModel;
     private JComboBox<String> cboFilterPosition;
-    private JLabel lblPagination;
-    private int currentPage = 1;
-    private static final int ROWS_PER_PAGE = 6;
+
+    // Đã bỏ các biến phân trang, thêm biến lưu trạng thái sắp xếp
     private List<EmployeeDTO> allData = new ArrayList<>();
     private List<EmployeeDTO> currentData = new ArrayList<>();
-    private JPanel pageButtonsPanel;
     private JTextField txtSearch;
-    private JComboBox<String> cboSort;
+    private boolean isAscendingSort = true;
     private boolean isUpdatingFilters = false;
 
     // Dashboards
@@ -95,7 +94,7 @@ public class EmployeePanel extends JPanel {
                 new Color(254, 252, 232)));
 
         // ===== FILTER CARD =====
-        JPanel filterCard = new JPanel() {
+        JPanel filterCard = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -107,17 +106,22 @@ public class EmployeePanel extends JPanel {
                 g2.dispose();
             }
         };
-        filterCard.setLayout(new BoxLayout(filterCard, BoxLayout.X_AXIS));
         filterCard.setOpaque(false);
         filterCard.setBorder(BorderFactory.createEmptyBorder(12, 20, 12, 20));
 
+        // Nhóm công cụ bên Trái
+        JPanel pnlLeftTools = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
+        pnlLeftTools.setOpaque(false);
+
         // Search Field
         txtSearch = new JTextField();
-        txtSearch.setPreferredSize(new Dimension(200, 36));
-        txtSearch.setMaximumSize(new Dimension(400, 36));
-        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtSearch.setPreferredSize(new Dimension(300, 42));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm kiếm nhân viên...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(AppColor.BORDER),
+                new EmptyBorder(8, 12, 8, 12)));
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
                 applyFilters();
@@ -131,22 +135,19 @@ public class EmployeePanel extends JPanel {
                 applyFilters();
             }
         });
-        filterCard.add(txtSearch);
-        filterCard.add(Box.createHorizontalStrut(20));
 
         // Position Filter
         cboFilterPosition = new JComboBox<>();
         cboFilterPosition.addItem("Tất cả chức vụ");
-        cboFilterPosition.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cboFilterPosition.setPreferredSize(new Dimension(170, 36));
-        cboFilterPosition.setMaximumSize(new Dimension(200, 36));
+        cboFilterPosition.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        cboFilterPosition.setPreferredSize(new Dimension(180, 42));
         cboFilterPosition.setBackground(AppColor.SURFACE);
         cboFilterPosition.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
                     boolean cellHasFocus) {
                 String display = (value == null) ? "" : value.toString();
-                if (index == -1) { // Selected item display
+                if (index == -1) {
                     if (display.equals("Tất cả chức vụ"))
                         display = "Chức vụ: Tất cả";
                     else
@@ -156,50 +157,51 @@ public class EmployeePanel extends JPanel {
             }
         });
         cboFilterPosition.addActionListener(e -> applyFilters());
-        filterCard.add(cboFilterPosition);
-        filterCard.add(Box.createHorizontalStrut(20));
-
-        // Sort Dropdown
-        cboSort = new JComboBox<>(new String[] { "Sắp xếp: Tên (A-Z)", "Sắp xếp: Tên (Z-A)" });
-        cboSort.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        cboSort.setPreferredSize(new Dimension(160, 36));
-        cboSort.setMaximumSize(new Dimension(200, 36));
-        cboSort.setBackground(AppColor.SURFACE);
-        cboSort.addActionListener(e -> applyFilters());
-        filterCard.add(cboSort);
-
-        filterCard.add(Box.createHorizontalGlue()); // Push refresh button to the right
 
         // Refresh Button
-        JButton btnRefresh = new JButton(" Làm mới", new RefreshIcon());
-        btnRefresh.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnRefresh.setForeground(AppColor.TEXT_SECONDARY);
-        btnRefresh.setBackground(Color.WHITE);
-        btnRefresh.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(AppColor.BORDER),
-                BorderFactory.createEmptyBorder(0, 12, 0, 12)));
-        btnRefresh.setFocusPainted(false);
-        btnRefresh.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        btnRefresh.setPreferredSize(new Dimension(110, 36));
-        btnRefresh.setMaximumSize(new Dimension(110, 36));
-        btnRefresh.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                btnRefresh.setBackground(new Color(248, 250, 252));
-            }
-
-            public void mouseExited(MouseEvent e) {
-                btnRefresh.setBackground(Color.WHITE);
-            }
-        });
+        JButton btnRefresh = makeSecondaryButton(" Làm mới", new RefreshIcon());
+        btnRefresh.setPreferredSize(new Dimension(130, 42)); // Tăng size để chữ không bị che
         btnRefresh.addActionListener(e -> {
             isUpdatingFilters = true;
             txtSearch.setText("");
             cboFilterPosition.setSelectedIndex(0);
-            cboSort.setSelectedIndex(0);
+            isAscendingSort = true;
             isUpdatingFilters = false;
             loadData();
         });
-        filterCard.add(btnRefresh);
+
+        // Sort Dropdown Button
+        JButton btnSort = makeSecondaryButton("Sắp xếp ▼", null);
+        btnSort.setPreferredSize(new Dimension(120, 42));
+
+        JPopupMenu sortMenu = new JPopupMenu();
+        sortMenu.setBackground(Color.WHITE);
+        sortMenu.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
+
+        JMenuItem itemSortAsc = createMenuItem("Tên nhân viên (A - Z)");
+        JMenuItem itemSortDesc = createMenuItem("Tên nhân viên (Z - A)");
+
+        itemSortAsc.addActionListener(e -> {
+            isAscendingSort = true;
+            applyFilters();
+        });
+
+        itemSortDesc.addActionListener(e -> {
+            isAscendingSort = false;
+            applyFilters();
+        });
+
+        sortMenu.add(itemSortAsc);
+        sortMenu.add(itemSortDesc);
+
+        btnSort.addActionListener(e -> sortMenu.show(btnSort, 0, btnSort.getHeight() + 2));
+
+        pnlLeftTools.add(txtSearch);
+        pnlLeftTools.add(cboFilterPosition);
+        pnlLeftTools.add(btnRefresh);
+        pnlLeftTools.add(btnSort);
+
+        filterCard.add(pnlLeftTools, BorderLayout.WEST);
 
         JPanel topWrapper = new JPanel(new BorderLayout(0, 8));
         topWrapper.setOpaque(false);
@@ -252,7 +254,6 @@ public class EmployeePanel extends JPanel {
         header.setPreferredSize(new Dimension(0, 50));
         header.setReorderingAllowed(false);
 
-        // Remove header vertical lines by setting a custom renderer
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable t, Object v, boolean sel, boolean foc, int r, int c) {
@@ -260,7 +261,7 @@ public class EmployeePanel extends JPanel {
                 label.setFont(new Font("Segoe UI", Font.BOLD, 12));
                 label.setForeground(AppColor.TEXT_SECONDARY);
                 label.setBackground(AppColor.SURFACE);
-                if (c == 4) { // Action column
+                if (c == 4) {
                     label.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
                     label.setHorizontalAlignment(SwingConstants.CENTER);
                 } else {
@@ -293,20 +294,7 @@ public class EmployeePanel extends JPanel {
         scrollPane.getViewport().setBackground(AppColor.SURFACE);
         tableCard.add(scrollPane, BorderLayout.CENTER);
 
-        // ===== FOOTER / PAGINATION =====
-        JPanel footerPanel = new JPanel(new BorderLayout());
-        footerPanel.setOpaque(false);
-        footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        lblPagination = new JLabel();
-        lblPagination.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblPagination.setForeground(AppColor.TEXT_SECONDARY);
-        footerPanel.add(lblPagination, BorderLayout.WEST);
-
-        pageButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        pageButtonsPanel.setOpaque(false);
-        footerPanel.add(pageButtonsPanel, BorderLayout.EAST);
-        tableCard.add(footerPanel, BorderLayout.SOUTH);
+        // Đã xóa Pagination Panel
 
         contentWrapper.add(tableCard);
         add(contentWrapper, BorderLayout.CENTER);
@@ -374,7 +362,6 @@ public class EmployeePanel extends JPanel {
 
         String searchText = txtSearch.getText().toLowerCase().trim();
         String selectedPos = (String) cboFilterPosition.getSelectedItem();
-        boolean isAscending = cboSort.getSelectedIndex() == 0;
 
         currentData = new ArrayList<>();
 
@@ -396,42 +383,20 @@ public class EmployeePanel extends JPanel {
         currentData.sort((e1, e2) -> {
             String name1 = e1.getFullName() != null ? e1.getFullName() : "";
             String name2 = e2.getFullName() != null ? e2.getFullName() : "";
-            return isAscending ? name1.compareToIgnoreCase(name2) : name2.compareToIgnoreCase(name1);
+            return isAscendingSort ? name1.compareToIgnoreCase(name2) : name2.compareToIgnoreCase(name1);
         });
 
-        currentPage = 1;
         refreshTable();
-    }
-
-    private static class SearchIcon implements Icon {
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(AppColor.TEXT_SECONDARY);
-            g2.setStroke(new BasicStroke(1.5f));
-            g2.drawOval(x + 4, y + 4, 8, 8);
-            g2.drawLine(x + 10, y + 10, x + 14, y + 14);
-            g2.dispose();
-        }
-
-        @Override
-        public int getIconWidth() {
-            return 20;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 20;
-        }
     }
 
     private void refreshTable() {
         tableModel.setRowCount(0);
-        int start = (currentPage - 1) * ROWS_PER_PAGE;
-        int end = Math.min(start + ROWS_PER_PAGE, currentData.size());
-        for (int i = start; i < end; i++) {
-            EmployeeDTO emp = currentData.get(i);
+        if (currentData == null || currentData.isEmpty()) {
+            return;
+        }
+
+        // Đổ toàn bộ dữ liệu để sử dụng cuộn dọc
+        for (EmployeeDTO emp : currentData) {
             tableModel.addRow(new Object[] {
                     emp,
                     emp.getPosition() != null ? emp.getPosition() : "",
@@ -440,63 +405,6 @@ public class EmployeePanel extends JPanel {
                     emp.getEmployeeID()
             });
         }
-        int totalPages = Math.max(1, (int) Math.ceil((double) currentData.size() / ROWS_PER_PAGE));
-        lblPagination.setText("Hiển thị " + (start + 1) + "-" + end + " của " + currentData.size() + "  •  Trang "
-                + currentPage + "/" + totalPages);
-
-        updatePaginationButtons(totalPages);
-    }
-
-    private void updatePaginationButtons(int totalPages) {
-        pageButtonsPanel.removeAll();
-
-        // Nút lùi
-        JButton btnPrev = createPageButton("‹");
-        btnPrev.setEnabled(currentPage > 1);
-        btnPrev.addActionListener(e -> {
-            currentPage--;
-            refreshTable();
-        });
-        pageButtonsPanel.add(btnPrev);
-
-        // Hiển thị các số trang
-        for (int i = 1; i <= totalPages; i++) {
-            // Giới hạn hiển thị số trang nếu quá nhiều (đơn giản hóa: hiện hết nếu <= 7,
-            // hoặc hiện quanh trang hiện tại)
-            if (totalPages > 7) {
-                if (i > 1 && i < totalPages && (i < currentPage - 1 || i > currentPage + 1)) {
-                    if (i == currentPage - 2 || i == currentPage + 2) {
-                        JLabel dots = new JLabel("...");
-                        dots.setForeground(AppColor.TEXT_SECONDARY);
-                        pageButtonsPanel.add(dots);
-                    }
-                    continue;
-                }
-            }
-
-            final int pageNum = i;
-            JButton btnPage = createPageButton(String.valueOf(i));
-            if (i == currentPage) {
-                btnPage.setBackground(AppColor.PRIMARY);
-            }
-            btnPage.addActionListener(e -> {
-                currentPage = pageNum;
-                refreshTable();
-            });
-            pageButtonsPanel.add(btnPage);
-        }
-
-        // Nút tới
-        JButton btnNext = createPageButton("›");
-        btnNext.setEnabled(currentPage < totalPages);
-        btnNext.addActionListener(e -> {
-            currentPage++;
-            refreshTable();
-        });
-        pageButtonsPanel.add(btnNext);
-
-        pageButtonsPanel.revalidate();
-        pageButtonsPanel.repaint();
     }
 
     // ===== ACTIONS =====
@@ -640,40 +548,36 @@ public class EmployeePanel extends JPanel {
         return btn;
     }
 
-    private JButton createPageButton(String text) {
-        JButton btn = new JButton(text) {
+    private JButton makeSecondaryButton(String text, Icon icon) {
+        JButton btn = new JButton(text, icon) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                if (getBackground() == AppColor.PRIMARY) { // Active page
-                    g2.setColor(AppColor.PRIMARY);
-                    g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                    g2.setColor(Color.WHITE);
-                } else {
-                    if (getModel().isRollover()) {
-                        g2.setColor(new Color(241, 245, 249)); // Subtle hover grey
-                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 6, 6);
-                    }
-                    g2.setColor(AppColor.TEXT_PRIMARY);
-                }
-
-                g2.setFont(getFont());
-                FontMetrics fm = g2.getFontMetrics();
-                int x = (getWidth() - fm.stringWidth(getText())) / 2;
-                int y = (getHeight() + fm.getAscent() - fm.getDescent()) / 2;
-                g2.drawString(getText(), x, y);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(AppColor.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
                 g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setPreferredSize(new Dimension(30, 30));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(AppColor.TEXT_PRIMARY);
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    private JMenuItem createMenuItem(String text) {
+        JMenuItem item = new JMenuItem(text);
+        item.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        item.setBackground(Color.WHITE);
+        item.setForeground(AppColor.TEXT_PRIMARY);
+        item.setBorder(new EmptyBorder(8, 15, 8, 15));
+        item.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return item;
     }
 
     // ===== CUSTOM RENDERERS =====
@@ -710,7 +614,6 @@ public class EmployeePanel extends JPanel {
                 String name = emp.getFullName() != null ? emp.getFullName() : "N/A";
                 String initials = getInitials(name);
 
-                // Avatar circle
                 JLabel avatar = new JLabel(initials, SwingConstants.CENTER) {
                     @Override
                     protected void paintComponent(Graphics g) {
@@ -756,7 +659,29 @@ public class EmployeePanel extends JPanel {
         }
     }
 
-    // ===== ACTION RENDERER / EDITOR =====
+    private static class SearchIcon implements Icon {
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(AppColor.TEXT_SECONDARY);
+            g2.setStroke(new BasicStroke(1.5f));
+            g2.drawOval(x + 4, y + 4, 8, 8);
+            g2.drawLine(x + 10, y + 10, x + 14, y + 14);
+            g2.dispose();
+        }
+
+        @Override
+        public int getIconWidth() {
+            return 20;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 20;
+        }
+    }
+
     private static class RefreshIcon implements Icon {
         @Override
         public void paintIcon(Component c, Graphics g, int x, int y) {
@@ -764,7 +689,6 @@ public class EmployeePanel extends JPanel {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(AppColor.TEXT_SECONDARY);
             g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            // Circular arrow
             g2.drawArc(x + 2, y + 2, 12, 12, 50, 260);
             g2.drawPolyline(new int[] { x + 13, x + 13, x + 9 }, new int[] { y + 0, y + 4, y + 4 }, 3);
             g2.dispose();
@@ -795,14 +719,11 @@ public class EmployeePanel extends JPanel {
             g2.setColor(color);
             g2.translate(x, y);
             g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-            // Pencil shape
             g2.drawLine(4, 15, 7, 15);
             g2.drawLine(4, 15, 4, 12);
             g2.drawLine(4, 12, 12, 4);
             g2.drawLine(12, 4, 15, 7);
             g2.drawLine(15, 7, 7, 15);
-            // Eraser line
             g2.drawLine(11, 5, 14, 8);
             g2.dispose();
         }
@@ -832,8 +753,6 @@ public class EmployeePanel extends JPanel {
             g2.setColor(color);
             g2.translate(x, y);
             g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-            // Trash bin
             g2.drawRect(5, 6, 8, 10);
             g2.drawLine(3, 6, 15, 6);
             g2.drawLine(7, 4, 11, 4);
@@ -905,15 +824,10 @@ public class EmployeePanel extends JPanel {
             b.setFocusPainted(false);
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-            // Ngăn việc icon bị dịch chuyển khi nhấn
             b.setPressedIcon(baseIcon);
             b.setMargin(new Insets(0, 0, 0, 0));
             b.setBorder(BorderFactory.createEmptyBorder());
 
-            // Create a hover version of the icon by brightening the color slightly if
-            // needed,
-            // but vector icons are tricky to mutate unless we recreate them.
-            // We'll just rely on the cursor change and a slight background change.
             b.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseEntered(MouseEvent e) {
