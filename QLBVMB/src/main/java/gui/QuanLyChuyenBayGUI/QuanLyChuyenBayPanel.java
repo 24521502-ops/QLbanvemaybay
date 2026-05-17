@@ -1,7 +1,6 @@
 package gui.QuanLyChuyenBayGUI;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,9 +68,17 @@ public class QuanLyChuyenBayPanel extends JPanel {
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
         txtSearch.putClientProperty("JComponent.roundRect", true);
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                performSearch();
+            }
         });
 
         // NÚT LÀM MỚI
@@ -79,6 +86,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
             txtSearch.setText("");
+            @SuppressWarnings("unchecked")
             TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) table.getRowSorter();
             if (sorter != null) {
                 sorter.setRowFilter(null);

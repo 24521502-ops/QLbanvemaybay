@@ -780,28 +780,7 @@ public class PhanQuyenGUI extends JPanel {
         }
     }
 
-    private static class RefreshIcon implements Icon {
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(AppColor.TEXT_SECONDARY);
-            g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2.drawArc(x + 3, y + 3, 10, 10, 0, -270);
-            g2.drawPolyline(new int[] { x + 8, x + 11, x + 8 }, new int[] { y + 0, y + 3, y + 6 }, 3);
-            g2.dispose();
-        }
 
-        @Override
-        public int getIconWidth() {
-            return 16;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 16;
-        }
-    }
 
     private static class PlusIcon implements Icon {
         @Override

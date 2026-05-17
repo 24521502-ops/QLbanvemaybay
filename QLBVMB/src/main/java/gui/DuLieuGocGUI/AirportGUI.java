@@ -707,28 +707,6 @@ public class AirportGUI extends JPanel {
         return item;
     }
 
-    private static class RefreshIcon implements Icon {
-        @Override
-        public void paintIcon(Component c, Graphics g, int x, int y) {
-            Graphics2D g2 = (Graphics2D) g.create();
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(AppColor.TEXT_SECONDARY);
-            g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g2.drawArc(x + 2, y + 2, 12, 12, 50, 260);
-            g2.drawPolyline(new int[] { x + 13, x + 13, x + 9 }, new int[] { y + 0, y + 4, y + 4 }, 3);
-            g2.dispose();
-        }
-
-        @Override
-        public int getIconWidth() {
-            return 16;
-        }
-
-        @Override
-        public int getIconHeight() {
-            return 16;
-        }
-    }
 
     private static class EditIcon implements javax.swing.Icon {
         @Override
