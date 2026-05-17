@@ -46,9 +46,6 @@ public class loginDAO {
         return null;
     }
 
-    /**
-     * Kiểm tra userName đã tồn tại chưa (dùng khi đăng ký).
-     */
     public boolean isUserNameExisted(String userName) {
         String sql = "SELECT 1 FROM Account WHERE userName = ? AND isDeleted = 0";
         try (Connection conn = DBConnection.getConnection();
@@ -61,5 +58,27 @@ public class loginDAO {
             System.err.println("[loginDAO] Lỗi kiểm tra userName: " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Lấy tên nhóm quyền của tài khoản.
+     */
+    public String getRoleGroupName(String accountID) {
+        String sql = "SELECT rg.NameRoleGroup " +
+                     "FROM ACCOUNT_ASSIGN_ROLE_GROUP aarg " +
+                     "JOIN ROLE_GROUP rg ON aarg.RoleGroupID = rg.RoleGroupID " +
+                     "WHERE aarg.AccountID = ? AND (aarg.IsDeleted = 0 OR aarg.IsDeleted IS NULL)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, accountID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("NameRoleGroup");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[loginDAO] Lỗi lấy nhóm quyền: " + e.getMessage());
+        }
+        return null;
     }
 }

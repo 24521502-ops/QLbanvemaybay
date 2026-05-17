@@ -130,7 +130,7 @@ public class PhanQuyenGUI extends JPanel {
         });
 
         // Nút Làm mới
-        JButton btnRefresh = makeSecondaryButton(" Làm mới", new RefreshIcon());
+        JButton btnRefresh = makeSecondaryButton("Làm mới", null);
         // Sửa số 110 thành 130 (hoặc 140 nếu vẫn thấy chật)
         btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {

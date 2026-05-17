@@ -59,13 +59,13 @@ public class FrameAdmin extends JFrame {
     private static final int TOPBAR_HEIGHT = 56;
 
     // Menu items config: {text, iconType}
-    private static final String[][] MENU_ITEMS = {
+    private static final String[][] ALL_MENU_ITEMS = {
             { "Dashboard", "dashboard" },
             { "Chuyến bay", "flight" },
             { "Đặt chỗ", "booking" },
             { "Vé", "ticket" },
-            { "Nhân viên", "employee" },
             { "Khách hàng", "customer" },
+            { "Nhân viên", "employee" },
             { "Phân quyền", "permission" },
             { "Dữ liệu gốc", "data" }
     };
@@ -321,7 +321,8 @@ public class FrameAdmin extends JFrame {
 
         // Menu items
         sidebarButtons.clear();
-        for (String[] item : MENU_ITEMS) {
+        java.util.List<String[]> authorizedItems = getAuthorizedMenuItems();
+        for (String[] item : authorizedItems) {
             JButton btn = createMenuButton(item[0], item[1]);
             sidebarButtons.add(btn);
             menuPanel.add(btn);
@@ -366,6 +367,45 @@ public class FrameAdmin extends JFrame {
                 }
             }
         }
+    }
+
+    private java.util.List<String[]> getAuthorizedMenuItems() {
+        java.util.List<String[]> list = new java.util.ArrayList<>();
+        
+        // Nếu tài khoản null (khi bạn chạy test file FrameAdmin độc lập) mặc định cấp quyền admin để test
+        String role = (currentAccount != null && currentAccount.getRoleGroup() != null) 
+                      ? currentAccount.getRoleGroup() 
+                      : "ADMIN_GROUP";
+                      
+        for (String[] item : ALL_MENU_ITEMS) {
+            String menuText = item[0];
+            
+            if ("ADMIN_GROUP".equals(role)) {
+                // ADMIN: Được thấy TẤT CẢ các module
+                list.add(item);
+            } 
+            else if ("MANAGER_GROUP".equals(role)) {
+                // QUẢN LÝ: Xem 6 module (Nghiệp vụ + Nhân viên)
+                if (!"Phân quyền".equals(menuText) && !"Dữ liệu gốc".equals(menuText)) {
+                    list.add(item);
+                }
+            }
+            else if ("STAFF_GROUP".equals(role)) {
+                // NHÂN VIÊN: Chỉ thấy 5 module nghiệp vụ
+                if (!"Nhân viên".equals(menuText) && 
+                    !"Phân quyền".equals(menuText) && 
+                    !"Dữ liệu gốc".equals(menuText)) {
+                    list.add(item);
+                }
+            } 
+            else {
+                // KHÁCH HÀNG (CUSTOMER_GROUP): Chỉ cho xem Đặt chỗ, Vé và Dashboard cá nhân
+                if ("Dashboard".equals(menuText) || "Đặt chỗ".equals(menuText) || "Vé".equals(menuText)) {
+                    list.add(item);
+                }
+            }
+        }
+        return list;
     }
 
     // ==================== TOP BAR ====================

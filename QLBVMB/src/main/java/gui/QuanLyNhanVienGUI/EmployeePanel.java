@@ -159,7 +159,7 @@ public class EmployeePanel extends JPanel {
         cboFilterPosition.addActionListener(e -> applyFilters());
 
         // Refresh Button
-        JButton btnRefresh = makeSecondaryButton(" Làm mới", new RefreshIcon());
+        JButton btnRefresh = makeSecondaryButton("Làm mới", null);
         btnRefresh.setPreferredSize(new Dimension(130, 42)); // Tăng size để chữ không bị che
         btnRefresh.addActionListener(e -> {
             isUpdatingFilters = true;
@@ -467,11 +467,17 @@ public class EmployeePanel extends JPanel {
                 g2.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 16, 16));
                 g2.setColor(AppColor.BORDER);
                 g2.draw(new RoundRectangle2D.Double(0.5, 0.5, getWidth() - 1, getHeight() - 1, 16, 16));
+
+                g2.setColor(iconColor);
+                Shape oldClip = g2.getClip();
+                g2.clipRect(0, 0, 6, getHeight());
+                g2.fill(new RoundRectangle2D.Double(0, 0, 12, getHeight(), 16, 16));
+                g2.setClip(oldClip);
                 g2.dispose();
             }
         };
         card.setOpaque(false);
-        card.setBorder(BorderFactory.createEmptyBorder(20, 16, 20, 16));
+        card.setBorder(BorderFactory.createEmptyBorder(20, 22, 20, 16));
 
         JPanel textPanel = new JPanel(new GridLayout(2, 1, 0, 4));
         textPanel.setOpaque(false);

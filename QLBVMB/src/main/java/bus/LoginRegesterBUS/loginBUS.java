@@ -22,7 +22,14 @@ public class loginBUS {
     public AccountDTO login(String userName, String password) {
         if (userName == null || userName.isBlank()) return null;
         if (password == null || password.isBlank()) return null;
-        return loginDAO.findAccount(userName.trim(), password.trim());
+        
+        AccountDTO acc = loginDAO.findAccount(userName.trim(), password.trim());
+        if (acc != null) {
+            // Lấy nhóm quyền của tài khoản này từ CSDL và gán vào session DTO
+            String roleGroup = loginDAO.getRoleGroupName(acc.getAccountID());
+            acc.setRoleGroup(roleGroup != null ? roleGroup : "STAFF_GROUP"); // dự phòng mặc định là STAFF
+        }
+        return acc;
     }
 
     /**

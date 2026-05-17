@@ -37,7 +37,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         headerPanel.setOpaque(false);
 
         JLabel lblTitle = new JLabel("QUẢN LÝ CHUYẾN BAY");
-        lblTitle.setFont(new Font("Inter", Font.BOLD, 26));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 26));
         lblTitle.setForeground(AppColor.TEXT_PRIMARY);
         headerPanel.add(lblTitle, BorderLayout.NORTH);
 
@@ -60,7 +60,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         toolPanel.setOpaque(false);
 
         txtSearch = new JTextField();
-        txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setPreferredSize(new Dimension(300, 42));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(AppColor.BORDER),
@@ -68,19 +68,24 @@ public class QuanLyChuyenBayPanel extends JPanel {
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm kiếm chuyến bay...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
         txtSearch.putClientProperty("JComponent.roundRect", true);
-        txtSearch.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                performSearch();
-            }
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { performSearch(); }
         });
 
         // NÚT LÀM MỚI
         JButton btnRefresh = makeSecondaryButton("Làm mới");
+        btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
-            loadDataToTable();
             txtSearch.setText("");
-            performSearch();
+            TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) table.getRowSorter();
+            if (sorter != null) {
+                sorter.setRowFilter(null);
+                sorter.setSortKeys(null);
+            }
+            loadDataToTable();
+            txtSearch.requestFocus();
         });
 
         // ==========================================
@@ -219,7 +224,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
     // --- CÁC HÀM HỖ TRỢ MENU DROPDOWN SẮP XẾP ---
     private JMenuItem createMenuItem(String text) {
         JMenuItem item = new JMenuItem(text);
-        item.setFont(new Font("Inter", Font.PLAIN, 13));
+        item.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         item.setBackground(AppColor.SURFACE);
         item.setForeground(AppColor.TEXT_PRIMARY);
         item.setBorder(new EmptyBorder(8, 15, 8, 15));
@@ -251,7 +256,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 13));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setForeground(Color.WHITE);
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
@@ -274,13 +279,13 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 13));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setForeground(AppColor.TEXT_PRIMARY);
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         // Cho nút Sắp xếp to hơn một xíu để hiện mũi tên ▼ cho đẹp
-        btn.setPreferredSize(new Dimension(110, 42));
+        btn.setPreferredSize(new Dimension(120, 42));
         return btn;
     }
 
@@ -298,7 +303,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 13));
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btn.setForeground(Color.WHITE);
         btn.setContentAreaFilled(false);
         btn.setBorderPainted(false);
@@ -315,10 +320,10 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 new EmptyBorder(20, 25, 20, 25)));
 
         JLabel lblT = new JLabel(title);
-        lblT.setFont(new Font("Inter", Font.BOLD, 12));
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblT.setForeground(AppColor.TEXT_SECONDARY);
 
-        lblCount.setFont(new Font("Inter", Font.BOLD, 42));
+        lblCount.setFont(new Font("Segoe UI", Font.BOLD, 42));
         lblCount.setForeground(AppColor.TEXT_PRIMARY);
 
         card.add(lblT, BorderLayout.NORTH);
@@ -328,7 +333,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
 
     private void customizeTable() {
         table.setRowHeight(50);
-        table.setFont(new Font("Inter", Font.PLAIN, 14));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setShowVerticalLines(false);
         table.setGridColor(AppColor.BORDER);
         table.setSelectionBackground(new Color(243, 244, 246));
@@ -346,7 +351,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
                 setForeground(AppColor.TEXT_SECONDARY);
-                setFont(new Font("Inter", Font.BOLD, 12));
+                setFont(new Font("Segoe UI", Font.BOLD, 12));
                 setBackground(AppColor.SURFACE);
                 return this;
             }
@@ -364,7 +369,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                     setBackground(r % 2 == 0 ? AppColor.SURFACE : new Color(252, 252, 253));
 
                 if (c == 6 && val != null) {
-                    setFont(new Font("Inter", Font.BOLD, 13));
+                    setFont(new Font("Segoe UI", Font.BOLD, 13));
                     String status = val.toString().toUpperCase();
                     if (status.contains("CANCEL"))
                         setForeground(AppColor.ERROR);
@@ -444,19 +449,19 @@ public class QuanLyChuyenBayPanel extends JPanel {
         body.setBorder(new EmptyBorder(30, 30, 30, 30));
 
         JLabel lblInfo = new JLabel("Chuyến bay: " + flightNum);
-        lblInfo.setFont(new Font("Inter", Font.BOLD, 16));
+        lblInfo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblInfo.setForeground(AppColor.PRIMARY);
         body.add(lblInfo);
         body.add(Box.createVerticalStrut(20));
 
         JLabel lblInput = new JLabel("Giờ khởi hành mới (yyyy-MM-dd HH:mm:ss):");
-        lblInput.setFont(new Font("Inter", Font.BOLD, 12));
+        lblInput.setFont(new Font("Segoe UI", Font.BOLD, 12));
         lblInput.setForeground(AppColor.TEXT_SECONDARY);
         body.add(lblInput);
         body.add(Box.createVerticalStrut(8));
 
         JTextField txtNewTime = new JTextField(oldTimeStr);
-        txtNewTime.setFont(new Font("Inter", Font.PLAIN, 14));
+        txtNewTime.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtNewTime.setPreferredSize(new Dimension(0, 40));
         body.add(txtNewTime);
 

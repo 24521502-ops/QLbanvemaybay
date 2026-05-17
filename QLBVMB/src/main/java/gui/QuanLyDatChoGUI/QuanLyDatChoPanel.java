@@ -45,10 +45,10 @@ public class QuanLyDatChoPanel extends JPanel {
         titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.Y_AXIS));
         titlePanel.setOpaque(false);
         JLabel lblTitle = new JLabel("Quản lý Đặt chỗ");
-        lblTitle.setFont(new Font("Inter", Font.BOLD, 28));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblTitle.setForeground(AppColor.TEXT_PRIMARY);
         JLabel lblSub = new JLabel("Xem và quản lý tất cả các đặt chỗ trên hệ thống.");
-        lblSub.setFont(new Font("Inter", Font.PLAIN, 14));
+        lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblSub.setForeground(AppColor.TEXT_SECONDARY);
         titlePanel.add(lblTitle);
         titlePanel.add(Box.createVerticalStrut(5));
@@ -84,7 +84,7 @@ public class QuanLyDatChoPanel extends JPanel {
         pnlLeftTools.setOpaque(false);
 
         txtSearch = new JTextField();
-        txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setPreferredSize(new Dimension(340, 42));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(AppColor.BORDER), 
@@ -93,15 +93,20 @@ public class QuanLyDatChoPanel extends JPanel {
         txtSearch.putClientProperty("JTextField.placeholderText", "Nhập mã đặt chỗ, tên KH hoặc trạng thái...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
         txtSearch.putClientProperty("JComponent.roundRect", true);
-        txtSearch.addKeyListener(new KeyAdapter() {
-            @Override public void keyReleased(KeyEvent e) { applyFilter(); }
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
         });
 
         JButton btnRefresh = makeSecondaryButton("Làm mới"); 
-        btnRefresh.setPreferredSize(new Dimension(110, 42));
+        btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
             txtSearch.setText(""); 
-            rowSorter.setRowFilter(null);
+            if (rowSorter != null) {
+                rowSorter.setRowFilter(null);
+                rowSorter.setSortKeys(null);
+            }
             loadRealData(); 
             txtSearch.requestFocus();
         });
@@ -205,7 +210,7 @@ public class QuanLyDatChoPanel extends JPanel {
 
     private JMenuItem createMenuItem(String text) {
         JMenuItem item = new JMenuItem(text);
-        item.setFont(new Font("Inter", Font.PLAIN, 13));
+        item.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         item.setBackground(Color.WHITE);
         item.setForeground(AppColor.TEXT_PRIMARY);
         item.setBorder(new EmptyBorder(8, 15, 8, 15));
@@ -217,8 +222,8 @@ public class QuanLyDatChoPanel extends JPanel {
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(Color.WHITE);
         card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 5, 0, 0, themeColor), new EmptyBorder(20, 25, 20, 25)));
-        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Inter", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
-        lblCount.setFont(new Font("Inter", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
+        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Segoe UI", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
+        lblCount.setFont(new Font("Segoe UI", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
         card.add(lblT, BorderLayout.NORTH); card.add(lblCount, BorderLayout.CENTER); 
         
         card.addMouseListener(new MouseAdapter() {
@@ -267,9 +272,9 @@ public class QuanLyDatChoPanel extends JPanel {
                 else if (status.equalsIgnoreCase("Đã hủy")) cancelled++;
             }
 
-            String htmlKhachHang = "<html><b><font size='4' face='Inter'>" + fullName + "</font></b><br><font color='#64748b' face='Inter'>" + email + "</font></html>";
-            String htmlChangBay = "<html><b><font size='4' face='Inter'>" + route + "</font></b><br><font color='#64748b' face='Inter'>" + flightInfo + "</font></html>";
-            String htmlTongTien = "<html><b><font color='#0f172a' face='Inter'>" + formattedMoney + "</font></b></html>";
+            String htmlKhachHang = "<html><b><font size='4' face='Segoe UI'>" + fullName + "</font></b><br><font color='#64748b' face='Segoe UI'>" + email + "</font></html>";
+            String htmlChangBay = "<html><b><font size='4' face='Segoe UI'>" + route + "</font></b><br><font color='#64748b' face='Segoe UI'>" + flightInfo + "</font></html>";
+            String htmlTongTien = "<html><b><font color='#0f172a' face='Segoe UI'>" + formattedMoney + "</font></b></html>";
 
             tableModel.addRow(new Object[]{
                 bookingID, htmlKhachHang, htmlChangBay, date, htmlTongTien, status, ""
@@ -305,7 +310,7 @@ public class QuanLyDatChoPanel extends JPanel {
     // ===============================================
     private void customizeTable() {
         table.setRowHeight(65); 
-        table.setFont(new Font("Inter", Font.PLAIN, 14));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         
         table.setShowVerticalLines(false); 
         table.setShowHorizontalLines(false);
@@ -323,7 +328,7 @@ public class QuanLyDatChoPanel extends JPanel {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
                 setForeground(new Color(100, 116, 139)); 
-                setFont(new Font("Inter", Font.BOLD, 12)); 
+                setFont(new Font("Segoe UI", Font.BOLD, 12)); 
                 setBackground(Color.WHITE);
                 return this;
             }
@@ -346,9 +351,9 @@ public class QuanLyDatChoPanel extends JPanel {
                 
                 setForeground(AppColor.TEXT_PRIMARY);
                 if (c == 0) {
-                    setFont(new Font("Inter", Font.BOLD, 14)); 
+                    setFont(new Font("Segoe UI", Font.BOLD, 14)); 
                 } else {
-                    setFont(new Font("Inter", Font.PLAIN, 14)); 
+                    setFont(new Font("Segoe UI", Font.PLAIN, 14)); 
                 }
                 return this;
             }
@@ -380,7 +385,7 @@ public class QuanLyDatChoPanel extends JPanel {
                 g2.setColor(AppColor.PRIMARY); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8); g2.dispose(); super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(160, 42)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(160, 42)); return btn;
     }
 
     private JButton makeSecondaryButton(String text) {
@@ -391,7 +396,7 @@ public class QuanLyDatChoPanel extends JPanel {
                 g2.setColor(AppColor.BORDER); g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8); g2.dispose(); super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(AppColor.TEXT_PRIMARY); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(AppColor.TEXT_PRIMARY); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
     }
 
     class BadgeRenderer extends JPanel implements TableCellRenderer {
@@ -415,7 +420,7 @@ public class QuanLyDatChoPanel extends JPanel {
         @Override protected void paintComponent(Graphics g) {
             super.paintComponent(g); if(text.isEmpty()) return;
             Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setFont(new Font("Inter", Font.BOLD, 12)); FontMetrics fm = g2.getFontMetrics();
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 12)); FontMetrics fm = g2.getFontMetrics();
             int paddingX = 14, paddingY = 6; int width = fm.stringWidth(text) + paddingX * 2; int height = fm.getHeight() + paddingY * 2;
             int x = 15; int y = (getHeight() - height) / 2;
             g2.setColor(bgColor); g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8)); 

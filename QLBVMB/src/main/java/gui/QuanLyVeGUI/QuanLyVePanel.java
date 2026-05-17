@@ -41,7 +41,7 @@ public class QuanLyVePanel extends JPanel {
         headerPanel.setOpaque(false);
 
         JLabel lblTitle = new JLabel("Danh sách Vé");
-        lblTitle.setFont(new Font("Inter", Font.BOLD, 28));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
         lblTitle.setForeground(AppColor.TEXT_PRIMARY);
         headerPanel.add(lblTitle, BorderLayout.WEST);
 
@@ -62,15 +62,17 @@ public class QuanLyVePanel extends JPanel {
         toolPanel.setBorder(new EmptyBorder(25, 0, 0, 0));
 
         txtSearch = new JTextField();
-        txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
+        txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setPreferredSize(new Dimension(350, 42));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(AppColor.BORDER), new EmptyBorder(8, 15, 8, 15)));
         txtSearch.putClientProperty("JTextField.placeholderText", "Tìm theo mã vé, tên khách hàng...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon()); 
         txtSearch.putClientProperty("JComponent.roundRect", true);
-        txtSearch.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            private void filter() {
                 String text = txtSearch.getText().trim();
                 if (text.length() == 0) rowSorter.setRowFilter(null);
                 else rowSorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
@@ -81,11 +83,15 @@ public class QuanLyVePanel extends JPanel {
         pnlLeftTools.setOpaque(false);
 
         JButton btnRefresh = makeSecondaryButton("Làm mới");
+        btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
             table.clearSelection();
-            loadRealData();
             txtSearch.setText("");
-            rowSorter.setRowFilter(null);
+            if (rowSorter != null) {
+                rowSorter.setRowFilter(null);
+                rowSorter.setSortKeys(null);
+            }
+            loadRealData();
             txtSearch.requestFocus();
         });
 
@@ -185,7 +191,7 @@ public class QuanLyVePanel extends JPanel {
 
     private JMenuItem createMenuItem(String text) {
         JMenuItem item = new JMenuItem(text);
-        item.setFont(new Font("Inter", Font.PLAIN, 13));
+        item.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         item.setBackground(AppColor.SURFACE);
         item.setForeground(AppColor.TEXT_PRIMARY);
         item.setBorder(new EmptyBorder(8, 15, 8, 15));
@@ -235,7 +241,7 @@ public class QuanLyVePanel extends JPanel {
 
     private void customizeTable() {
         table.setRowHeight(55); 
-        table.setFont(new Font("Inter", Font.PLAIN, 14)); 
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 14)); 
         
         table.setShowVerticalLines(false);
         table.setShowHorizontalLines(false); 
@@ -254,7 +260,7 @@ public class QuanLyVePanel extends JPanel {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15)); 
                 setForeground(AppColor.TEXT_SECONDARY);
-                setFont(new Font("Inter", Font.BOLD, 12));
+                setFont(new Font("Segoe UI", Font.BOLD, 12));
                 setBackground(AppColor.SURFACE);
                 return this;
             }
@@ -278,9 +284,9 @@ public class QuanLyVePanel extends JPanel {
                 setForeground(AppColor.TEXT_PRIMARY);
                 
                 if (c == 0 || c == 1) {
-                    setFont(new Font("Inter", Font.BOLD, 14));
+                    setFont(new Font("Segoe UI", Font.BOLD, 14));
                 } else {
-                    setFont(new Font("Inter", Font.PLAIN, 14));
+                    setFont(new Font("Segoe UI", Font.PLAIN, 14));
                 }
                 return this;
             }
@@ -313,8 +319,8 @@ public class QuanLyVePanel extends JPanel {
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(AppColor.SURFACE);
         card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 5, 0, 0, themeColor), new EmptyBorder(20, 25, 20, 25)));
-        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Inter", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
-        lblCount.setFont(new Font("Inter", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
+        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Segoe UI", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
+        lblCount.setFont(new Font("Segoe UI", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
         card.add(lblT, BorderLayout.NORTH); card.add(lblCount, BorderLayout.CENTER); 
         
         card.addMouseListener(new MouseAdapter() {
@@ -369,14 +375,14 @@ public class QuanLyVePanel extends JPanel {
             g2.setColor(avatarBg);
             g2.fill(new Ellipse2D.Double(15, y, size, size)); 
             g2.setColor(Color.WHITE);
-            g2.setFont(new Font("Inter", Font.BOLD, 13));
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 13));
             FontMetrics fm = g2.getFontMetrics();
             int txtX = 15 + (size - fm.stringWidth(initials)) / 2;
             int txtY = y + ((size - fm.getHeight()) / 2) + fm.getAscent();
             g2.drawString(initials, txtX, txtY);
             
             g2.setColor(AppColor.TEXT_PRIMARY);
-            g2.setFont(new Font("Inter", Font.PLAIN, 14)); 
+            g2.setFont(new Font("Segoe UI", Font.PLAIN, 14)); 
             g2.drawString(fullName, 15 + size + 15, y + 23);
             g2.dispose();
         }
@@ -413,7 +419,7 @@ public class QuanLyVePanel extends JPanel {
             if(text.isEmpty()) return;
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setFont(new Font("Inter", Font.BOLD, 12));
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
             FontMetrics fm = g2.getFontMetrics();
             int paddingX = 12, paddingY = 6;
             int width = fm.stringWidth(text) + paddingX * 2;
@@ -505,7 +511,7 @@ public class QuanLyVePanel extends JPanel {
                 g2.setColor(AppColor.BORDER); g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8); g2.dispose(); super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(AppColor.TEXT_PRIMARY); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(110, 42)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(AppColor.TEXT_PRIMARY); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(120, 42)); return btn;
     }
 
     private JButton makeDestructiveButton(String text) {
@@ -516,7 +522,7 @@ public class QuanLyVePanel extends JPanel {
                 g2.setColor(AppColor.ERROR); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8); g2.dispose(); super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Inter", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(140, 42)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(140, 42)); return btn;
     }
 
     private static class SearchIcon implements Icon {

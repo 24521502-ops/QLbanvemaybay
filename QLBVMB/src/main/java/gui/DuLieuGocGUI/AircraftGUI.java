@@ -109,7 +109,7 @@ public class AircraftGUI extends JPanel {
 
         searchBox.add(txtSearch, BorderLayout.CENTER);
 
-        JButton btnRefresh = makeSecondaryButton(" Làm mới", new RefreshIcon());
+        JButton btnRefresh = makeSecondaryButton("Làm mới", null);
         btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
             txtSearch.setText("Tìm kiếm loại máy bay...");
@@ -594,11 +594,26 @@ public class AircraftGUI extends JPanel {
 
     // ===== UI Helpers =====
     private JPanel createKPICard(String title, String value, int iconType, Color color) {
-        JPanel p = new JPanel(new BorderLayout(16, 0));
-        p.setBackground(Color.WHITE);
-        p.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(226, 232, 240), 1, true),
-                BorderFactory.createEmptyBorder(16, 16, 16, 16)));
+        JPanel p = new JPanel(new BorderLayout(16, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fill(new java.awt.geom.RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 16, 16));
+                g2.setColor(new Color(226, 232, 240));
+                g2.draw(new java.awt.geom.RoundRectangle2D.Double(0.5, 0.5, getWidth() - 1, getHeight() - 1, 16, 16));
+
+                g2.setColor(color);
+                Shape oldClip = g2.getClip();
+                g2.clipRect(0, 0, 6, getHeight());
+                g2.fill(new java.awt.geom.RoundRectangle2D.Double(0, 0, 12, getHeight(), 16, 16));
+                g2.setClip(oldClip);
+                g2.dispose();
+            }
+        };
+        p.setOpaque(false);
+        p.setBorder(BorderFactory.createEmptyBorder(16, 22, 16, 16));
 
         JLabel lblIcon = new JLabel() {
             @Override
