@@ -15,7 +15,8 @@ public class QuanLyKhachHangPanel extends JPanel {
 
     private DefaultTableModel tableModel;
     private JTable table;
-    private JTextField txtSearch; // Đổi tên cho chuẩn đồng bộ
+    private JTextField txtSearch; 
+    private JLabel lblTotalCustomers, lblHasEmail, lblHasPassport;
     private TableRowSorter<DefaultTableModel> rowSorter;
     private CustomerBUS customerBUS;
 
@@ -56,7 +57,23 @@ public class QuanLyKhachHangPanel extends JPanel {
         headerPanel.add(titlePanel, BorderLayout.WEST);
 
         // ==========================================
-        // 2. TOOLBAR (ĐỒNG BỘ GIAO DIỆN XỊN)
+        // 2. THỐNG KÊ (STATS CARDS)
+        // ==========================================
+        JPanel statsPanel = new JPanel(new GridLayout(1, 3, 30, 0));
+        statsPanel.setOpaque(false);
+        statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
+        statsPanel.setBorder(new EmptyBorder(15, 0, 5, 0));
+        
+        lblTotalCustomers = new JLabel("0");
+        lblHasEmail = new JLabel("0");
+        lblHasPassport = new JLabel("0");
+        
+        statsPanel.add(createClickableStatCard("TỔNG KHÁCH HÀNG", lblTotalCustomers, AppColor.PRIMARY, "ALL"));
+        statsPanel.add(createClickableStatCard("CÓ EMAIL LIÊN HỆ", lblHasEmail, AppColor.SUCCESS, "HAS_EMAIL"));
+        statsPanel.add(createClickableStatCard("CÓ SỐ PASSPORT", lblHasPassport, AppColor.WARNING, "HAS_PASSPORT"));
+
+        // ==========================================
+        // 3. TOOLBAR (ĐỒNG BỘ GIAO DIỆN XỊN)
         // ==========================================
         JPanel toolbarPanel = new JPanel(new BorderLayout());
         toolbarPanel.setOpaque(false);
@@ -66,7 +83,7 @@ public class QuanLyKhachHangPanel extends JPanel {
         JPanel pnlLeftTools = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
         pnlLeftTools.setOpaque(false);
 
-        // 2.1 Thanh tìm kiếm
+        // 3.1 Thanh tìm kiếm
         txtSearch = new JTextField();
         txtSearch.setFont(new Font("Inter", Font.PLAIN, 14));
         txtSearch.setPreferredSize(new Dimension(340, 42));
@@ -81,7 +98,7 @@ public class QuanLyKhachHangPanel extends JPanel {
             @Override public void keyReleased(KeyEvent e) { applyFilter(); }
         });
 
-        // 2.2 Nút Làm mới
+        // 3.2 Nút Làm mới
         JButton btnRefresh = makeSecondaryButton("Làm mới");
         btnRefresh.setPreferredSize(new Dimension(110, 42));
         btnRefresh.addActionListener(e -> {
@@ -91,7 +108,7 @@ public class QuanLyKhachHangPanel extends JPanel {
             txtSearch.requestFocus();
         });
 
-        // 2.3 Nút Sắp xếp xổ xuống (JPopupMenu)
+        // 3.3 Nút Sắp xếp xổ xuống (JPopupMenu)
         JButton btnSort = makeSecondaryButton("Sắp xếp ▼");
         btnSort.setPreferredSize(new Dimension(120, 42));
         
@@ -137,14 +154,16 @@ public class QuanLyKhachHangPanel extends JPanel {
         toolbarPanel.add(pnlLeftTools, BorderLayout.WEST);
         toolbarPanel.add(pnlRightTools, BorderLayout.EAST);
 
-        JPanel topPanel = new JPanel(new BorderLayout(0, 10));
+        // Gộp Header, Stats và Toolbar lại
+        JPanel topPanel = new JPanel(new BorderLayout(0, 5));
         topPanel.setOpaque(false);
         topPanel.add(headerPanel, BorderLayout.NORTH);
-        topPanel.add(toolbarPanel, BorderLayout.CENTER);
+        topPanel.add(statsPanel, BorderLayout.CENTER);
+        topPanel.add(toolbarPanel, BorderLayout.SOUTH);
         add(topPanel, BorderLayout.NORTH);
 
         // ==========================================
-        // 3. BẢNG DANH SÁCH
+        // 4. BẢNG DANH SÁCH
         // ==========================================
         JPanel panelTableCard = new JPanel(new BorderLayout());
         panelTableCard.setBackground(Color.WHITE);
@@ -165,6 +184,45 @@ public class QuanLyKhachHangPanel extends JPanel {
         panelTableCard.add(scrollPane, BorderLayout.CENTER);
 
         add(panelTableCard, BorderLayout.CENTER);
+    }
+
+    private JPanel createClickableStatCard(String title, JLabel lblCount, Color themeColor, String filterType) {
+        JPanel card = new JPanel(new BorderLayout(0, 10));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 5, 0, 0, themeColor), new EmptyBorder(20, 25, 20, 25)));
+        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Inter", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
+        lblCount.setFont(new Font("Inter", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
+        card.add(lblT, BorderLayout.NORTH); card.add(lblCount, BorderLayout.CENTER); 
+        
+        card.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (filterType.equals("ALL")) {
+                    rowSorter.setRowFilter(null);
+                } else if (filterType.equals("HAS_EMAIL")) {
+                    rowSorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+                        @Override public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                            String email = entry.getStringValue(2);
+                            return email != null && email.contains("@");
+                        }
+                    });
+                } else if (filterType.equals("HAS_PASSPORT")) {
+                    rowSorter.setRowFilter(new RowFilter<DefaultTableModel, Integer>() {
+                        @Override public boolean include(Entry<? extends DefaultTableModel, ? extends Integer> entry) {
+                            String passport = entry.getStringValue(4).trim();
+                            return !passport.isEmpty() && !passport.equalsIgnoreCase("NA") && !passport.equalsIgnoreCase("Không") && !passport.equalsIgnoreCase("Trống");
+                        }
+                    });
+                }
+            }
+            @Override public void mouseEntered(MouseEvent e) { 
+                card.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
+                card.setBackground(ZEBRA_COLOR); 
+            }
+            @Override public void mouseExited(MouseEvent e) { 
+                card.setBackground(Color.WHITE); 
+            }
+        });
+        return card;
     }
 
     private void applyFilter() {
@@ -196,8 +254,30 @@ public class QuanLyKhachHangPanel extends JPanel {
     private void loadData() {
         tableModel.setRowCount(0);
         List<Object[]> list = customerBUS.layDanhSachKhachHang();
+        
+        int total = 0, hasEmail = 0, hasPassport = 0;
+
         for (Object[] row : list) {
             tableModel.addRow(new Object[] { row[0], row[1], row[2], row[3], row[4], "" });
+            
+            // Đếm số liệu thống kê
+            total++;
+            if (row[2] != null && row[2].toString().contains("@")) {
+                hasEmail++;
+            }
+            if (row[4] != null) {
+                String passport = row[4].toString().trim();
+                if (!passport.isEmpty() && !passport.equalsIgnoreCase("NA") && !passport.equalsIgnoreCase("Không") && !passport.equalsIgnoreCase("Trống")) {
+                    hasPassport++;
+                }
+            }
+        }
+        
+        // Cập nhật lên màn hình
+        if (lblTotalCustomers != null) {
+            lblTotalCustomers.setText(String.valueOf(total));
+            lblHasEmail.setText(String.valueOf(hasEmail));
+            lblHasPassport.setText(String.valueOf(hasPassport));
         }
     }
 
