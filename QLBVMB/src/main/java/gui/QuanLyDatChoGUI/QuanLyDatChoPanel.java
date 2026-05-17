@@ -284,6 +284,25 @@ public class QuanLyDatChoPanel extends JPanel {
         }
     }
 
+    /** Tìm và chọn hàng theo BookingID (cột 0) - được gọi từ GlobalSearch */
+    public void selectById(String bookingId) {
+        rowSorter.setRowFilter(null);
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            Object val = tableModel.getValueAt(row, 0);
+            if (val != null && bookingId.equalsIgnoreCase(val.toString())) {
+                int viewRow = table.convertRowIndexToView(row);
+                if (viewRow >= 0) {
+                    table.setRowSelectionInterval(viewRow, viewRow);
+                    table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+                }
+                return;
+            }
+        }
+    }
+
+    // ===============================================
+    // LỘT XÁC BẢNG: ĐỒNG BỘ NGỰA VẰN VÀ ĐƯỜNG KẺ MẢNH
+    // ===============================================
     private void customizeTable() {
         table.setRowHeight(65); 
         table.setFont(new Font("Inter", Font.PLAIN, 14));
