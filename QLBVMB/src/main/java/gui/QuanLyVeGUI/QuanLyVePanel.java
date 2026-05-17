@@ -217,6 +217,22 @@ public class QuanLyVePanel extends JPanel {
         lblCancelledTicket.setText(String.valueOf(cancelled));
     }
 
+    /** Tìm và chọn hàng theo TicketID (cột 0) - được gọi từ GlobalSearch */
+    public void selectById(String ticketId) {
+        if (rowSorter != null) rowSorter.setRowFilter(null); // Xóa filter cũ để hiện hết dữ liệu
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            Object val = tableModel.getValueAt(row, 0);
+            if (val != null && ticketId.equalsIgnoreCase(val.toString())) {
+                int viewRow = table.convertRowIndexToView(row);
+                if (viewRow >= 0) {
+                    table.setRowSelectionInterval(viewRow, viewRow);
+                    table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+                }
+                return;
+            }
+        }
+    }
+
     private void customizeTable() {
         table.setRowHeight(55); 
         table.setFont(new Font("Inter", Font.PLAIN, 14)); 

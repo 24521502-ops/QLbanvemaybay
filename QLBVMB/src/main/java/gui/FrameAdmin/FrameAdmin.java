@@ -14,9 +14,13 @@ import gui.QuanLyChuyenBayGUI.QuanLyChuyenBayPanel;
 import gui.QuanLyDatChoGUI.QuanLyDatChoPanel;
 import gui.QuanLyKhachHangGUI.QuanLyKhachHangPanel;
 import gui.QuanLyNhanVienGUI.EmployeePanel;
-import gui.QuanLyPhanQuyenGUI.PhanQuyenGUI;
 import gui.QuanLyVeGUI.QuanLyVePanel;
 import dto.AccountDTO;
+
+import bus.FrameAdminBUS.FrameAdminBUS;
+import dto.NotificationDTO;
+import dto.SearchResultDTO;
+import java.util.List;
 
 /**
  * FrameAdmin - Khung chính của ứng dụng Aviation Manager
@@ -37,8 +41,18 @@ public class FrameAdmin extends JFrame {
     private EmployeePanel employeePanel;
     private QuanLyKhachHangPanel quanLyKhachHangPanel;
     private BaoCaoTKGUI baoCaoTKGUI;
-    private PhanQuyenGUI phanQuyenGUI;
+    private gui.QuanLyPhanQuyenGUI.PhanQuyenGUI phanQuyenGUI;
     private DuLieuGocPanel duLieuGocPanel;
+
+    // Global search and notification
+    private final FrameAdminBUS frameAdminBUS = new FrameAdminBUS();
+    private GlobalSearchPopup searchPopup;
+    private NotificationDialog notiDialog;
+    private Timer notificationTimer;
+    private int unreadNotificationsCount = 0;
+    private JButton btnNotification;
+    private JTextField txtSearch;
+    private java.util.List<JButton> sidebarButtons = new java.util.ArrayList<>();
 
     // Sidebar dimensions
     private static final int SIDEBAR_WIDTH = 220;
@@ -69,6 +83,10 @@ public class FrameAdmin extends JFrame {
     }
 
     private void initComponents() {
+        // Init global search and notification popups
+        searchPopup = new GlobalSearchPopup();
+        notiDialog = new NotificationDialog();
+
         // ===== RIGHT SIDE (TopBar + Content) =====
         JPanel rightPanel = new JPanel(new BorderLayout(0, 0));
         rightPanel.setBackground(AppColor.BACKGROUND);
@@ -89,7 +107,21 @@ public class FrameAdmin extends JFrame {
         sidebarPanel = createSidebar();
         add(sidebarPanel, BorderLayout.WEST);
 
+        // Bắt đầu timer thông báo
+        notificationTimer = new Timer(30000, e -> updateNotifications());
+        notificationTimer.start();
+        updateNotifications();
+
         setVisible(true);
+    }
+
+    private void updateNotifications() {
+        List<NotificationDTO> notis = frameAdminBUS.getUrgentNotifications();
+        unreadNotificationsCount = (notis != null) ? notis.size() : 0;
+        notiDialog.updateNotifications(notis);
+        if (btnNotification != null) {
+            btnNotification.repaint();
+        }
     }
 
     // ==================== SIDEBAR ====================
@@ -288,8 +320,10 @@ public class FrameAdmin extends JFrame {
         menuPanel.setBorder(BorderFactory.createEmptyBorder(4, 12, 4, 12));
 
         // Menu items
+        sidebarButtons.clear();
         for (String[] item : MENU_ITEMS) {
             JButton btn = createMenuButton(item[0], item[1]);
+            sidebarButtons.add(btn);
             menuPanel.add(btn);
             menuPanel.add(Box.createVerticalStrut(2));
         }
@@ -354,7 +388,7 @@ public class FrameAdmin extends JFrame {
         searchPanel.setOpaque(false);
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        JTextField txtSearch = new JTextField() {
+        txtSearch = new JTextField() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -379,6 +413,40 @@ public class FrameAdmin extends JFrame {
                 BorderFactory.createLineBorder(AppColor.BORDER, 1, true),
                 BorderFactory.createEmptyBorder(4, 34, 4, 12)));
         txtSearch.setBackground(new Color(249, 250, 251)); // Gray 50
+
+        // --- Thêm logic Search ---
+        txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                doSearch();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                doSearch();
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                doSearch();
+            }
+        });
+
+        txtSearch.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                if (txtSearch.getText().trim().length() > 0) {
+                    searchPopup.showLastResults(txtSearch);
+                }
+            }
+        });
+
+        txtSearch.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (txtSearch.getText().trim().length() > 0 && !searchPopup.isVisible()) {
+                    searchPopup.showLastResults(txtSearch);
+                }
+            }
+        });
+
         searchPanel.add(txtSearch);
         topBar.add(searchPanel, BorderLayout.CENTER);
 
@@ -387,21 +455,56 @@ public class FrameAdmin extends JFrame {
         iconsPanel.setOpaque(false);
         iconsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        iconsPanel.add(createTopBarIcon("bell"));
-        iconsPanel.add(createTopBarIcon("help"));
-        
+        btnNotification = createTopBarIcon("bell");
+        btnNotification.addActionListener(e -> {
+            notiDialog.show(btnNotification, -notiDialog.getPreferredSize().width + btnNotification.getWidth(),
+                    btnNotification.getHeight() + 4);
+        });
+        iconsPanel.add(btnNotification);
+
         // Hiển thị tên người dùng từ currentAccount
         String name = (currentAccount != null) ? currentAccount.getUserName() : "Admin";
         JLabel lblUser = new JLabel(name);
         lblUser.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblUser.setForeground(AppColor.TEXT_PRIMARY);
         iconsPanel.add(lblUser);
-        
+
         iconsPanel.add(createAvatarButton());
 
         topBar.add(iconsPanel, BorderLayout.EAST);
 
         return topBar;
+    }
+
+    private void doSearch() {
+        String kw = txtSearch.getText().trim();
+        if (kw.length() > 0) {
+            List<SearchResultDTO> results = frameAdminBUS.globalSearch(kw);
+            searchPopup.updateResults(results, dto -> {
+                String type = dto.getType();
+                String id = dto.getId();
+                if ("FLIGHT".equals(type)) {
+                    selectMenuByName("Chuyến bay");
+                    if (quanLyChuyenBayPanel != null) quanLyChuyenBayPanel.selectById(id);
+                } else if ("CUSTOMER".equals(type)) {
+                    selectMenuByName("Khách hàng");
+                    if (quanLyKhachHangPanel != null) quanLyKhachHangPanel.selectById(id);
+                } else if ("BOOKING".equals(type)) {
+                    selectMenuByName("Đặt chỗ");
+                    if (quanLyDatChoPanel != null) quanLyDatChoPanel.selectById(id);
+                } else if ("TICKET".equals(type)) {
+                    selectMenuByName("Vé");
+                    if (quanLyVePanel != null) quanLyVePanel.selectById(id);
+                }
+                searchPopup.setVisible(false); // Ẩn popup sau khi chọn
+            });
+            if (!searchPopup.isVisible()) {
+                searchPopup.show(txtSearch, 0, txtSearch.getHeight() + 4);
+                txtSearch.requestFocusInWindow();
+            }
+        } else {
+            searchPopup.setVisible(false);
+        }
     }
 
     // ==================== COMPONENT FACTORIES ====================
@@ -536,6 +639,18 @@ public class FrameAdmin extends JFrame {
 
                     // Quả lắc chuông (Clapper) nằm ngay dưới đáy
                     g2.fillOval(cx - 2, cy + 6, 4, 4);
+
+                    // Vẽ badge thông báo đỏ
+                    if (unreadNotificationsCount > 0) {
+                        g2.setColor(new Color(239, 68, 68)); // red
+                        g2.fillOval(cx + 2, cy - 8, 14, 14);
+                        g2.setColor(Color.WHITE);
+                        g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
+                        String txt = unreadNotificationsCount > 9 ? "9+" : String.valueOf(unreadNotificationsCount);
+                        FontMetrics fm2 = g2.getFontMetrics();
+                        int w = fm2.stringWidth(txt);
+                        g2.drawString(txt, cx + 2 + (14 - w) / 2, cy - 8 + 11);
+                    }
                 } else if ("help".equals(type)) {
                     // --- Icon dấu chấm hỏi nằm ngay trọng tâm và thẩm mỹ hơn ---
                     g2.setColor(new Color(90, 105, 125));
@@ -672,6 +787,20 @@ public class FrameAdmin extends JFrame {
 
     // ==================== NAVIGATION ====================
 
+    private void selectMenuByName(String menuText) {
+        if (sidebarButtons != null) {
+            for (JButton btn : sidebarButtons) {
+                if (menuText.equals(btn.getText())) {
+                    setSelectedButton(btn);
+                    onMenuClicked(menuText);
+                    return;
+                }
+            }
+        }
+        // Dự phòng nếu không tìm thấy nút trên sidebar
+        onMenuClicked(menuText);
+    }
+
     /**
      * Xử lý khi người dùng nhấn vào menu sidebar.
      * Gọi setContentPanel() để đổi panel ở giữa.
@@ -679,39 +808,48 @@ public class FrameAdmin extends JFrame {
     private void onMenuClicked(String menuText) {
         switch (menuText) {
             case "Chuyến bay":
-                if (quanLyChuyenBayPanel == null) quanLyChuyenBayPanel = new QuanLyChuyenBayPanel();
+                if (quanLyChuyenBayPanel == null)
+                    quanLyChuyenBayPanel = new QuanLyChuyenBayPanel();
                 setContentPanel(quanLyChuyenBayPanel);
                 break;
             case "Đặt chỗ":
-                if (quanLyDatChoPanel == null) quanLyDatChoPanel = new QuanLyDatChoPanel();
+                if (quanLyDatChoPanel == null)
+                    quanLyDatChoPanel = new QuanLyDatChoPanel();
                 setContentPanel(quanLyDatChoPanel);
                 break;
             case "Vé":
-                if (quanLyVePanel == null) quanLyVePanel = new QuanLyVePanel();
+                if (quanLyVePanel == null)
+                    quanLyVePanel = new QuanLyVePanel();
                 setContentPanel(quanLyVePanel);
                 break;
             case "Nhân viên":
-                if (employeePanel == null) employeePanel = new EmployeePanel();
+                if (employeePanel == null)
+                    employeePanel = new EmployeePanel();
                 setContentPanel(employeePanel);
                 break;
             case "Khách hàng":
-                if (quanLyKhachHangPanel == null) quanLyKhachHangPanel = new QuanLyKhachHangPanel();
+                if (quanLyKhachHangPanel == null)
+                    quanLyKhachHangPanel = new QuanLyKhachHangPanel();
                 setContentPanel(quanLyKhachHangPanel);
                 break;
             case "Dashboard":
-                if (baoCaoTKGUI == null) baoCaoTKGUI = new BaoCaoTKGUI();
+                if (baoCaoTKGUI == null)
+                    baoCaoTKGUI = new BaoCaoTKGUI();
                 setContentPanel(baoCaoTKGUI);
                 break;
             case "Phân quyền":
-                if (phanQuyenGUI == null) phanQuyenGUI = new PhanQuyenGUI();
+                if (phanQuyenGUI == null)
+                    phanQuyenGUI = new gui.QuanLyPhanQuyenGUI.PhanQuyenGUI();
                 setContentPanel(phanQuyenGUI);
                 break;
             case "Dữ liệu gốc":
-                if (duLieuGocPanel == null) duLieuGocPanel = new DuLieuGocPanel();
+                if (duLieuGocPanel == null)
+                    duLieuGocPanel = new DuLieuGocPanel();
                 setContentPanel(duLieuGocPanel);
                 break;
             case "Logout":
-                int opt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Đăng xuất", JOptionPane.YES_NO_OPTION);
+                int opt = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn đăng xuất?", "Đăng xuất",
+                        JOptionPane.YES_NO_OPTION);
                 if (opt == JOptionPane.YES_OPTION) {
                     new gui.LoginRegesterGUI.loginGUI();
                     dispose();

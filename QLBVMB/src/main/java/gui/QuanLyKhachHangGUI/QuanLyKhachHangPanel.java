@@ -201,6 +201,22 @@ public class QuanLyKhachHangPanel extends JPanel {
         }
     }
 
+    /** Tìm và chọn hàng theo CustomerID - được gọi từ GlobalSearch */
+    public void selectById(String customerId) {
+        rowSorter.setRowFilter(null); // Xóa filter cũ để hiện hết dữ liệu
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            Object val = tableModel.getValueAt(row, 0);
+            if (val != null && customerId.equalsIgnoreCase(val.toString())) {
+                int viewRow = table.convertRowIndexToView(row);
+                if (viewRow >= 0) {
+                    table.setRowSelectionInterval(viewRow, viewRow);
+                    table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+                }
+                return;
+            }
+        }
+    }
+
     // ===============================================
     // LỘT XÁC BẢNG: ĐỒNG BỘ NGỰA VẰN VÀ ĐƯỜNG KẺ MẢNH
     // ===============================================

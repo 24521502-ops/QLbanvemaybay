@@ -214,7 +214,6 @@ public class QuanLyDatChoPanel extends JPanel {
             if(raw[7] != null) {
                 totalAmount = Double.valueOf(raw[7].toString()); 
             }
-            // Dùng &nbsp; thay vì khoảng trắng để chữ VNĐ KHÔNG BAO GIỜ rớt xuống dòng
             String formattedMoney = (totalAmount != null && totalAmount > 0) ? formatter.format(totalAmount) + "&nbsp;VNĐ" : "0&nbsp;VNĐ";
             String status = (String) raw[8]; 
 
@@ -226,6 +225,22 @@ public class QuanLyDatChoPanel extends JPanel {
             tableModel.addRow(new Object[]{
                 bookingID, htmlKhachHang, htmlChangBay, date, htmlTongTien, status, ""
             });
+        }
+    }
+
+    /** Tìm và chọn hàng theo BookingID (cột 0) - được gọi từ GlobalSearch */
+    public void selectById(String bookingId) {
+        rowSorter.setRowFilter(null);
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            Object val = tableModel.getValueAt(row, 0);
+            if (val != null && bookingId.equalsIgnoreCase(val.toString())) {
+                int viewRow = table.convertRowIndexToView(row);
+                if (viewRow >= 0) {
+                    table.setRowSelectionInterval(viewRow, viewRow);
+                    table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+                }
+                return;
+            }
         }
     }
 

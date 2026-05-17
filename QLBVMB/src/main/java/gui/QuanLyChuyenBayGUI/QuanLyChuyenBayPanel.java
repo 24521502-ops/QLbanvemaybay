@@ -406,6 +406,21 @@ public class QuanLyChuyenBayPanel extends JPanel {
         lblDelayedCount.setText(String.valueOf(delayed));
     }
 
+    /** Tìm và chọn hàng theo FlightID (cột ẩn 7) - được gọi từ GlobalSearch */
+    public void selectById(String flightId) {
+        for (int row = 0; row < tableModel.getRowCount(); row++) {
+            Object val = tableModel.getValueAt(row, 7);
+            if (val != null && flightId.equalsIgnoreCase(val.toString())) {
+                int viewRow = table.convertRowIndexToView(row);
+                if (viewRow >= 0) {
+                    table.setRowSelectionInterval(viewRow, viewRow);
+                    table.scrollRectToVisible(table.getCellRect(viewRow, 0, true));
+                }
+                return;
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     private void performSearch() {
         String text = txtSearch.getText().toLowerCase();
