@@ -705,3 +705,21 @@ BEGIN
     COMMIT;
 END;
 /
+
+--moi them vao
+-- 8. Procedure tính toán lại tổng tiền hóa đơn (Bao gồm Giá vé + 10% Thuế phí mỗi vé)
+-- Gọi thủ tục này sau khi đã chèn xong toàn bộ vé để ghi đè kết quả sai của Trigger cũ.
+CREATE OR REPLACE PROCEDURE PROC_RECALCULATE_BOOKING_TOTAL (p_BookingID IN VARCHAR2) AS
+    v_BaseTotal NUMBER;
+BEGIN
+    -- Tính tổng giá vé cơ bản
+    SELECT SUM(Price) INTO v_BaseTotal
+    FROM TICKET 
+    WHERE BookingID = p_BookingID AND TicketStatus != 'CANCELLED';
+
+    -- Cập nhật lại hóa đơn với công thức: Tổng Giá Vé * 1.10 (Giá vé + 10% thuế VAT)
+    UPDATE BOOKING 
+    SET TotalAmount = NVL(v_BaseTotal, 0) * 1.10
+    WHERE BookingID = p_BookingID;
+END;
+/

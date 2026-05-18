@@ -8,7 +8,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>25</maven.compiler.release>
-        <exec.mainClass>com.mycompany.qlbvmb.QLBVMB</exec.mainClass>
+        <exec.mainClass>gui.MainFrame</exec.mainClass>
     </properties>
     
     <dependencies>
@@ -16,7 +16,7 @@
     <dependency>
         <groupId>com.formdev</groupId>
         <artifactId>flatlaf</artifactId>
-        <version>3.4.1</version> <!-- Bạn có thể dùng 3.4.1 hoặc bản 3.5 mới nhất -->
+        <version>3.4.1</version>
     </dependency>
 
     <!-- FlatLaf Extras (để dùng các icon và tính năng mở rộng) -->
@@ -53,6 +53,13 @@
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- 6. Thư viện chọn ngày LGoodDatePicker -->
+        <dependency>
+            <groupId>com.github.lgooddatepicker</groupId>
+            <artifactId>LGoodDatePicker</artifactId>
+            <version>11.2.1</version>
         </dependency>
         </dependencies>
 </project>

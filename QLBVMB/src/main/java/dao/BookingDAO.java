@@ -1,192 +1,355 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import util.DBConnection;
+import javax.swing.JOptionPane;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import util.DBConnection;
 
 public class BookingDAO {
 
-    // 1. Lấy danh sách Booking để hiển thị lên Bảng
-    // 1. Lấy danh sách Booking để hiển thị lên Bảng
-    // 1. Lấy danh sách Booking để hiển thị lên Bảng
-    public List<Object[]> layDanhSachDatCho() {
-        List<Object[]> list = new ArrayList<>();
-        
-        // ĐÃ TRẢ LẠI CÂU SQL GỐC: Lấy trực tiếp b.TotalAmount từ bảng BOOKING
-        String sql = "WITH FirstTicket AS ("
-                   + "    SELECT BookingID, FlightID, SeatID, "
-                   + "           ROW_NUMBER() OVER(PARTITION BY BookingID ORDER BY TicketID) as rn "
-                   + "    FROM TICKET"
-                   + ") "
-                   + "SELECT b.BookingID, c.FullName, c.Email, "
-                   + "       dep.IATACode || ' -> ' || arr.IATACode AS ChangBay, "
-                   + "       f.FlightNumber, s.Class, "
-                   + "       TO_CHAR(f.DepartureTime, 'DD/MM/YYYY HH24:MI') AS NgayDi, "
-                   + "       b.TotalAmount, " // Cột Tổng tiền có sẵn trong DB
-                   + "       b.Status "
-                   + "FROM BOOKING b "
-                   + "JOIN CUSTOMER c ON b.CustomerID = c.CustomerID "
-                   + "LEFT JOIN FirstTicket ft ON b.BookingID = ft.BookingID AND ft.rn = 1 "
-                   + "LEFT JOIN FLIGHT f ON ft.FlightID = f.FlightID "
-                   + "LEFT JOIN ROUTE r ON f.RouteID = r.RouteID "
-                   + "LEFT JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID "
-                   + "LEFT JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID "
-                   + "LEFT JOIN SEAT s ON ft.SeatID = s.SeatID "
-                   + "ORDER BY b.BookingID DESC";
+    /**
+     * BƯỚC 4: XỬ LÝ TRANSACTION & GIỮ GHẾ (Yêu cầu 3.b)
+     * TẠO ĐƠN HÀNG & GIỮ GHẾ (Sử dụng Stored Procedure và Transaction an toàn)
+     */
+    public String createPendingBooking(String flightID, List<String> seatNumbers, List<dto.PassengerDTO> passengers,
+            double price) {
+        String bookingID = null;
+        Connection conn = DBConnection.getConnection();
 
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-             
-            while (rs.next()) {
-                list.add(new Object[]{
-                    rs.getString("BookingID"),      // 0
-                    rs.getString("FullName"),       // 1
-                    rs.getString("Email"),          // 2
-                    rs.getString("ChangBay"),       // 3
-                    rs.getString("FlightNumber"),   // 4
-                    rs.getString("Class"),          // 5
-                    rs.getString("NgayDi"),         // 6
-                    rs.getDouble("TotalAmount"),    // 7. Lấy chính xác Tổng tiền
-                    rs.getString("Status")          // 8. Trạng thái
-                });
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
-    
-    // Lấy danh sách Khách hàng
-    public List<String> layDanhSachKhachHang() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT CustomerID, FullName FROM CUSTOMER ORDER BY CustomerID DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                list.add(rs.getString("CustomerID") + " - " + rs.getString("FullName"));
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
+        try {
+            // Bước 1: Tắt Auto-Commit để tự quản lý Transaction
+            conn.setAutoCommit(false);
 
-    // Lấy danh sách Chuyến bay ĐANG MỞ BÁN
-    public List<String> layDanhSachChuyenBay() {
-        List<String> list = new ArrayList<>();
-        String sql = "SELECT f.FlightID, f.FlightNumber, dep.IATACode as DepIATA, arr.IATACode as ArrIATA, TO_CHAR(f.DepartureTime, 'DD/MM/YYYY') as NgayBay "
-                   + "FROM FLIGHT f "
-                   + "JOIN ROUTE r ON f.RouteID = r.RouteID "
-                   + "JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID "
-                   + "JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID "
-                   + "WHERE f.FlightStatus = 'SCHEDULED' "
-                   + "ORDER BY f.DepartureTime ASC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql);
-             ResultSet rs = pst.executeQuery()) {
-            while (rs.next()) {
-                // Format: FL01 - VN101 (SGN -> HAN) - 12/05/2026
-                String display = rs.getString("FlightID") + " - " + rs.getString("FlightNumber") 
-                               + " (" + rs.getString("DepIATA") + " -> " + rs.getString("ArrIATA") + ") - " 
-                               + rs.getString("NgayBay");
-                list.add(display);
-            }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
-
-    // Lấy danh sách GHẾ TRỐNG của 1 chuyến bay cụ thể kèm Giá Tiền
-    public List<String> layDanhSachGheTrong(String flightID) {
-        List<String> list = new ArrayList<>();
-        // Query cực hay: Chỉ lấy ghế thuộc máy bay đó, và loại trừ những ghế đã có vé (TICKET)
-        String sql = "SELECT s.SeatID, s.SeatNumber, s.Class, scp.Price "
-                   + "FROM SEAT s "
-                   + "JOIN FLIGHT f ON s.AircraftID = f.AircraftID "
-                   + "JOIN SEATCLASSPRICE scp ON f.FlightID = scp.FlightID AND s.Class = scp.Class "
-                   + "WHERE f.FlightID = ? "
-                   + "AND s.SeatID NOT IN (SELECT SeatID FROM TICKET WHERE FlightID = ? AND TicketStatus != 'CANCELLED') "
-                   + "ORDER BY s.Class, s.SeatNumber";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, flightID);
-            pst.setString(2, flightID);
-            try (ResultSet rs = pst.executeQuery()) {
-                while (rs.next()) {
-                    // Format: ST01 - 1A (Thương gia) - 4000000
-                    String display = rs.getString("SeatID") + " - " + rs.getString("SeatNumber") 
-                                   + " (" + rs.getString("Class") + ") - " + rs.getInt("Price");
-                    list.add(display);
+            // Bước 2: Xử lý hành khách bằng Stored Procedure
+            List<String> passengerIds = new ArrayList<>();
+            if (passengers != null && !passengers.isEmpty()) {
+                for (dto.PassengerDTO p : passengers) {
+                    String pId = null;
+                    try (CallableStatement cstP = conn.prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
+                        cstP.setString(1, p.getFullName());
+                        cstP.setString(2, p.getGender());
+                        if (p.getDateOfBirth() != null) {
+                            cstP.setDate(3, new java.sql.Date(p.getDateOfBirth().getTime()));
+                        } else {
+                            cstP.setNull(3, java.sql.Types.DATE);
+                        }
+                        cstP.setString(4, p.getPassportNumber());
+                        cstP.registerOutParameter(5, java.sql.Types.VARCHAR);
+                        cstP.execute();
+                        pId = cstP.getString(5);
+                    }
+                    if (pId != null)
+                        passengerIds.add(pId);
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
-        return list;
-    }
 
-    // Gọi Procedure SP_CREATE_BOOKING_TRANSACTION để tạo đơn
-    public boolean taoDatChoMoi(String customerID, String employeeID, String flightID, String seatID) {
-        String sql = "{CALL SP_CREATE_BOOKING_TRANSACTION(?, ?, ?, ?)}";
-        try (Connection conn = DBConnection.getConnection();
-             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
-            cst.setString(1, customerID);
-            cst.setString(2, employeeID);
-            cst.setString(3, flightID);
-            cst.setString(4, seatID);
-            cst.execute();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    // Gọi Procedure SP_CANCEL_BOOKING để hủy đơn và vé
-    public boolean huyDatCho(String bookingID, String reason) {
-        String sql = "{CALL SP_CANCEL_BOOKING(?, ?)}";
-        try (Connection conn = DBConnection.getConnection();
-             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
-            cst.setString(1, bookingID);
-            cst.setString(2, reason);
-            cst.execute();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
-    public String layTicketIDTuBooking(String bookingID) {
-        String ticketID = "";
-        String sql = "SELECT TicketID FROM TICKET WHERE BookingID = ? AND ROWNUM = 1";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, bookingID);
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) ticketID = rs.getString("TicketID");
+            // Bước 3: Tạo mã Booking PENDING
+            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?)}")) {
+                cstB.registerOutParameter(1, java.sql.Types.VARCHAR);
+                cstB.execute();
+                bookingID = cstB.getString(1);
             }
-        } catch (Exception e) { e.printStackTrace(); }
-        return ticketID;
+
+            if (bookingID == null)
+                throw new SQLException("Không tạo được mã đơn hàng.");
+
+            // Bước 4 & 5: Dọn vé treo cũ và chèn vé mới (Giữ chỗ)
+            try (CallableStatement cstT = conn.prepareCall("{call SP_CLEANUP_AND_BOOK_TICKET(?, ?, ?, ?, ?)}")) {
+                for (int i = 0; i < seatNumbers.size(); i++) {
+                    String seatNum = seatNumbers.get(i).trim();
+                    String passId = null;
+                    if (passengerIds.size() == 1) {
+                        passId = passengerIds.get(0);
+                    } else if (i < passengerIds.size()) {
+                        passId = passengerIds.get(i);
+                    }
+
+                    cstT.setString(1, bookingID);
+                    cstT.setString(2, flightID);
+                    cstT.setString(3, seatNum);
+                    if (passId != null) {
+                        cstT.setString(4, passId);
+                    } else {
+                        cstT.setNull(4, java.sql.Types.VARCHAR);
+                    }
+                    cstT.setDouble(5, price);
+                    cstT.addBatch();
+                }
+                cstT.executeBatch();
+            }
+
+            // Bước 6: Gọi thủ tục PL/SQL để tính toán lại tổng tiền hóa đơn (giá vé + 150k phí/vé)
+            try (CallableStatement cstRecalc = conn.prepareCall("{call PROC_RECALCULATE_BOOKING_TOTAL(?)}")) {
+                cstRecalc.setString(1, bookingID);
+                cstRecalc.execute();
+            }
+
+            // Bước 7: Commit toàn bộ nếu thành công
+            conn.commit();
+            return bookingID;
+
+        } catch (SQLException e) {
+            // Rollback ngay lập tức khi xảy ra lỗi
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+            if (e.getErrorCode() == 1) {
+                JOptionPane.showMessageDialog(null, "Ghế hoặc hành khách này đã được đăng ký trên chuyến bay!",
+                        "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Lỗi Database: " + e.getMessage(),
+                        "Lỗi SQL", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+            return null;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    // Gọi Procedure SP_CHANGE_FLIGHT_TICKET để đổi chuyến bay / ghế
-    public boolean doiChuyenBayVaGhe(String ticketID, String newFlightID, String newSeatID) {
-        String sql = "{CALL SP_CHANGE_FLIGHT_TICKET(?, ?, ?)}";
-        try (Connection conn = DBConnection.getConnection();
-             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
-            cst.setString(1, ticketID);
-            cst.setString(2, newFlightID);
-            cst.setString(3, newSeatID);
-            cst.execute();
+    /**
+     * TẠO ĐƠN HÀNG ĐA CHẶNG & GIỮ GHẾ CHO TOÀN BỘ CÁC CHẶNG BAY (Traveloka Style)
+     */
+    public String createPendingBookingMulti(List<String> flightIDs, List<List<String>> multiCitySeats,
+            List<String> seatClasses, List<dto.PassengerDTO> passengers, double totalPrice) {
+        String bookingID = null;
+        Connection conn = DBConnection.getConnection();
+
+        try {
+            conn.setAutoCommit(false);
+
+            // 1. Xử lý hành khách bằng Stored Procedure
+            List<String> passengerIds = new ArrayList<>();
+            if (passengers != null && !passengers.isEmpty()) {
+                for (dto.PassengerDTO p : passengers) {
+                    String pId = null;
+                    try (CallableStatement cstP = conn.prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
+                        cstP.setString(1, p.getFullName());
+                        cstP.setString(2, p.getGender());
+                        if (p.getDateOfBirth() != null) {
+                            cstP.setDate(3, new java.sql.Date(p.getDateOfBirth().getTime()));
+                        } else {
+                            cstP.setNull(3, java.sql.Types.DATE);
+                        }
+                        cstP.setString(4, p.getPassportNumber());
+                        cstP.registerOutParameter(5, java.sql.Types.VARCHAR);
+                        cstP.execute();
+                        pId = cstP.getString(5);
+                    }
+                    if (pId != null)
+                        passengerIds.add(pId);
+                }
+            }
+
+            // 2. Khởi tạo Booking PENDING
+            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?)}")) {
+                cstB.registerOutParameter(1, java.sql.Types.VARCHAR);
+                cstB.execute();
+                bookingID = cstB.getString(1);
+            }
+
+            if (bookingID == null)
+                throw new SQLException("Không tạo được mã đơn hàng.");
+
+            // 3. Giữ ghế và dọn dẹp cho từng chặng bay
+            try (CallableStatement cstT = conn.prepareCall("{call SP_CLEANUP_AND_BOOK_TICKET(?, ?, ?, ?, ?)}")) {
+                for (int legIdx = 0; legIdx < flightIDs.size(); legIdx++) {
+                    String flightID = flightIDs.get(legIdx);
+                    List<String> seats = multiCitySeats.get(legIdx);
+                    String seatClass = seatClasses.get(legIdx);
+                    double legPrice = getLegPriceFromDB(conn, flightID, seatClass);
+
+                    for (int i = 0; i < seats.size(); i++) {
+                        String seatNum = seats.get(i).trim();
+                        String passId = null;
+                        if (passengerIds.size() == 1) {
+                            passId = passengerIds.get(0);
+                        } else if (i < passengerIds.size()) {
+                            passId = passengerIds.get(i);
+                        }
+
+                        cstT.setString(1, bookingID);
+                        cstT.setString(2, flightID);
+                        cstT.setString(3, seatNum);
+                        if (passId != null) {
+                            cstT.setString(4, passId);
+                        } else {
+                            cstT.setNull(4, java.sql.Types.VARCHAR);
+                        }
+                        cstT.setDouble(5, legPrice);
+                        cstT.addBatch();
+                    }
+                }
+                cstT.executeBatch();
+            }
+
+            // 4. Tính lại tổng hóa đơn
+            try (CallableStatement cstRecalc = conn.prepareCall("{call PROC_RECALCULATE_BOOKING_TOTAL(?)}")) {
+                cstRecalc.setString(1, bookingID);
+                cstRecalc.execute();
+            }
+
+            conn.commit();
+            return bookingID;
+
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            if (e.getErrorCode() == 1) {
+                JOptionPane.showMessageDialog(null, "Ghế hoặc hành khách này đã được đăng ký trên chuyến bay!",
+                        "Lỗi Database", JOptionPane.ERROR_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Lỗi Database: " + e.getMessage(),
+                        "Lỗi SQL", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
+            }
+            return null;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private double getLegPriceFromDB(Connection conn, String flightID, String seatClass) {
+        String sql = "SELECT FUNC_GET_DYNAMIC_PRICE(?, ?) AS Price FROM DUAL";
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, flightID);
+            pst.setString(2, seatClass);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("Price");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1200000; // Mặc định nếu xảy ra sự cố
+    }
+
+    /**
+     * GIẢI PHÓNG GHẾ (Yêu cầu 4)
+     * Gọi Stored Procedure SP_CANCEL_BOOKING có sẵn trong DB để quản lý giao dịch hoàn tiền tự động
+     */
+    public boolean cancelBooking(String bookingID) {
+        if (bookingID == null)
+            return false;
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+            try (CallableStatement cst = conn.prepareCall("{call SP_CANCEL_BOOKING(?, ?)}")) {
+                cst.setString(1, bookingID);
+                cst.setString(2, "Khách hàng yêu cầu hủy giữ chỗ");
+                cst.execute();
+            }
+            conn.commit();
             return true;
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+            }
+            return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.setAutoCommit(true);
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    /**
+     * HOÀN TẤT THANH TOÁN (Sử dụng Stored Procedure SP_FINALIZE_BOOKING tối ưu)
+     */
+    public boolean finalizeBooking(String bookingID, String paymentMethod, double amount) {
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+            try (CallableStatement cst = conn.prepareCall("{call SP_FINALIZE_BOOKING(?, ?, ?)}")) {
+                cst.setString(1, bookingID);
+                cst.setString(2, paymentMethod);
+                cst.setDouble(3, amount);
+                cst.execute();
+            }
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+            }
+            return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.setAutoCommit(true);
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    /**
+     * CẬP NHẬT THÔNG TIN HÀNH KHÁCH SAU KHI GIỮ GHẾ
+     * Gọi Stored Procedure SP_UPDATE_BOOKING_PASSENGER theo Batch
+     */
+    public boolean updatePassengerInfo(String bookingID, List<dto.PassengerDTO> passengers) {
+        if (bookingID == null || passengers == null || passengers.isEmpty())
+            return false;
+        Connection conn = DBConnection.getConnection();
+        try {
+            conn.setAutoCommit(false);
+            for (int i = 0; i < passengers.size(); i++) {
+                dto.PassengerDTO p = passengers.get(i);
+                try (CallableStatement cst = conn.prepareCall("{call SP_UPDATE_BOOKING_PASSENGER(?, ?, ?, ?, ?, ?)}")) {
+                    cst.setString(1, bookingID);
+                    cst.setString(2, p.getFullName());
+                    cst.setString(3, p.getGender());
+                    if (p.getDateOfBirth() != null) {
+                        cst.setDate(4, new java.sql.Date(p.getDateOfBirth().getTime()));
+                    } else {
+                        cst.setNull(4, java.sql.Types.DATE);
+                    }
+                    cst.setString(5, p.getPassportNumber());
+                    cst.setInt(6, i + 1); // Oracle Index bắt đầu từ 1
+                    cst.execute();
+                }
+            }
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            try {
+                if (conn != null)
+                    conn.rollback();
+            } catch (SQLException ex) {
+            }
             e.printStackTrace();
             return false;
+        } finally {
+            try {
+                if (conn != null)
+                    conn.setAutoCommit(true);
+            } catch (SQLException e) {
+            }
         }
     }
 }

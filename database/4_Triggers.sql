@@ -231,4 +231,3 @@ END;
 /
 
 
-DROP TRIGGER TRG_No_Duplicate_Seat;
