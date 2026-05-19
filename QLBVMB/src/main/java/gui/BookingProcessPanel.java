@@ -436,8 +436,8 @@ public class BookingProcessPanel extends JPanel {
             currentBookingID = null;
 
             Window window = SwingUtilities.getWindowAncestor(this);
-            if (window instanceof MainFrame) {
-                ((MainFrame) window).showPanel(new BookingHomePanel());
+            if (window instanceof BookingMainFrame) {
+                ((BookingMainFrame) window).showPanel(new BookingHomePanel());
             } else {
                 showStep(0);
             }

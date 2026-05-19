@@ -353,15 +353,15 @@ public class BookingHomePanel extends JPanel {
 
                 // Chuyển sang màn hình quy trình đặt vé và khởi động chọn các chặng
                 Window window = SwingUtilities.getWindowAncestor(this);
-                if (window instanceof MainFrame) {
-                    MainFrame mainFrame = (MainFrame) window;
+                if (window instanceof BookingMainFrame) {
+                    BookingMainFrame mainFrame = (BookingMainFrame) window;
                     BookingProcessPanel processPanel = new BookingProcessPanel();
                     mainFrame.showPanel(processPanel);
 
                     processPanel.updateFlightResults(legs);
                     System.out.println("DEBUG: Switched to BookingProcessPanel with all Multi-City search legs.");
                 } else {
-                    System.err.println("ERROR: Could not find MainFrame ancestor.");
+                    System.err.println("ERROR: Could not find BookingMainFrame ancestor.");
                 }
                 return;
             }
@@ -413,15 +413,15 @@ public class BookingHomePanel extends JPanel {
                 legs.add(new BookingProcessPanel.SearchLeg(arrIATA, depIATA, dateReturn.toString(), returnResults));
 
                 Window window = SwingUtilities.getWindowAncestor(this);
-                if (window instanceof MainFrame) {
-                    MainFrame mainFrame = (MainFrame) window;
+                if (window instanceof BookingMainFrame) {
+                    BookingMainFrame mainFrame = (BookingMainFrame) window;
                     BookingProcessPanel processPanel = new BookingProcessPanel();
                     mainFrame.showPanel(processPanel);
 
                     processPanel.updateFlightResults(legs);
                     System.out.println("DEBUG ROUND-TRIP: Switched to BookingProcessPanel with 2 legs.");
                 } else {
-                    System.err.println("ERROR: Could not find MainFrame ancestor.");
+                    System.err.println("ERROR: Could not find BookingMainFrame ancestor.");
                 }
                 return;
             }
@@ -459,8 +459,8 @@ public class BookingHomePanel extends JPanel {
             System.out.println("DEBUG ONE-WAY: Found " + (results != null ? results.size() : 0) + " flights.");
 
             Window window = SwingUtilities.getWindowAncestor(this);
-            if (window instanceof MainFrame) {
-                MainFrame mainFrame = (MainFrame) window;
+            if (window instanceof BookingMainFrame) {
+                BookingMainFrame mainFrame = (BookingMainFrame) window;
                 BookingProcessPanel processPanel = new BookingProcessPanel();
                 mainFrame.showPanel(processPanel);
 
@@ -468,7 +468,7 @@ public class BookingHomePanel extends JPanel {
                 processPanel.updateFlightResults(depIATA, arrIATA, dateDisplay, results);
                 System.out.println("DEBUG ONE-WAY: Switched to BookingProcessPanel.");
             } else {
-                System.err.println("ERROR: Could not find MainFrame ancestor.");
+                System.err.println("ERROR: Could not find BookingMainFrame ancestor.");
             }
         });
 
