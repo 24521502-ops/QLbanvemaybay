@@ -34,7 +34,7 @@ public class FlightSearchResultPanel extends JPanel {
 
     // Design System
     private static final Color PRIMARY = new Color(29, 78, 216); // blue-700
-    private static final Color SECONDARY = new Color(0, 102, 138); // SkyLink Secondary
+    private static final Color SECONDARY = new Color(0, 102, 138); // TIU AIRLINES Secondary
     private static final Color BG_CONTENT = new Color(248, 249, 255);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
     private static final Color TEXT_GRAY = new Color(71, 85, 105);

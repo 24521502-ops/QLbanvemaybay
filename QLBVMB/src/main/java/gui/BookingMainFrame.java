@@ -75,7 +75,7 @@ public class BookingMainFrame extends JFrame {
 
         gbc.gridx = 1;
         gbc.insets = new Insets(0, 0, 0, 0);
-        JLabel text = new JLabel("SkyLink Aviation");
+        JLabel text = new JLabel("TIU AIRLINES");
         text.setFont(new Font("Segoe UI", Font.BOLD, 22));
         text.setForeground(TEXT_DARK);
         panel.add(text, gbc);

@@ -33,7 +33,7 @@ public class BookingSuccessPanel extends JPanel {
         lblTitle.setForeground(new Color(22, 163, 74)); // Success Green
         content.add(lblTitle);
 
-        JLabel lblSub = new JLabel("Cảm ơn bạn đã tin dùng SkyLink Aviation. Mã đặt chỗ của bạn là:");
+        JLabel lblSub = new JLabel("Cảm ơn bạn đã tin dùng TIU AIRLINES. Mã đặt chỗ của bạn là:");
         lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         lblSub.setForeground(new Color(71, 85, 105));
         content.add(lblSub, "gapy 0 10");

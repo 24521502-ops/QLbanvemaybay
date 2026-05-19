@@ -105,5 +105,3 @@ EXCEPTION
         RETURN NULL;
 END;
 /
-
-
