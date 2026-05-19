@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class BookingMainFrame extends JFrame {
+public class CustomerMainFrame extends JFrame {
 
     private JPanel contentPanel;
     private JPanel activeNavPanel;
@@ -19,7 +19,7 @@ public class BookingMainFrame extends JFrame {
     private static final Color BG_CONTENT = new Color(248, 249, 255);
     private static final Color SECONDARY = new Color(0, 102, 138);
 
-    public BookingMainFrame() {
+    public CustomerMainFrame() {
         setTitle("TIU AIRLINES - Đặt vé máy bay");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
@@ -307,6 +307,6 @@ public class BookingMainFrame extends JFrame {
             }
         }
 
-        SwingUtilities.invokeLater(() -> new BookingMainFrame().setVisible(true));
+        SwingUtilities.invokeLater(() -> new CustomerMainFrame().setVisible(true));
     }
 }
