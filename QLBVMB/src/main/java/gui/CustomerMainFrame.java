@@ -11,6 +11,7 @@ public class CustomerMainFrame extends JFrame {
 
     private JPanel contentPanel;
     private JPanel activeNavPanel;
+    private dto.AccountDTO account;
 
     private static final Color BLUE = new Color(29, 78, 216);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
@@ -19,7 +20,8 @@ public class CustomerMainFrame extends JFrame {
     private static final Color BG_CONTENT = new Color(248, 249, 255);
     private static final Color SECONDARY = new Color(0, 102, 138);
 
-    public CustomerMainFrame() {
+    public CustomerMainFrame(dto.AccountDTO account) {
+        this.account = account;
         setTitle("TIU AIRLINES - Đặt vé máy bay");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
@@ -209,7 +211,8 @@ public class CustomerMainFrame extends JFrame {
         separator.setBackground(BORDER);
         separatorWrapper.add(separator);
 
-        JLabel name = new JLabel("Nguyễn Văn A");
+        String userName = (account != null && account.getUserName() != null) ? account.getUserName() : "Khách hàng";
+        JLabel name = new JLabel(userName);
         name.setFont(new Font("Segoe UI", Font.BOLD, 14));
         name.setForeground(TEXT_DARK);
         name.setPreferredSize(new Dimension(100, 70));
@@ -307,6 +310,6 @@ public class CustomerMainFrame extends JFrame {
             }
         }
 
-        SwingUtilities.invokeLater(() -> new CustomerMainFrame().setVisible(true));
+        SwingUtilities.invokeLater(() -> new CustomerMainFrame(null).setVisible(true));
     }
 }

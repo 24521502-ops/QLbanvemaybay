@@ -279,8 +279,14 @@ public class loginGUI extends JFrame {
     }
 
     private void openMainWindow(AccountDTO account) {
-        gui.FrameAdmin.FrameAdmin frame = new gui.FrameAdmin.FrameAdmin(account);
-        frame.setVisible(true);
+        String role = account.getRoleGroup();
+        if ("ADMIN_GROUP".equals(role) || "MANAGER_GROUP".equals(role) || "STAFF_GROUP".equals(role)) {
+            gui.FrameAdmin.FrameAdmin frame = new gui.FrameAdmin.FrameAdmin(account);
+            frame.setVisible(true);
+        } else {
+            gui.CustomerMainFrame frame = new gui.CustomerMainFrame(account);
+            frame.setVisible(true);
+        }
         dispose();
     }
 
