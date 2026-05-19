@@ -6,31 +6,29 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeatDAO {
+public class BookingSeatDAO {
     
     /**
-     * Lấy danh sách ghế dựa trên FlightID và Hạng ghế.
-     * Đã tối ưu hóa cho Oracle để tránh lỗi subquery.
+     * Lấy danh sách ghế dựa trên FlightID và Hạng ghế qua Stored Procedure.
      */
     public List<SeatInfo> getSeatsByFlightAndClass(String flightID, String seatClass) throws SQLException {
         List<SeatInfo> results = new ArrayList<>();
         
-        String sql = "SELECT SeatID, SeatNumber, Class, IsBooked " +
-                     "FROM VIEW_FLIGHT_SEAT_STATUS " +
-                     "WHERE FlightID = ? " +
-                     "AND UPPER(TRIM(Class)) = UPPER(TRIM(?)) " +
-                     "ORDER BY SeatNumber";
+        String sql = "{call SP_GET_SEATS_BY_FLIGHT_AND_CLASS(?, ?, ?)}";
 
         Connection conn = DBConnection.getConnection();
         if (conn == null) {
             throw new SQLException("Không thể kết nối đến Database. Vui lòng kiểm tra lại DBConnection.");
         }
         
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, flightID);
-            ps.setString(2, seatClass);
+        try (CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, flightID);
+            cst.setString(2, seatClass);
+            cst.registerOutParameter(3, java.sql.Types.REF_CURSOR);
+            
+            cst.execute();
 
-            try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = (ResultSet) cst.getObject(3)) {
                 while (rs.next()) {
                     SeatInfo info = new SeatInfo();
                     info.setSeatID(rs.getString("SeatID"));
@@ -41,7 +39,6 @@ public class SeatDAO {
                 }
             }
         }
-        // Lưu ý: Không đóng conn ở đây nếu DBConnection trả về connection dùng chung (singleton)
         return results;
     }
 

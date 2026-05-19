@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AirportDAO {
+public class BookingAirportDAO {
 
     public List<String> getAllAirportsForDisplay() {
         List<String> list = new ArrayList<>();
@@ -17,7 +17,7 @@ public class AirportDAO {
 
         Connection conn = DBConnection.getConnection();
         if (conn == null) {
-            System.err.println("AirportDAO: Không thể kết nối đến Database.");
+            System.err.println("BookingAirportDAO: Không thể kết nối đến Database.");
             return list;
         }
 

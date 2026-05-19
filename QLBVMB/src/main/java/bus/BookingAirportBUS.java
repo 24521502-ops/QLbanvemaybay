@@ -1,10 +1,10 @@
 package bus;
 
-import dao.AirportDAO;
+import dao.BookingAirportDAO;
 import java.util.List;
 
-public class AirportBUS {
-    private AirportDAO airportDAO = new AirportDAO();
+public class BookingAirportBUS {
+    private BookingAirportDAO airportDAO = new BookingAirportDAO();
 
     public List<String> getAirportDisplayList() {
         // Có thể thêm logic xử lý ở đây nếu cần

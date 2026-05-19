@@ -2,7 +2,7 @@ package bus;
 
 import javax.swing.*;
 
-public class FlightBUS {
+public class BookingFlightBUS {
 
     /**
      * Kiểm tra tính hợp lệ của thông tin tìm kiếm chuyến bay.
@@ -46,6 +46,6 @@ public class FlightBUS {
     }
 
     public java.util.List<dto.FlightSearchResultDTO> searchFlights(String depIATA, String arrIATA, String dateStr) {
-        return new dao.FlightDAO().searchFlights(depIATA, arrIATA, dateStr);
+        return new dao.BookingFlightDAO().searchFlights(depIATA, arrIATA, dateStr);
     }
 }

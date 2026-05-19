@@ -24,7 +24,7 @@ public class PassengerInfoPanel extends JPanel {
     private static final Color BORDER_COLOR = new Color(226, 232, 240);
 
     private final BookingProcessPanel navigationListener;
-    private final bus.PassengerBUS passengerBUS = new bus.PassengerBUS();
+    private final bus.BookingPassengerBUS passengerBUS = new bus.BookingPassengerBUS();
     private JPanel formContainer;
     private List<PassengerFormBlock> formBlocks = new ArrayList<>();
     private JComboBox<Integer> cbPassengerCount;

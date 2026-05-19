@@ -2,7 +2,7 @@ package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import dao.AirportDAO;
+import dao.BookingAirportDAO;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -68,7 +68,7 @@ public class BookingHomePanel extends JPanel {
 
     private void loadAirportData() {
         try {
-            AirportDAO dao = new AirportDAO();
+            BookingAirportDAO dao = new BookingAirportDAO();
             airportList = dao.getAllAirportsForDisplay();
             // Nếu DB trả về rỗng, vẫn thêm dữ liệu mẫu để app chạy được
             if (airportList == null || airportList.isEmpty()) {
@@ -338,7 +338,7 @@ public class BookingHomePanel extends JPanel {
                 }
 
                 // Thực hiện tìm kiếm tất cả các chặng bay qua BUS
-                bus.FlightBUS flightBUS = new bus.FlightBUS();
+                bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
                 List<BookingProcessPanel.SearchLeg> legs = new ArrayList<>();
                 for (int i = 0; i < depIATAs.size(); i++) {
                     String dep = depIATAs.get(i);
@@ -401,7 +401,7 @@ public class BookingHomePanel extends JPanel {
                     return;
                 }
 
-                bus.FlightBUS flightBUS = new bus.FlightBUS();
+                bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
                 List<BookingProcessPanel.SearchLeg> legs = new ArrayList<>();
 
                 // Chặng đi (Outbound)
@@ -453,7 +453,7 @@ public class BookingHomePanel extends JPanel {
                 return;
             }
 
-            bus.FlightBUS flightBUS = new bus.FlightBUS();
+            bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
             java.util.List<dto.FlightSearchResultDTO> results = flightBUS.searchFlights(depIATA, arrIATA,
                     date.toString());
             System.out.println("DEBUG ONE-WAY: Found " + (results != null ? results.size() : 0) + " flights.");

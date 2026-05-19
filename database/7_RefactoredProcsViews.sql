@@ -247,6 +247,61 @@ BEGIN
 END;
 /
 
+-- 8. SP_GET_SEATS_BY_FLIGHT_AND_CLASS (Lấy danh sách ghế theo chuyến bay và hạng ghế)
+CREATE OR REPLACE PROCEDURE SP_GET_SEATS_BY_FLIGHT_AND_CLASS (
+    p_FlightID IN VARCHAR2,
+    p_Class IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT SeatID, SeatNumber, Class, IsBooked
+        FROM VIEW_FLIGHT_SEAT_STATUS
+        WHERE FlightID = p_FlightID
+          AND UPPER(TRIM(Class)) = UPPER(TRIM(p_Class))
+        ORDER BY SeatNumber;
+END;
+/
+
+-- 9. SP_SEARCH_FLIGHTS (Tìm kiếm chuyến bay theo điểm khởi hành, điểm đến và ngày đi)
+CREATE OR REPLACE PROCEDURE SP_SEARCH_FLIGHTS (
+    p_DepCode IN VARCHAR2,
+    p_ArrCode IN VARCHAR2,
+    p_DateStr IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT FlightID, AirlineName, AircraftModel, DepCode, ArrCode, DepartureTime, ArrivalTime, ClassName, Price, Seats
+        FROM VIEW_FLIGHT_SEARCH
+        WHERE TRIM(UPPER(DepCode)) = TRIM(UPPER(p_DepCode))
+          AND TRIM(UPPER(ArrCode)) = TRIM(UPPER(p_ArrCode))
+          AND TRUNC(DepartureTime) = TO_DATE(p_DateStr, 'YYYY-MM-DD')
+          AND DepartureTime > SYSDATE
+        ORDER BY DepartureTime ASC, Price ASC;
+END;
+/
+
+-- 10. SP_GET_MIN_PRICES_FOR_WEEK (Lấy giá vé rẻ nhất trong tuần xung quanh một ngày)
+CREATE OR REPLACE PROCEDURE SP_GET_MIN_PRICES_FOR_WEEK (
+    p_DepCode IN VARCHAR2,
+    p_ArrCode IN VARCHAR2,
+    p_StartDate IN VARCHAR2,
+    p_EndDate IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT TRUNC(DepartureTime) as d, MIN(Price) as min_p
+        FROM VIEW_FLIGHT_MIN_PRICES
+        WHERE TRIM(UPPER(DepCode)) = TRIM(UPPER(p_DepCode))
+          AND TRIM(UPPER(ArrCode)) = TRIM(UPPER(p_ArrCode))
+          AND TRUNC(DepartureTime) BETWEEN TO_DATE(p_StartDate, 'YYYY-MM-DD') AND TO_DATE(p_EndDate, 'YYYY-MM-DD')
+          AND DepartureTime > SYSDATE
+        GROUP BY TRUNC(DepartureTime);
+END;
+/
+
 
 -- =========================================================================
 -- PHẦN 4: TRIGGERS RÀNG BUỘC LIÊN QUAN ĐẾN VÉ, ĐƠN HÀNG VÀ THANH TOÁN

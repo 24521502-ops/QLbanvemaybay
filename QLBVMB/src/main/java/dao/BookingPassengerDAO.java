@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PassengerDAO {
+public class BookingPassengerDAO {
 
     /**
      * Thêm hành khách mới vào cơ sở dữ liệu.

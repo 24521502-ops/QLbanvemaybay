@@ -2,8 +2,8 @@ package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import bus.AirportBUS;
-import dao.FlightDAO;
+import bus.BookingAirportBUS;
+import dao.BookingFlightDAO;
 import dto.FlightSearchResultDTO;
 
 import javax.swing.*;
@@ -29,8 +29,8 @@ public class FlightSearchResultPanel extends JPanel {
     private List<FlightSearchResultDTO> flights;
     private BookingProcessPanel navigationListener;
 
-    private final AirportBUS airportBUS = new AirportBUS();
-    private final FlightDAO flightDAO = new FlightDAO();
+    private final BookingAirportBUS airportBUS = new BookingAirportBUS();
+    private final BookingFlightDAO flightDAO = new BookingFlightDAO();
 
     // Design System
     private static final Color PRIMARY = new Color(29, 78, 216); // blue-700

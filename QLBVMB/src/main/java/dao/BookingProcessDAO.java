@@ -6,7 +6,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BookingDAO {
+public class BookingProcessDAO {
 
     /**
      * BƯỚC 4: XỬ LÝ TRANSACTION & GIỮ GHẾ (Yêu cầu 3.b)
@@ -26,7 +26,8 @@ public class BookingDAO {
             if (passengers != null && !passengers.isEmpty()) {
                 for (dto.PassengerDTO p : passengers) {
                     String pId = null;
-                    try (CallableStatement cstP = conn.prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
+                    try (CallableStatement cstP = conn
+                            .prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
                         cstP.setString(1, p.getFullName());
                         cstP.setString(2, p.getGender());
                         if (p.getDateOfBirth() != null) {
@@ -79,7 +80,8 @@ public class BookingDAO {
                 cstT.executeBatch();
             }
 
-            // Bước 6: Gọi thủ tục PL/SQL để tính toán lại tổng tiền hóa đơn (giá vé + 150k phí/vé)
+            // Bước 6: Gọi thủ tục PL/SQL để tính toán lại tổng tiền hóa đơn (giá vé + 150k
+            // phí/vé)
             try (CallableStatement cstRecalc = conn.prepareCall("{call PROC_RECALCULATE_BOOKING_TOTAL(?)}")) {
                 cstRecalc.setString(1, bookingID);
                 cstRecalc.execute();
@@ -133,7 +135,8 @@ public class BookingDAO {
             if (passengers != null && !passengers.isEmpty()) {
                 for (dto.PassengerDTO p : passengers) {
                     String pId = null;
-                    try (CallableStatement cstP = conn.prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
+                    try (CallableStatement cstP = conn
+                            .prepareCall("{call SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}")) {
                         cstP.setString(1, p.getFullName());
                         cstP.setString(2, p.getGender());
                         if (p.getDateOfBirth() != null) {
@@ -246,7 +249,8 @@ public class BookingDAO {
 
     /**
      * GIẢI PHÓNG GHẾ (Yêu cầu 4)
-     * Gọi Stored Procedure SP_CANCEL_BOOKING có sẵn trong DB để quản lý giao dịch hoàn tiền tự động
+     * Gọi Stored Procedure SP_CANCEL_BOOKING có sẵn trong DB để quản lý giao dịch
+     * hoàn tiền tự động
      */
     public boolean cancelBooking(String bookingID) {
         if (bookingID == null)

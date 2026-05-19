@@ -24,7 +24,7 @@ public class BookingProcessPanel extends JPanel {
     private SeatSelectionPanel seatSelectionPanel;
     private PaymentPanel paymentPanel;
 
-    private final dao.BookingDAO bookingDAO = new dao.BookingDAO();
+    private final dao.BookingProcessDAO bookingDAO = new dao.BookingProcessDAO();
     private String currentBookingID;
     private Timer checkoutTimer;
     private int remainingSeconds = 1200; // 20 minutes

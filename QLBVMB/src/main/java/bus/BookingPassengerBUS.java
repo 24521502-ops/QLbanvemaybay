@@ -3,8 +3,8 @@ package bus;
 import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
-public class PassengerBUS {
-    private final dao.PassengerDAO passengerDAO = new dao.PassengerDAO();
+public class BookingPassengerBUS {
+    private final dao.BookingPassengerDAO passengerDAO = new dao.BookingPassengerDAO();
 
     /**
      * Kiểm tra định dạng thông tin hành khách.

@@ -1,7 +1,7 @@
 package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import dao.SeatDAO;
+import dao.BookingSeatDAO;
 import dto.FlightSearchResultDTO;
 import net.miginfocom.swing.MigLayout;
 
@@ -19,7 +19,7 @@ public class SeatSelectionPanel extends JPanel {
     private FlightSearchResultDTO flight;
     private String selectedClass;
     private final BookingProcessPanel navigationListener;
-    private final SeatDAO seatDAO = new SeatDAO();
+    private final BookingSeatDAO seatDAO = new BookingSeatDAO();
     
     private final Set<String> selectedSeats = new HashSet<>();
     private double baggagePrice = 0;
@@ -85,9 +85,9 @@ public class SeatSelectionPanel extends JPanel {
     }
 
     private void loadSeatsAsync() {
-        SwingWorker<List<SeatDAO.SeatInfo>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<BookingSeatDAO.SeatInfo>, Void> worker = new SwingWorker<>() {
             @Override
-            protected List<SeatDAO.SeatInfo> doInBackground() throws Exception {
+            protected List<BookingSeatDAO.SeatInfo> doInBackground() throws Exception {
                 // Kiểm tra an toàn trước khi gọi DAO
                 if (flight == null || flight.getFlightID() == null) {
                     throw new Exception("Thông tin chuyến bay không hợp lệ (FlightID is NULL)");
@@ -98,7 +98,7 @@ public class SeatSelectionPanel extends JPanel {
             @Override
             protected void done() {
                 try {
-                    List<SeatDAO.SeatInfo> seats = get();
+                    List<BookingSeatDAO.SeatInfo> seats = get();
                     displayUI(seats);
                 } catch (ExecutionException e) {
                     Throwable cause = e.getCause();
@@ -113,7 +113,7 @@ public class SeatSelectionPanel extends JPanel {
         worker.execute();
     }
 
-    private void displayUI(List<SeatDAO.SeatInfo> seats) {
+    private void displayUI(List<BookingSeatDAO.SeatInfo> seats) {
         removeAll();
         initComponents(seats);
         revalidate();
@@ -144,7 +144,7 @@ public class SeatSelectionPanel extends JPanel {
         repaint();
     }
 
-    private void initComponents(List<SeatDAO.SeatInfo> seats) {
+    private void initComponents(List<BookingSeatDAO.SeatInfo> seats) {
         if (flight == null) return;
         
         // Header
@@ -158,8 +158,8 @@ public class SeatSelectionPanel extends JPanel {
         JLabel title = new JLabel(stepTitle);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
         
-        String depCity = new bus.AirportBUS().getCityByIATA(flight.getDepartureCode());
-        String arrCity = new bus.AirportBUS().getCityByIATA(flight.getArrivalCode());
+        String depCity = new bus.BookingAirportBUS().getCityByIATA(flight.getDepartureCode());
+        String arrCity = new bus.BookingAirportBUS().getCityByIATA(flight.getArrivalCode());
         String routeStr = depCity + " -> " + arrCity;
 
         JLabel subtitle = new JLabel("Tùy chỉnh chỗ ngồi của bạn cho chuyến bay " + flight.getFlightID() + " (" + routeStr + ") - Hạng " + selectedClass);
@@ -181,7 +181,7 @@ public class SeatSelectionPanel extends JPanel {
         add(main, BorderLayout.CENTER);
     }
 
-    private JPanel createSeatMapPanel(List<SeatDAO.SeatInfo> seats) {
+    private JPanel createSeatMapPanel(List<BookingSeatDAO.SeatInfo> seats) {
         JPanel p = new JPanel(new MigLayout("wrap 1, insets 24, fill", "[grow, fill]", "[]16[grow, fill]"));
         p.setBackground(Color.WHITE);
         p.putClientProperty(FlatClientProperties.STYLE, "arc:16; borderColor:#e2e8f0; borderWidth:1");
@@ -208,7 +208,7 @@ public class SeatSelectionPanel extends JPanel {
         if (seats.isEmpty()) {
             planeInterior.add(new JLabel("Không có ghế nào được tìm thấy cho hạng này."), "span");
         } else {
-            for (SeatDAO.SeatInfo s : seats) {
+            for (BookingSeatDAO.SeatInfo s : seats) {
                 planeInterior.add(createSeatButton(s), "w 40!, h 40!");
             }
         }
@@ -222,7 +222,7 @@ public class SeatSelectionPanel extends JPanel {
         return p;
     }
 
-    private JButton createSeatButton(SeatDAO.SeatInfo s) {
+    private JButton createSeatButton(BookingSeatDAO.SeatInfo s) {
         JButton btn = new JButton(s.getSeatNumber());
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 10));
         btn.putClientProperty(FlatClientProperties.STYLE, "arc:8");
