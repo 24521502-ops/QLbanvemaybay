@@ -6,12 +6,20 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import dto.CustomerDTO;
+import dao.QuanLyKhachHangDAO.ProfileDAO;
 
 public class CustomerMainFrame extends JFrame {
 
     private JPanel contentPanel;
     private JPanel activeNavPanel;
     private dto.AccountDTO account;
+    private final java.util.Map<String, JPanel> navItems = new java.util.HashMap<>();
+
+    private CustomerDTO customer;
+    private JLabel lblHeaderUserName;
+    private JPanel headerAvatarPanel;
+    private String headerInitials = "?";
 
     private static final Color BLUE = new Color(29, 78, 216);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
@@ -22,6 +30,13 @@ public class CustomerMainFrame extends JFrame {
 
     public CustomerMainFrame(dto.AccountDTO account) {
         this.account = account;
+        if (account != null && account.getCustomerID() != null) {
+            try {
+                this.customer = new ProfileDAO().getProfileByCustomerID(account.getCustomerID());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         setTitle("TIU AIRLINES - Đặt vé máy bay");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1280, 800);
@@ -124,6 +139,7 @@ public class CustomerMainFrame extends JFrame {
         item.add(label, BorderLayout.CENTER);
         item.add(underline, BorderLayout.SOUTH);
 
+        navItems.put(text, item);
         if (active) {
             activeNavPanel = item;
         }
@@ -197,7 +213,7 @@ public class CustomerMainFrame extends JFrame {
     private JPanel createUserPanel() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 14, 0));
         panel.setOpaque(false);
-        panel.setPreferredSize(new Dimension(330, 70));
+        panel.setPreferredSize(new Dimension(370, 70));
 
         JLabel globe = createHeaderIcon("🌐");
         JLabel help = createHeaderIcon("❔");
@@ -211,19 +227,25 @@ public class CustomerMainFrame extends JFrame {
         separator.setBackground(BORDER);
         separatorWrapper.add(separator);
 
-        String userName = (account != null && account.getUserName() != null) ? account.getUserName() : "Khách hàng";
-        JLabel name = new JLabel(userName);
-        name.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        name.setForeground(TEXT_DARK);
-        name.setPreferredSize(new Dimension(100, 70));
-        name.setVerticalAlignment(SwingConstants.CENTER);
+        String displayName = "Khách hàng";
+        if (customer != null && customer.getFullName() != null && !customer.getFullName().isBlank()) {
+            displayName = customer.getFullName();
+        } else if (account != null && account.getUserName() != null) {
+            displayName = account.getUserName();
+        }
 
-        JLabel avatar = createAvatarLabel();
+        lblHeaderUserName = new JLabel(displayName);
+        lblHeaderUserName.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblHeaderUserName.setForeground(TEXT_DARK);
+        lblHeaderUserName.setPreferredSize(new Dimension(140, 70));
+        lblHeaderUserName.setVerticalAlignment(SwingConstants.CENTER);
+
+        JPanel avatar = createAvatarLabel();
 
         panel.add(globe);
         panel.add(help);
         panel.add(separatorWrapper);
-        panel.add(name);
+        panel.add(lblHeaderUserName);
         panel.add(avatar);
 
         return panel;
@@ -239,46 +261,94 @@ public class CustomerMainFrame extends JFrame {
         return label;
     }
 
-    private JLabel createAvatarLabel() {
-        JLabel avatar = new JLabel() {
+    private JPanel createAvatarLabel() {
+        String displayName = "Khách hàng";
+        if (customer != null && customer.getFullName() != null && !customer.getFullName().isBlank()) {
+            displayName = customer.getFullName();
+        } else if (account != null && account.getUserName() != null) {
+            displayName = account.getUserName();
+        }
+        headerInitials = getInitials(displayName);
+
+        headerAvatarPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                int size = 36;
-                int x = 0;
-                int y = 17;
-
-                g2.setColor(new Color(0, 102, 138, 51));
+                int size = 36 - 2; // Subtract 2 to prevent clipping of the border
+                int x = (getWidth() - size) / 2;
+                int y = (getHeight() - size) / 2;
+                
+                // Gradient nền sky sang trọng khớp 100% với ProfilePanel
+                GradientPaint gp = new GradientPaint(x, y, new Color(186, 230, 253),
+                        x + size, y + size, new Color(147, 197, 253));
+                g2.setPaint(gp);
                 g2.fillOval(x, y, size, size);
-
-                g2.setColor(Color.WHITE);
-                g2.fillOval(x + 2, y + 2, size - 4, size - 4);
-
-                g2.setColor(new Color(209, 213, 219));
-                g2.fillOval(x + 2, y + 2, size - 4, size - 4);
-
-                g2.setColor(TEXT_GRAY);
-                g2.fillOval(x + 10, y + 8, 15, 15);
-                g2.fillArc(x + 5, y + 24, 25, 20, 0, 180);
-
+                
+                // Viền
+                g2.setColor(new Color(0, 102, 138));
+                g2.setStroke(new BasicStroke(1.2f));
+                g2.drawOval(x, y, size, size);
+                
+                // Initials
+                g2.setColor(new Color(0, 102, 138));
+                g2.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                FontMetrics fm = g2.getFontMetrics();
+                int tx = x + (size - fm.stringWidth(headerInitials)) / 2;
+                int ty = y + (size + fm.getAscent()) / 2 - 2; // Visually perfectly centered vertically for capitals
+                g2.drawString(headerInitials, tx, ty);
                 g2.dispose();
             }
         };
 
-        avatar.setPreferredSize(new Dimension(36, 70));
-        avatar.setMinimumSize(new Dimension(36, 70));
-        avatar.setMaximumSize(new Dimension(36, 70));
+        headerAvatarPanel.setOpaque(false);
+        headerAvatarPanel.setPreferredSize(new Dimension(36, 70));
+        headerAvatarPanel.setMinimumSize(new Dimension(36, 70));
+        headerAvatarPanel.setMaximumSize(new Dimension(36, 70));
+        headerAvatarPanel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        headerAvatarPanel.setToolTipText("Hồ sơ cá nhân");
 
-        return avatar;
+        headerAvatarPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                try {
+                    showPanel(new ProfilePanel(account));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Lỗi mở hồ sơ: " + ex.getMessage());
+                }
+            }
+        });
+
+        return headerAvatarPanel;
+    }
+
+    private String getInitials(String name) {
+        if (name == null || name.isBlank()) return "?";
+        String[] p = name.trim().split("\\s+");
+        return p.length >= 2
+                ? (p[0].substring(0, 1) + p[p.length - 1].substring(0, 1)).toUpperCase()
+                : p[0].substring(0, 1).toUpperCase();
+    }
+
+    public void updateHeaderUserInfo(String newFullName) {
+        if (lblHeaderUserName != null) {
+            lblHeaderUserName.setText(newFullName);
+        }
+        headerInitials = getInitials(newFullName);
+        if (headerAvatarPanel != null) {
+            headerAvatarPanel.repaint();
+        }
     }
 
     private void handleNavClick(String menuName) {
         if (menuName.equals("Đặt vé")) {
             showPanel(new BookingHomePanel());
+        } else if (menuName.equals("Chuyến bay của tôi")) {
+            showPanel(new MyFlightPanel(account));
+        } else if (menuName.equals("Lịch sử vé")) {
+            showPanel(new FlightHistoryPanel(account));
         } else {
             JPanel placeholder = new JPanel(new GridBagLayout());
             placeholder.setBackground(BG_CONTENT);
@@ -297,6 +367,24 @@ public class CustomerMainFrame extends JFrame {
         contentPanel.add(panel, BorderLayout.CENTER);
         contentPanel.revalidate();
         contentPanel.repaint();
+    }
+
+    public dto.AccountDTO getAccount() {
+        return account;
+    }
+
+    /** Chuyển sang một tab bất kỳ đúng cách (cập nhật cả nav highlight lẫn nội dung) */
+    public void navigateTo(String menuName) {
+        JPanel navItem = navItems.get(menuName);
+        if (navItem != null) {
+            updateNavStyle(navItem);
+        }
+        handleNavClick(menuName);
+    }
+
+    /** Chuyển sang tab "Lịch sử vé" đúng cách */
+    public void navigateToHistory() {
+        navigateTo("Lịch sử vé");
     }
 
     public static void main(String[] args) {

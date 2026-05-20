@@ -1,9 +1,10 @@
 package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+
+import bus.DatVeBUS.BookingAirportBUS;
 import net.miginfocom.swing.MigLayout;
-import bus.BookingAirportBUS;
-import dao.BookingFlightDAO;
+import dao.DatVeDAO.BookingFlightDAO;
 import dto.FlightSearchResultDTO;
 
 import javax.swing.*;
@@ -72,7 +73,8 @@ public class FlightSearchResultPanel extends JPanel {
         initComponents();
     }
 
-    public FlightSearchResultPanel(List<BookingProcessPanel.SearchLeg> legs, int activeIndex, BookingProcessPanel listener) {
+    public FlightSearchResultPanel(List<BookingProcessPanel.SearchLeg> legs, int activeIndex,
+            BookingProcessPanel listener) {
         this.multiCityLegs = legs;
         this.activeLegIndex = activeIndex;
         BookingProcessPanel.SearchLeg activeLeg = legs.get(activeIndex);
@@ -80,18 +82,19 @@ public class FlightSearchResultPanel extends JPanel {
         this.arrCode = activeLeg.arrCode;
         this.flights = activeLeg.results != null ? activeLeg.results : new ArrayList<>();
         this.navigationListener = listener;
-        
+
         try {
             this.searchDate = LocalDate.parse(activeLeg.dateStr);
         } catch (Exception e) {
             this.searchDate = LocalDate.now();
         }
-        
+
         setLayout(new BorderLayout());
         setBackground(BG_CONTENT);
         initComponents();
 
-        // Đưa trực tiếp card hành trình dọc vào thanh sidebar bên trái để giải phóng hoàn toàn không gian
+        // Đưa trực tiếp card hành trình dọc vào thanh sidebar bên trái để giải phóng
+        // hoàn toàn không gian
         if (listener != null) {
             listener.getSidebar().setMultiCityCard(createMultiCityVerticalCard());
         }
@@ -112,7 +115,8 @@ public class FlightSearchResultPanel extends JPanel {
     private void initComponents() {
         removeAll();
 
-        // Layout 1 cột rộng rãi, phóng khoáng cho cả Một chiều, Khứ hồi và Nhiều điểm đến
+        // Layout 1 cột rộng rãi, phóng khoáng cho cả Một chiều, Khứ hồi và Nhiều điểm
+        // đến
         setLayout(new BorderLayout());
         JPanel container = new JPanel(new MigLayout("wrap, fillx, insets 24 16, gapy 24", "[grow, fill]"));
         container.setOpaque(false);
@@ -129,30 +133,30 @@ public class FlightSearchResultPanel extends JPanel {
         JPanel card = new JPanel(new MigLayout("wrap, fillx, insets 16 0 16 0, gapy 0", "[grow, fill]"));
         card.setBackground(SURFACE);
         card.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#e2e8f0; borderWidth:1");
-        
+
         // Tiêu đề card
         JPanel titlePanel = new JPanel(new MigLayout("insets 0 16 12 16, gapx 8", "[][]", "[]"));
         titlePanel.setOpaque(false);
         titlePanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(226, 232, 240))); // Line phân cách
-        
+
         JLabel lblIcon = new JLabel("🛫");
         lblIcon.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
-        
+
         JLabel lblTitle = new JLabel("Chuyến bay của bạn");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 15));
         lblTitle.setForeground(TEXT_DARK);
-        
+
         titlePanel.add(lblIcon);
         titlePanel.add(lblTitle);
         card.add(titlePanel, "wrap, growx");
-        
+
         // Danh sách các chặng bay xếp dọc
         for (int i = 0; i < multiCityLegs.size(); i++) {
             BookingProcessPanel.SearchLeg leg = multiCityLegs.get(i);
             final int legIdx = i;
             final boolean isActive = (i == activeLegIndex);
             final boolean isCompleted = (i < activeLegIndex);
-            
+
             JPanel legRow = new JPanel(new MigLayout("insets 12 16, gapx 12", "[pref!][grow, fill]", "[]"));
             legRow.setOpaque(isActive);
             if (isActive) {
@@ -160,23 +164,23 @@ public class FlightSearchResultPanel extends JPanel {
             } else {
                 legRow.setBackground(Color.WHITE);
             }
-            
+
             // Đường xanh bên trái nếu đang được chọn (Active)
             if (isActive) {
                 legRow.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(14, 165, 233)), // Thanh đứng xanh dương
-                    BorderFactory.createEmptyBorder(0, 8, 0, 0) // Padding trong
+                        BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(14, 165, 233)), // Thanh đứng xanh dương
+                        BorderFactory.createEmptyBorder(0, 8, 0, 0) // Padding trong
                 ));
             } else {
                 legRow.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 0));
             }
-            
+
             // Số thứ tự chặng (Hộp tròn)
             JLabel lblNum = new JLabel();
             lblNum.setHorizontalAlignment(SwingConstants.CENTER);
             lblNum.setOpaque(true);
             lblNum.setFont(new Font("Segoe UI", Font.BOLD, 11));
-            
+
             if (isCompleted) {
                 lblNum.setText(String.valueOf(i + 1));
                 lblNum.setBackground(new Color(34, 197, 94)); // Xanh lá cây
@@ -192,29 +196,30 @@ public class FlightSearchResultPanel extends JPanel {
             }
             lblNum.setPreferredSize(new Dimension(24, 24));
             lblNum.putClientProperty(FlatClientProperties.STYLE, "arc:999");
-            
+
             // Text chặng bay
             JPanel textPnl = new JPanel(new MigLayout("wrap, insets 0, gapy 2"));
             textPnl.setOpaque(false);
-            
+
             // Dòng ngày đi
             JLabel lblDate = new JLabel(formatLegDate(leg.dateStr));
             lblDate.setFont(new Font("Segoe UI", isActive ? Font.BOLD : Font.PLAIN, 12));
             lblDate.setForeground(isActive ? TEXT_DARK : new Color(148, 163, 184)); // Tối hoặc xám nhạt
-            
-            // Dòng hành trình (TP HCM -> Bangkok) - Dùng ký tự ASCII -> để không bao giờ bị lỗi ô vuông
+
+            // Dòng hành trình (TP HCM -> Bangkok) - Dùng ký tự ASCII -> để không bao giờ bị
+            // lỗi ô vuông
             String depCity = airportBUS.getCityByIATA(leg.depCode);
             String arrCity = airportBUS.getCityByIATA(leg.arrCode);
             JLabel lblRoute = new JLabel(depCity + " -> " + arrCity);
             lblRoute.setFont(new Font("Segoe UI", Font.BOLD, 13));
             lblRoute.setForeground(isActive ? TEXT_DARK : new Color(148, 163, 184));
-            
+
             textPnl.add(lblDate);
             textPnl.add(lblRoute);
-            
+
             legRow.add(lblNum, "w 24!, h 24!");
             legRow.add(textPnl);
-            
+
             // Thêm hiệu ứng click và hover tương tác kiểu Traveloka Premium
             legRow.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             legRow.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -225,14 +230,14 @@ public class FlightSearchResultPanel extends JPanel {
                         listener.goToLeg(legIdx);
                     }
                 }
-                
+
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
                     legRow.setBackground(new Color(241, 245, 249)); // Màu xám nhẹ khi hover
                     legRow.setOpaque(true);
                     legRow.repaint();
                 }
-                
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
                     if (isActive) {
@@ -246,7 +251,7 @@ public class FlightSearchResultPanel extends JPanel {
             });
 
             card.add(legRow, "wrap, growx");
-            
+
             // Thêm đường phân cách mờ ở giữa các chặng
             if (i < multiCityLegs.size() - 1) {
                 JPanel line = new JPanel();
@@ -254,7 +259,7 @@ public class FlightSearchResultPanel extends JPanel {
                 card.add(line, "h 1!, growx, gapleft 12, gapright 12");
             }
         }
-        
+
         return card;
     }
 
@@ -284,7 +289,8 @@ public class FlightSearchResultPanel extends JPanel {
         // Icon
         JLabel lblPlane = new JLabel("🛫");
         lblPlane.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
-        lblPlane.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20)); // Thêm padding trên dưới để tránh bị cắt cánh/đuôi 
+        lblPlane.setBorder(BorderFactory.createEmptyBorder(8, 20, 8, 20)); // Thêm padding trên dưới để tránh bị cắt
+                                                                           // cánh/đuôi
 
         // Arrival
         JPanel pnlTo = createCityGroup(arrCode, arrCity, false);
@@ -482,9 +488,9 @@ public class FlightSearchResultPanel extends JPanel {
         JLabel lblDur = new JLabel("2h 15m"); // Sample duration
         lblDur.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblDur.setForeground(TEXT_GRAY);
-        JLabel lblLine = new JLabel("- - - - - - -  🛫  - - - - - - -"); // Sử dụng dấu gạch ngang chuẩn Segoe UI để không bao giờ bị lỗi ô vuông
+        JLabel lblLine = new JLabel("<html>- - - - - - -  <font face='Segoe UI Emoji'>🛫</font>  - - - - - - -</html>"); // Sử dụng dấu gạch ngang chuẩn Segoe UI và bọc emoji trong font Segoe UI Emoji để không bao giờ bị lỗi ô vuông
         lblLine.setFont(new Font("Segoe UI", Font.PLAIN, 14)); // Sử dụng Segoe UI chuẩn vẽ gạch ngang tuyệt đẹp
-        lblLine.setForeground(new Color(203, 213, 225)); 
+        lblLine.setForeground(new Color(203, 213, 225));
         mid.add(lblDur, "center");
         mid.add(lblLine, "center");
         pnlTime.add(mid);

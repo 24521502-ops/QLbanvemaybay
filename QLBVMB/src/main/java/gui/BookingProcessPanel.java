@@ -24,7 +24,7 @@ public class BookingProcessPanel extends JPanel {
     private SeatSelectionPanel seatSelectionPanel;
     private PaymentPanel paymentPanel;
 
-    private final dao.BookingProcessDAO bookingDAO = new dao.BookingProcessDAO();
+    private final dao.DatVeDAO.BookingProcessDAO bookingDAO = new dao.DatVeDAO.BookingProcessDAO();
     private String currentBookingID;
     private Timer checkoutTimer;
     private int remainingSeconds = 1200; // 20 minutes
@@ -47,7 +47,14 @@ public class BookingProcessPanel extends JPanel {
     // Passenger Data
     private List<dto.PassengerDTO> currentPassengers = new ArrayList<>();
 
+    private dto.AccountDTO account; // Lưu account trực tiếp thay vì dùng getWindowAncestor
+
     public BookingProcessPanel() {
+        this(null);
+    }
+
+    public BookingProcessPanel(dto.AccountDTO account) {
+        this.account = account;
         setLayout(new BorderLayout());
         setBackground(new Color(248, 249, 255));
         initComponents();
@@ -212,12 +219,16 @@ public class BookingProcessPanel extends JPanel {
 
     // --- LOGIC NHẬP THÔNG TIN HÀNH KHÁCH (BƯỚC 3) ---
     public void showPassengerInfoStep() {
-        if (selectedSeats != null) {
-            passengerInfoPanel.initPassengerCount(selectedSeats.size());
-        } else {
-            passengerInfoPanel.initPassengerCount(1);
+        int count = 1;
+        if (selectedSeats != null && !selectedSeats.isEmpty()) {
+            // Luồng cũ hoặc 1-chặng: selectedSeats set trực tiếp
+            count = selectedSeats.size();
+        } else if (multiCitySeats != null && !multiCitySeats.isEmpty() && multiCitySeats.get(0) != null) {
+            // Luồng nhiều chặng: lấy số ghế chặng đầu làm chuẩn
+            count = multiCitySeats.get(0).size();
         }
-        showStep(2); // Hiện màn hình nhập thông tin khách hàng (STEP_3)
+        passengerInfoPanel.initPassengerCount(count);
+        showStep(2);
     }
 
     public void confirmPassengersAndGoToPayment(List<dto.PassengerDTO> passengers) {
@@ -314,7 +325,10 @@ public class BookingProcessPanel extends JPanel {
                 flightIDs.add(f.getFlightID());
             }
 
+            String customerID = (account != null) ? account.getCustomerID() : null;
+
             this.currentBookingID = bookingDAO.createPendingBookingMulti(
+                    customerID,
                     flightIDs,
                     multiCitySeats,
                     selectedClasses,
@@ -421,6 +435,26 @@ public class BookingProcessPanel extends JPanel {
         goBackToSeatSelection();
     }
 
+    public void payLater() {
+        if (currentBookingID == null) return;
+
+        stopTimer(); // Dừng timer nhưng KHÔNG hủy booking
+
+        JOptionPane.showMessageDialog(this,
+                "V\u00e9 c\u1ee7a b\u1ea1n \u0111\u00e3 \u0111\u01b0\u1ee3c gi\u1eef ch\u1ed7 th\u00e0nh c\u00f4ng!\nM\u00e3 \u0111\u1eb7t ch\u1ed7: " + currentBookingID +
+                "\n\nVui l\u00f2ng thanh to\u00e1n t\u1ea1i m\u1ee5c 'L\u1ecbch s\u1eed v\u00e9' tr\u01b0\u1edbc khi h\u1ebft th\u1eddi gian gi\u1eef ch\u1ed7.",
+                "Gi\u1eef ch\u1ed7 th\u00e0nh c\u00f4ng", JOptionPane.INFORMATION_MESSAGE);
+
+        currentBookingID = null;
+
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window instanceof CustomerMainFrame) {
+            ((CustomerMainFrame) window).navigateToHistory(); // Navigate đúng cách, highlight nav
+        } else {
+            showStep(0);
+        }
+    }
+
     public boolean confirmPayment(String method, double amount) {
         if (currentBookingID == null)
             return false;
@@ -437,7 +471,7 @@ public class BookingProcessPanel extends JPanel {
 
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window instanceof CustomerMainFrame) {
-                ((CustomerMainFrame) window).showPanel(new BookingHomePanel());
+                ((CustomerMainFrame) window).navigateTo("Đặt vé");
             } else {
                 showStep(0);
             }
@@ -528,20 +562,25 @@ public class BookingProcessPanel extends JPanel {
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                        if (index == 0) {
-                            stopTimer();
-                            showStep(0);
-                        } else if (index == 1) {
-                            if (!selectedFlights.isEmpty()) {
-                                showStep(1);
-                            }
-                        } else if (index == 2) {
-                            if (!multiCitySeats.isEmpty()) {
-                                showStep(2);
-                            }
-                        } else if (index == 3 && currentBookingID != null) {
-                            showStep(3);
+                    if (index == 0) {
+                        stopTimer();
+                        // Hủy booking nếu đang ở bước thanh toán (ghế đang bị giữ)
+                        if (currentBookingID != null) {
+                            bookingDAO.cancelBooking(currentBookingID);
+                            currentBookingID = null;
                         }
+                        showStep(0);
+                    } else if (index == 1) {
+                        if (!selectedFlights.isEmpty()) {
+                            showStep(1);
+                        }
+                    } else if (index == 2) {
+                        if (!multiCitySeats.isEmpty()) {
+                            showStep(2);
+                        }
+                    } else if (index == 3 && currentBookingID != null) {
+                        showStep(3);
+                    }
                     }
                 });
             }

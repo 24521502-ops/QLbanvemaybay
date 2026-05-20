@@ -1,4 +1,4 @@
-package dao;
+package dao.DatVeDAO;
 
 import util.DBConnection;
 import javax.swing.JOptionPane;
@@ -12,7 +12,8 @@ public class BookingProcessDAO {
      * BƯỚC 4: XỬ LÝ TRANSACTION & GIỮ GHẾ (Yêu cầu 3.b)
      * TẠO ĐƠN HÀNG & GIỮ GHẾ (Sử dụng Stored Procedure và Transaction an toàn)
      */
-    public String createPendingBooking(String flightID, List<String> seatNumbers, List<dto.PassengerDTO> passengers,
+    public String createPendingBooking(String customerID, String flightID, List<String> seatNumbers,
+            List<dto.PassengerDTO> passengers,
             double price) {
         String bookingID = null;
         Connection conn = DBConnection.getConnection();
@@ -46,10 +47,11 @@ public class BookingProcessDAO {
             }
 
             // Bước 3: Tạo mã Booking PENDING
-            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?)}")) {
-                cstB.registerOutParameter(1, java.sql.Types.VARCHAR);
+            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?, ?)}")) {
+                cstB.setString(1, customerID);
+                cstB.registerOutParameter(2, java.sql.Types.VARCHAR);
                 cstB.execute();
-                bookingID = cstB.getString(1);
+                bookingID = cstB.getString(2);
             }
 
             if (bookingID == null)
@@ -122,7 +124,8 @@ public class BookingProcessDAO {
     /**
      * TẠO ĐƠN HÀNG ĐA CHẶNG & GIỮ GHẾ CHO TOÀN BỘ CÁC CHẶNG BAY (Traveloka Style)
      */
-    public String createPendingBookingMulti(List<String> flightIDs, List<List<String>> multiCitySeats,
+    public String createPendingBookingMulti(String customerID, List<String> flightIDs,
+            List<List<String>> multiCitySeats,
             List<String> seatClasses, List<dto.PassengerDTO> passengers, double totalPrice) {
         String bookingID = null;
         Connection conn = DBConnection.getConnection();
@@ -155,10 +158,11 @@ public class BookingProcessDAO {
             }
 
             // 2. Khởi tạo Booking PENDING
-            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?)}")) {
-                cstB.registerOutParameter(1, java.sql.Types.VARCHAR);
+            try (CallableStatement cstB = conn.prepareCall("{call SP_INIT_PENDING_BOOKING(?, ?)}")) {
+                cstB.setString(1, customerID);
+                cstB.registerOutParameter(2, java.sql.Types.VARCHAR);
                 cstB.execute();
-                bookingID = cstB.getString(1);
+                bookingID = cstB.getString(2);
             }
 
             if (bookingID == null)

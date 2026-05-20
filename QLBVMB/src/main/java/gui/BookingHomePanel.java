@@ -2,7 +2,6 @@ package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
-import dao.BookingAirportDAO;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,6 +14,9 @@ import java.util.List;
 import java.util.ArrayList;
 import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
+
+import dao.DatVeDAO.BookingAirportDAO;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -338,7 +340,7 @@ public class BookingHomePanel extends JPanel {
                 }
 
                 // Thực hiện tìm kiếm tất cả các chặng bay qua BUS
-                bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
+                bus.DatVeBUS.BookingFlightBUS flightBUS = new bus.DatVeBUS.BookingFlightBUS();
                 List<BookingProcessPanel.SearchLeg> legs = new ArrayList<>();
                 for (int i = 0; i < depIATAs.size(); i++) {
                     String dep = depIATAs.get(i);
@@ -355,7 +357,7 @@ public class BookingHomePanel extends JPanel {
                 Window window = SwingUtilities.getWindowAncestor(this);
                 if (window instanceof CustomerMainFrame) {
                     CustomerMainFrame mainFrame = (CustomerMainFrame) window;
-                    BookingProcessPanel processPanel = new BookingProcessPanel();
+                    BookingProcessPanel processPanel = new BookingProcessPanel(mainFrame.getAccount());
                     mainFrame.showPanel(processPanel);
 
                     processPanel.updateFlightResults(legs);
@@ -373,10 +375,13 @@ public class BookingHomePanel extends JPanel {
                 LocalDate dateOut = dpDateOut.getDate();
                 LocalDate dateReturn = dpDateReturn.getDate();
 
-                System.out.println("DEBUG ROUND-TRIP: Searching from " + fromStr + " to " + toStr + " out " + dateOut + " return " + dateReturn);
+                System.out.println("DEBUG ROUND-TRIP: Searching from " + fromStr + " to " + toStr + " out " + dateOut
+                        + " return " + dateReturn);
 
                 if (fromStr == null || toStr == null || dateOut == null || dateReturn == null) {
-                    JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ điểm đi, điểm đến, ngày đi và ngày về cho chuyến bay khứ hồi!", "Thông báo",
+                    JOptionPane.showMessageDialog(this,
+                            "Vui lòng chọn đầy đủ điểm đi, điểm đến, ngày đi và ngày về cho chuyến bay khứ hồi!",
+                            "Thông báo",
                             JOptionPane.WARNING_MESSAGE);
                     return;
                 }
@@ -401,21 +406,23 @@ public class BookingHomePanel extends JPanel {
                     return;
                 }
 
-                bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
+                bus.DatVeBUS.BookingFlightBUS flightBUS = new bus.DatVeBUS.BookingFlightBUS();
                 List<BookingProcessPanel.SearchLeg> legs = new ArrayList<>();
 
                 // Chặng đi (Outbound)
-                java.util.List<dto.FlightSearchResultDTO> outResults = flightBUS.searchFlights(depIATA, arrIATA, dateOut.toString());
+                java.util.List<dto.FlightSearchResultDTO> outResults = flightBUS.searchFlights(depIATA, arrIATA,
+                        dateOut.toString());
                 legs.add(new BookingProcessPanel.SearchLeg(depIATA, arrIATA, dateOut.toString(), outResults));
 
                 // Chặng về (Return)
-                java.util.List<dto.FlightSearchResultDTO> returnResults = flightBUS.searchFlights(arrIATA, depIATA, dateReturn.toString());
+                java.util.List<dto.FlightSearchResultDTO> returnResults = flightBUS.searchFlights(arrIATA, depIATA,
+                        dateReturn.toString());
                 legs.add(new BookingProcessPanel.SearchLeg(arrIATA, depIATA, dateReturn.toString(), returnResults));
 
                 Window window = SwingUtilities.getWindowAncestor(this);
                 if (window instanceof CustomerMainFrame) {
                     CustomerMainFrame mainFrame = (CustomerMainFrame) window;
-                    BookingProcessPanel processPanel = new BookingProcessPanel();
+                    BookingProcessPanel processPanel = new BookingProcessPanel(mainFrame.getAccount());
                     mainFrame.showPanel(processPanel);
 
                     processPanel.updateFlightResults(legs);
@@ -453,7 +460,7 @@ public class BookingHomePanel extends JPanel {
                 return;
             }
 
-            bus.BookingFlightBUS flightBUS = new bus.BookingFlightBUS();
+            bus.DatVeBUS.BookingFlightBUS flightBUS = new bus.DatVeBUS.BookingFlightBUS();
             java.util.List<dto.FlightSearchResultDTO> results = flightBUS.searchFlights(depIATA, arrIATA,
                     date.toString());
             System.out.println("DEBUG ONE-WAY: Found " + (results != null ? results.size() : 0) + " flights.");
@@ -461,7 +468,7 @@ public class BookingHomePanel extends JPanel {
             Window window = SwingUtilities.getWindowAncestor(this);
             if (window instanceof CustomerMainFrame) {
                 CustomerMainFrame mainFrame = (CustomerMainFrame) window;
-                BookingProcessPanel processPanel = new BookingProcessPanel();
+                BookingProcessPanel processPanel = new BookingProcessPanel(mainFrame.getAccount());
                 mainFrame.showPanel(processPanel);
 
                 String dateDisplay = date.format(DateTimeFormatter.ofPattern("dd 'Thg' MM, yyyy"));
@@ -613,21 +620,58 @@ public class BookingHomePanel extends JPanel {
         settings.setAllowEmptyDates(false);
         settings.setFormatForDatesCommonEra("dd/MM/yyyy");
         settings.setFontValidDate(new Font("Segoe UI", Font.PLAIN, 14));
+        settings.setAllowKeyboardEditing(false);
 
         DatePicker datePicker = new DatePicker(settings);
-        datePicker.getComponentDateTextField().setBorder(null);
-        datePicker.getComponentDateTextField().setOpaque(false);
-        datePicker.getComponentToggleCalendarButton().setText(icon);
-        datePicker.getComponentToggleCalendarButton().setBorder(null);
-        datePicker.getComponentToggleCalendarButton().setContentAreaFilled(false);
-        datePicker.getComponentToggleCalendarButton().setCursor(new Cursor(Cursor.HAND_CURSOR));
+        datePicker.setBorder(null);
+        datePicker.setOpaque(false);
         datePicker.setDateToToday();
 
-        JPanel field = new JPanel(new MigLayout("insets 0 10 0 4", "[grow,fill]", "[grow,fill]"));
-        field.putClientProperty(FlatClientProperties.STYLE,
-                "arc:8; background:#f8f9ff; borderColor:#C6C6CD; borderWidth:1");
+        JTextField tf = datePicker.getComponentDateTextField();
+        tf.setBorder(null);
+        tf.setOpaque(false);
+        tf.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tf.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        tf.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                datePicker.openPopup();
+            }
+        });
 
-        field.add(datePicker);
+        JButton nativeBtn = datePicker.getComponentToggleCalendarButton();
+        nativeBtn.setText(icon);
+        nativeBtn.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
+        nativeBtn.setBorder(null);
+        nativeBtn.setContentAreaFilled(false);
+        nativeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Construct the wrapper panel with a solid rounded border exactly like PassengerInfoPanel
+        JPanel field = new JPanel(new BorderLayout());
+        field.setBackground(SURFACE);
+        field.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(OUTLINE_VARIANT, 1, true),
+                BorderFactory.createEmptyBorder(0, 10, 0, 4)
+        ));
+        field.add(datePicker, BorderLayout.CENTER);
+
+        // Add focus transition styling to the wrapper
+        tf.addFocusListener(new java.awt.event.FocusListener() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent e) {
+                field.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(SECONDARY, 2, true),
+                        BorderFactory.createEmptyBorder(0, 9, 0, 3)
+                ));
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                field.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(OUTLINE_VARIANT, 1, true),
+                        BorderFactory.createEmptyBorder(0, 10, 0, 4)
+                ));
+            }
+        });
 
         g.add(field, "h 42!");
         return g;

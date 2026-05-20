@@ -1,7 +1,8 @@
 package gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import dao.BookingSeatDAO;
+
+import dao.DatVeDAO.BookingSeatDAO;
 import dto.FlightSearchResultDTO;
 import net.miginfocom.swing.MigLayout;
 
@@ -20,12 +21,12 @@ public class SeatSelectionPanel extends JPanel {
     private String selectedClass;
     private final BookingProcessPanel navigationListener;
     private final BookingSeatDAO seatDAO = new BookingSeatDAO();
-    
+
     private final Set<String> selectedSeats = new HashSet<>();
     private double baggagePrice = 0;
     private String baggageWeight = "0 kg";
 
-    private static final Color SECONDARY = new Color(0, 102, 138); 
+    private static final Color SECONDARY = new Color(0, 102, 138);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
     private static final Color TEXT_GRAY = new Color(71, 85, 105);
     private static final Color BORDER = new Color(226, 232, 240);
@@ -58,7 +59,7 @@ public class SeatSelectionPanel extends JPanel {
         this.selectedSeats.clear();
         this.baggagePrice = 0;
         this.baggageWeight = "0 kg";
-        
+
         showLoading();
         loadSeatsAsync();
     }
@@ -124,45 +125,47 @@ public class SeatSelectionPanel extends JPanel {
         removeAll();
         JPanel errorPnl = new JPanel(new MigLayout("wrap, center, insets 40"));
         errorPnl.setOpaque(false);
-        
+
         JLabel lblIcon = new JLabel("⚠️");
         lblIcon.setFont(new Font("Segoe UI", Font.PLAIN, 48));
-        
+
         JLabel lblMsg = new JLabel("<html><body style='width: 300px; text-align: center;'>" + msg + "</body></html>");
         lblMsg.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblMsg.setForeground(Color.RED);
-        
+
         JButton btnRetry = new JButton("Thử lại");
         btnRetry.addActionListener(e -> loadSeatsAsync());
-        
+
         errorPnl.add(lblIcon, "center");
         errorPnl.add(lblMsg, "center, gaptop 10");
         errorPnl.add(btnRetry, "center, gaptop 20");
-        
+
         add(errorPnl, BorderLayout.CENTER);
         revalidate();
         repaint();
     }
 
     private void initComponents(List<BookingSeatDAO.SeatInfo> seats) {
-        if (flight == null) return;
-        
+        if (flight == null)
+            return;
+
         // Header
         JPanel header = new JPanel(new MigLayout("wrap, insets 0 0 24 0, gapy 4"));
         header.setOpaque(false);
-        
+
         String stepTitle = "Chọn chỗ ngồi & Dịch vụ";
         if (totalLegsCount > 1) {
             stepTitle += " (Chặng " + (currentLegIndex + 1) + "/" + totalLegsCount + ")";
         }
         JLabel title = new JLabel(stepTitle);
         title.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        
-        String depCity = new bus.BookingAirportBUS().getCityByIATA(flight.getDepartureCode());
-        String arrCity = new bus.BookingAirportBUS().getCityByIATA(flight.getArrivalCode());
+
+        String depCity = new bus.DatVeBUS.BookingAirportBUS().getCityByIATA(flight.getDepartureCode());
+        String arrCity = new bus.DatVeBUS.BookingAirportBUS().getCityByIATA(flight.getArrivalCode());
         String routeStr = depCity + " -> " + arrCity;
 
-        JLabel subtitle = new JLabel("Tùy chỉnh chỗ ngồi của bạn cho chuyến bay " + flight.getFlightID() + " (" + routeStr + ") - Hạng " + selectedClass);
+        JLabel subtitle = new JLabel("Tùy chỉnh chỗ ngồi của bạn cho chuyến bay " + flight.getFlightID() + " ("
+                + routeStr + ") - Hạng " + selectedClass);
         subtitle.setForeground(TEXT_GRAY);
         header.add(title);
         header.add(subtitle);
@@ -171,10 +174,10 @@ public class SeatSelectionPanel extends JPanel {
         // Main
         JPanel main = new JPanel(new MigLayout("fill, insets 0, gapx 24", "[grow, fill] [320!, fill]", "[grow, fill]"));
         main.setOpaque(false);
-        
+
         // Seat Map
         main.add(createSeatMapPanel(seats));
-        
+
         // Sidebar
         main.add(createRightSidebar(), "top");
 
@@ -188,20 +191,21 @@ public class SeatSelectionPanel extends JPanel {
 
         JLabel lblTitle = new JLabel("Sơ đồ ghế ngồi (" + seats.size() + " ghế)");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        
+
         JPanel legend = new JPanel(new MigLayout("insets 0, gapx 16"));
         legend.setOpaque(false);
         legend.add(createLegendItem("Trống", Color.WHITE, BORDER));
         legend.add(createLegendItem("Đang chọn", new Color(135, 206, 250), null));
         legend.add(createLegendItem("Đã đặt", new Color(226, 232, 240), null));
-        
+
         JPanel top = new JPanel(new BorderLayout());
         top.setOpaque(false);
         top.add(lblTitle, BorderLayout.WEST);
         top.add(legend, BorderLayout.EAST);
         p.add(top);
 
-        planeInterior = new JPanel(new MigLayout("wrap 7, insets 40, center, gap 12", "[]12[]12[] 40 [] 12[]12[]12[]", ""));
+        planeInterior = new JPanel(
+                new MigLayout("wrap 7, insets 40, center, gap 12", "[]12[]12[] 40 [] 12[]12[]12[]", ""));
         planeInterior.setBackground(new Color(240, 244, 255));
         planeInterior.putClientProperty(FlatClientProperties.STYLE, "arc:12");
 
@@ -229,7 +233,7 @@ public class SeatSelectionPanel extends JPanel {
 
         if (s.isBooked()) {
             btn.setBackground(new Color(226, 232, 240));
-            btn.setText("✕");
+            btn.setText("X");
             btn.setEnabled(false);
         } else {
             btn.setBackground(Color.WHITE);
@@ -240,9 +244,9 @@ public class SeatSelectionPanel extends JPanel {
                     btn.setBackground(Color.WHITE);
                 } else {
                     if (selectedSeats.size() >= maxSeats) {
-                        JOptionPane.showMessageDialog(SeatSelectionPanel.this, 
-                            "Bạn chỉ được phép chọn tối đa " + maxSeats + " ghế!", 
-                            "Thông báo", JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(SeatSelectionPanel.this,
+                                "Bạn chỉ được phép chọn tối đa " + maxSeats + " ghế!",
+                                "Thông báo", JOptionPane.WARNING_MESSAGE);
                         return;
                     }
                     selectedSeats.add(s.getSeatNumber());
@@ -272,7 +276,7 @@ public class SeatSelectionPanel extends JPanel {
         pnlBagHeader.add(lblBagIcon);
         pnlBagHeader.add(lblBagTitle);
         pnlBag.add(pnlBagHeader, "wrap");
-        
+
         ButtonGroup group = new ButtonGroup();
         pnlBag.add(createBaggageOption("Không ký gửi", "Miễn phí", 0, group, true), "growx");
         pnlBag.add(createBaggageOption("20 kg", "+250.000₫", 250000, group, false), "growx");
@@ -288,7 +292,7 @@ public class SeatSelectionPanel extends JPanel {
         lblSelectedSeatsVal = createSummaryRow(pnlSum, "Ghế chọn:", "Chưa chọn");
         lblBaggageVal = createSummaryRow(pnlSum, "Hành lý:", "0 kg");
         pnlSum.add(new JSeparator(), "growx, gaptop 8");
-        
+
         lblTotalPriceVal = new JLabel("0 VNĐ");
         lblTotalPriceVal.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTotalPriceVal.setForeground(SECONDARY);
@@ -306,18 +310,19 @@ public class SeatSelectionPanel extends JPanel {
         btnNext.putClientProperty(FlatClientProperties.STYLE, "arc:8");
         btnNext.addActionListener(e -> {
             if (selectedSeats.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn ít nhất một chỗ ngồi để tiếp tục.", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn ít nhất một chỗ ngồi để tiếp tục.", "Thông báo",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
             // Xác nhận chọn ghế cho chặng hiện tại để chuyển chặng hoặc đi tiếp
             navigationListener.confirmSeatsForCurrentLeg(new ArrayList<>(selectedSeats));
         });
-        
+
         JPanel footer = new JPanel(new MigLayout("insets 0, fillx, gapx 8", "[grow, fill] [grow, fill]"));
         footer.setOpaque(false);
         footer.add(btnBack, "h 45!");
         footer.add(btnNext, "h 45!");
-        
+
         pnlSum.add(footer, "growx");
 
         p.add(pnlSum);
@@ -329,14 +334,15 @@ public class SeatSelectionPanel extends JPanel {
         p.setOpaque(false);
         JRadioButton rb = new JRadioButton();
         rb.setOpaque(false);
-        if (sel) rb.setSelected(true);
+        if (sel)
+            rb.setSelected(true);
         group.add(rb);
         p.add(rb);
         p.add(new JLabel(label));
         JLabel lp = new JLabel(priceLabel);
         lp.setForeground(SECONDARY);
         p.add(lp, "right");
-        
+
         rb.addActionListener(e -> {
             this.baggagePrice = price;
             this.baggageWeight = label;
@@ -362,18 +368,20 @@ public class SeatSelectionPanel extends JPanel {
         JPanel box = new JPanel();
         box.setPreferredSize(new Dimension(16, 16));
         box.setBackground(bg);
-        if (border != null) box.setBorder(BorderFactory.createLineBorder(border));
+        if (border != null)
+            box.setBorder(BorderFactory.createLineBorder(border));
         p.add(box);
         p.add(new JLabel(text));
         return p;
     }
 
     private void updateSummary() {
-        if (lblSelectedSeatsVal == null || lblTotalPriceVal == null) return;
+        if (lblSelectedSeatsVal == null || lblTotalPriceVal == null)
+            return;
 
         lblSelectedSeatsVal.setText(selectedSeats.isEmpty() ? "Chưa chọn" : String.join(", ", selectedSeats));
         lblBaggageVal.setText(baggageWeight);
-        
+
         double basePrice = 0;
         if (flight != null) {
             for (FlightSearchResultDTO.SeatClassInfo sc : flight.getSeatClasses()) {

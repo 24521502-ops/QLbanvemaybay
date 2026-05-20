@@ -120,24 +120,31 @@ public class PaymentPanel extends JPanel {
 
         p.add(dynamicFormContainer, "growx");
 
-        JPanel footer = new JPanel(new MigLayout("insets 24 0 0 0, fillx", "[pref!] [grow] [pref!]"));
+        JPanel footer = new JPanel(new MigLayout("insets 24 0 0 0, fillx", "[pref!] [pref!] [grow] [pref!]"));
         footer.setOpaque(false);
 
-        JButton btnBack = new JButton("Quay lại");
+        JButton btnBack = new JButton("Hủy giao dịch");
         btnBack.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btnBack.putClientProperty(FlatClientProperties.STYLE, "arc:8; background:#e2e8f0; color:#475569");
-        btnBack.setPreferredSize(new Dimension(120, 45));
+        btnBack.putClientProperty(FlatClientProperties.STYLE, "arc:8; background:#fee2e2; color:#ef4444");
+        btnBack.setPreferredSize(new Dimension(140, 45));
         btnBack.addActionListener(e -> navigationListener.goBackFromPayment());
 
-        JButton btnPay = new JButton("Thanh toán");
+        JButton btnPayLater = new JButton("Thanh toán sau");
+        btnPayLater.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnPayLater.putClientProperty(FlatClientProperties.STYLE, "arc:8; background:#e2e8f0; color:#475569");
+        btnPayLater.setPreferredSize(new Dimension(150, 45));
+        btnPayLater.addActionListener(e -> navigationListener.payLater());
+
+        JButton btnPay = new JButton("Thanh toán ngay");
         btnPay.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnPay.setBackground(new Color(0, 102, 138));
         btnPay.setForeground(Color.WHITE);
         btnPay.putClientProperty(FlatClientProperties.STYLE, "arc:8");
-        btnPay.setPreferredSize(new Dimension(220, 45));
+        btnPay.setPreferredSize(new Dimension(200, 45));
         btnPay.addActionListener(e -> handlePayment());
 
         footer.add(btnBack);
+        footer.add(btnPayLater, "gapleft 10");
         footer.add(new JLabel(), "growx");
         footer.add(btnPay);
 
@@ -361,12 +368,7 @@ public class PaymentPanel extends JPanel {
                 // Lưu vào DB thông qua listener
                 boolean success = navigationListener.confirmPayment(selectedMethod, currentTotal);
 
-                if (success) {
-                    JOptionPane.showMessageDialog(this,
-                            "Thanh toán thành công! Ghế của bạn đã được xác nhận.",
-                            "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                    navigationListener.showStep(0); // Quay về trang chủ
-                } else {
+                if (!success) {
                     JOptionPane.showMessageDialog(this,
                             "Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại hoặc liên hệ hỗ trợ.",
                             "Lỗi", JOptionPane.ERROR_MESSAGE);

@@ -1,4 +1,4 @@
-package dao;
+package dao.DatVeDAO;
 
 import util.DBConnection;
 
@@ -22,7 +22,7 @@ public class BookingAirportDAO {
         }
 
         try (PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 String display = rs.getString("City") + " (" + rs.getString("IATACode") + ")";
@@ -39,19 +39,26 @@ public class BookingAirportDAO {
         }
         return list;
     }
+
     public String getCityName(String iataCode) {
-        String sql = "SELECT City FROM AIRPORT WHERE IATACode = ?";
+        String sql = "SELECT FN_GET_CITY_BY_IATA(?) FROM DUAL";
         Connection conn = DBConnection.getConnection();
-        if (conn == null) return iataCode;
+        if (conn == null)
+            return iataCode;
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, iataCode);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getString("City");
+                if (rs.next())
+                    return rs.getString(1);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return iataCode;
     }

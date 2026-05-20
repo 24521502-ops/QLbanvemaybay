@@ -81,4 +81,23 @@ public class loginDAO {
         }
         return null;
     }
+
+    /**
+     * Lấy CustomerID tương ứng với AccountID của Khách hàng.
+     */
+    public String getCustomerIDByAccountID(String accountID) {
+        String sql = "SELECT CustomerID FROM CUSTOMER WHERE AccountID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, accountID);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("CustomerID");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[loginDAO] Lỗi lấy CustomerID: " + e.getMessage());
+        }
+        return null;
+    }
 }

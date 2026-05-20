@@ -1,17 +1,18 @@
-package bus;
+package bus.DatVeBUS;
 
 import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
 public class BookingPassengerBUS {
-    private final dao.BookingPassengerDAO passengerDAO = new dao.BookingPassengerDAO();
+    private final dao.DatVeDAO.BookingPassengerDAO passengerDAO = new dao.DatVeDAO.BookingPassengerDAO();
 
     /**
      * Kiểm tra định dạng thông tin hành khách.
-     * @param name Họ tên (phải viết hoa không dấu)
+     * 
+     * @param name  Họ tên (phải viết hoa không dấu)
      * @param email Email
      * @param phone Số điện thoại
-     * @param dob Ngày sinh
+     * @param dob   Ngày sinh
      * @return Thông báo lỗi nếu có, null nếu hợp lệ
      */
     public String validatePassenger(String name, String email, String phone, LocalDate dob, String passport) {
@@ -59,7 +60,7 @@ public class BookingPassengerBUS {
     public String addPassenger(dto.PassengerDTO p) {
         return passengerDAO.addPassenger(p);
     }
-    
+
     /**
      * Hiển thị thông báo lỗi (helper method)
      */

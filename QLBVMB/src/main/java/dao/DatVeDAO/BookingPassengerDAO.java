@@ -1,4 +1,4 @@
-package dao;
+package dao.DatVeDAO;
 
 import dto.PassengerDTO;
 import util.DBConnection;
@@ -11,6 +11,7 @@ public class BookingPassengerDAO {
     /**
      * Thêm hành khách mới vào cơ sở dữ liệu.
      * Sử dụng Trigger TRG_PASSENGER_ID để tự động sinh ID.
+     * 
      * @param p Đối tượng PassengerDTO
      * @return PassengerID được sinh ra, hoặc null nếu thất bại.
      */
@@ -19,8 +20,8 @@ public class BookingPassengerDAO {
         String generatedId = null;
 
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql, new String[]{"PASSENGERID"})) {
-            
+                PreparedStatement pst = conn.prepareStatement(sql, new String[] { "PASSENGERID" })) {
+
             pst.setString(1, p.getFullName());
             pst.setString(2, p.getGender());
             if (p.getDateOfBirth() != null) {
@@ -49,17 +50,16 @@ public class BookingPassengerDAO {
         List<PassengerDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM PASSENGER";
         try (Connection conn = DBConnection.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
+
             while (rs.next()) {
                 list.add(new PassengerDTO(
-                    rs.getString("PassengerID"),
-                    rs.getString("FullName"),
-                    rs.getString("Gender"),
-                    rs.getDate("DateOfBirth"),
-                    rs.getString("PassportNumber")
-                ));
+                        rs.getString("PassengerID"),
+                        rs.getString("FullName"),
+                        rs.getString("Gender"),
+                        rs.getDate("DateOfBirth"),
+                        rs.getString("PassportNumber")));
             }
         } catch (SQLException e) {
             e.printStackTrace();

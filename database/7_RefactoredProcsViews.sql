@@ -120,22 +120,23 @@ END;
 
 -- 2. SP_INIT_PENDING_BOOKING (Khởi tạo Booking PENDING)
 CREATE OR REPLACE PROCEDURE SP_INIT_PENDING_BOOKING (
+    p_CustomerID IN VARCHAR2,
     p_BookingID OUT VARCHAR2
 ) AS
 BEGIN
-    INSERT INTO BOOKING (TotalAmount, Status, BookingDate)
-    VALUES (0, 'PENDING', CURRENT_TIMESTAMP)
+    INSERT INTO BOOKING (CustomerID, TotalAmount, Status, BookingDate)
+    VALUES (p_CustomerID, 0, 'PENDING', CURRENT_TIMESTAMP)
     RETURNING BookingID INTO p_BookingID;
 END;
 /
 
 -- 3. SP_CLEANUP_AND_BOOK_TICKET (Dọn rác giữ chỗ cũ của ghế đó và tạo giữ chỗ mới)
 CREATE OR REPLACE PROCEDURE SP_CLEANUP_AND_BOOK_TICKET (
-    p_BookingID IN VARCHAR2,
-    p_FlightID IN VARCHAR2,
-    p_SeatNumber IN VARCHAR2,
+    p_BookingID   IN VARCHAR2,
+    p_FlightID    IN VARCHAR2,
+    p_SeatNumber  IN VARCHAR2,
     p_PassengerID IN VARCHAR2,
-    p_Price IN NUMBER
+    p_Price       IN NUMBER
 ) AS
     v_SeatID VARCHAR2(20);
 BEGIN
@@ -145,9 +146,15 @@ BEGIN
     WHERE f.FlightID = p_FlightID AND s.SeatNumber = TRIM(p_SeatNumber)
       AND ROWNUM = 1;
 
-    -- Xóa các vé giữ chỗ tạm cũ chưa thanh toán cho ghế này
-    DELETE FROM TICKET 
-    WHERE FlightID = p_FlightID AND SeatID = v_SeatID AND TicketStatus != 'PAID';
+    -- Giải phóng ghế cũ: đánh dấu CANCELLED + xóa SeatID để tránh 2 vấn đề:
+    --   (1) Nếu chỉ CANCELLED mà giữ SeatID → UNIQUE(FlightID,SeatID) bị vi phạm khi INSERT mới
+    --   (2) Nếu chỉ SET NULL mà không CANCELLED → TRG_UPDATE_BOOKING_TOTAL trừ tiền âm (ORA-02290)
+    UPDATE TICKET
+    SET TicketStatus = 'CANCELLED',
+        SeatID       = NULL
+    WHERE FlightID = p_FlightID
+      AND SeatID   = v_SeatID
+      AND TicketStatus NOT IN ('PAID', 'CHECKED-IN', 'CANCELLED');
 
     -- Chèn vé giữ chỗ mới
     INSERT INTO TICKET (BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus)
@@ -358,10 +365,15 @@ BEFORE INSERT OR UPDATE ON TICKET
 FOR EACH ROW
 DECLARE
     v_FlightAircraftID VARCHAR2(20);
-    v_SeatAircraftID VARCHAR2(20);
+    v_SeatAircraftID   VARCHAR2(20);
 BEGIN
+    -- Bỏ qua khi SeatID = NULL (vé bị CANCELLED, ghế đã được giải phóng)
+    IF :NEW.SeatID IS NULL THEN
+        RETURN;
+    END IF;
+
     SELECT AircraftID INTO v_FlightAircraftID FROM FLIGHT WHERE FlightID = :NEW.FlightID;
-    SELECT AircraftID INTO v_SeatAircraftID FROM SEAT WHERE SeatID = :NEW.SeatID;
+    SELECT AircraftID INTO v_SeatAircraftID   FROM SEAT  WHERE SeatID   = :NEW.SeatID;
 
     IF v_FlightAircraftID != v_SeatAircraftID THEN
         RAISE_APPLICATION_ERROR(-20004, 'RB65: Lỗi! Ghế được chọn không thuộc về máy bay thực hiện chuyến bay này.');

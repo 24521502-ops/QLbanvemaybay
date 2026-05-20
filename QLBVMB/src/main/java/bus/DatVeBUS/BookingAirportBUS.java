@@ -1,7 +1,8 @@
-package bus;
+package bus.DatVeBUS;
 
-import dao.BookingAirportDAO;
 import java.util.List;
+
+import dao.DatVeDAO.BookingAirportDAO;
 
 public class BookingAirportBUS {
     private BookingAirportDAO airportDAO = new BookingAirportDAO();
@@ -10,6 +11,7 @@ public class BookingAirportBUS {
         // Có thể thêm logic xử lý ở đây nếu cần
         return airportDAO.getAllAirportsForDisplay();
     }
+
     public String getCityByIATA(String iata) {
         return airportDAO.getCityName(iata);
     }

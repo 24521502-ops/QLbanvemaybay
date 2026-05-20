@@ -24,7 +24,7 @@ public class PassengerInfoPanel extends JPanel {
     private static final Color BORDER_COLOR = new Color(226, 232, 240);
 
     private final BookingProcessPanel navigationListener;
-    private final bus.BookingPassengerBUS passengerBUS = new bus.BookingPassengerBUS();
+    private final bus.DatVeBUS.BookingPassengerBUS passengerBUS = new bus.DatVeBUS.BookingPassengerBUS();
     private JPanel formContainer;
     private List<PassengerFormBlock> formBlocks = new ArrayList<>();
     private JComboBox<Integer> cbPassengerCount;
@@ -113,9 +113,10 @@ public class PassengerInfoPanel extends JPanel {
     }
 
     public void initPassengerCount(int count) {
-        // Theo yêu cầu: Chỉ nhập thông tin 1 lần (người đại diện) và áp dụng cho toàn bộ vé
-        cbPassengerCount.setSelectedItem(1);
-        setPassengerCount(1);
+        // Số form hành khách = số ghế đã chọn ở Bước 2
+        int clamped = Math.max(1, Math.min(count, 9));
+        cbPassengerCount.setSelectedItem(clamped);
+        setPassengerCount(clamped);
     }
 
     public void setPassengerCount(int count) {
@@ -177,6 +178,7 @@ public class PassengerInfoPanel extends JPanel {
     private class PassengerFormBlock extends JPanel {
         private JTextField tfName, tfEmail, tfPhone, tfPassport;
         private DatePicker dobPicker;
+        private JPanel panelDobWrapper;
         private JComboBox<String> cbGender;
 
         public PassengerFormBlock(int index) {
@@ -256,7 +258,7 @@ public class PassengerInfoPanel extends JPanel {
             gbc.gridx = 0;
             gbc.insets = new Insets(0, 0, 24, 12);
             dobPicker = createDatePicker();
-            form.add(dobPicker, gbc);
+            form.add(panelDobWrapper, gbc);
 
             gbc.gridx = 1;
             gbc.insets = new Insets(0, 12, 24, 0);
@@ -381,7 +383,14 @@ public class PassengerInfoPanel extends JPanel {
         }
 
         private void showError(JComponent comp, String msg) {
-            comp.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#ef4444; borderWidth:2");
+            if (comp == dobPicker.getComponentDateTextField()) {
+                panelDobWrapper.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(239, 68, 68), 2, true),
+                        BorderFactory.createEmptyBorder(0, 9, 0, 3)
+                ));
+            } else {
+                comp.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#ef4444; borderWidth:2");
+            }
             passengerBUS.showError(msg);
             comp.requestFocusInWindow();
         }
@@ -391,8 +400,76 @@ public class PassengerInfoPanel extends JPanel {
             tfEmail.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#cbd5e1");
             tfPhone.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#cbd5e1");
             tfPassport.putClientProperty(FlatClientProperties.STYLE, "arc:12; borderColor:#cbd5e1");
-            dobPicker.getComponentDateTextField().putClientProperty(FlatClientProperties.STYLE,
-                    "arc:12; borderColor:#cbd5e1");
+            panelDobWrapper.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
+                    BorderFactory.createEmptyBorder(0, 10, 0, 4)
+            ));
+        }
+
+        private DatePicker createDatePicker() {
+            DatePickerSettings settings = new DatePickerSettings();
+            settings.setAllowEmptyDates(true);
+            settings.setFormatForDatesCommonEra("dd/MM/yyyy");
+            settings.setFontValidDate(new Font("Segoe UI", Font.PLAIN, 15));
+            settings.setAllowKeyboardEditing(false);
+
+            DatePicker picker = new DatePicker(settings);
+            picker.setDate(null);
+            picker.setBackground(Color.WHITE);
+            picker.setBorder(null);
+            picker.setOpaque(false);
+
+            // Style the internal text field to be borderless and transparent
+            JTextField tf = picker.getComponentDateTextField();
+            tf.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ngày/tháng/năm");
+            tf.setBorder(null);
+            tf.setOpaque(false);
+            tf.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+            tf.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            tf.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mousePressed(java.awt.event.MouseEvent e) {
+                    picker.openPopup();
+                }
+            });
+
+            // Style the native calendar button
+            JButton nativeBtn = picker.getComponentToggleCalendarButton();
+            nativeBtn.setText("📅");
+            nativeBtn.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 14));
+            nativeBtn.setBorder(null);
+            nativeBtn.setContentAreaFilled(false);
+            nativeBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+            // Construct the wrapper panel with a solid rounded border
+            panelDobWrapper = new JPanel(new BorderLayout());
+            panelDobWrapper.setBackground(Color.WHITE);
+            panelDobWrapper.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
+                    BorderFactory.createEmptyBorder(0, 10, 0, 4)
+            ));
+            panelDobWrapper.setPreferredSize(new Dimension(0, 48));
+            panelDobWrapper.add(picker, BorderLayout.CENTER);
+
+            // Add focus transition styling to the wrapper
+            tf.addFocusListener(new java.awt.event.FocusListener() {
+                @Override
+                public void focusGained(java.awt.event.FocusEvent e) {
+                    panelDobWrapper.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(0, 102, 138), 2, true),
+                            BorderFactory.createEmptyBorder(0, 9, 0, 3)
+                    ));
+                }
+                @Override
+                public void focusLost(java.awt.event.FocusEvent e) {
+                    panelDobWrapper.setBorder(BorderFactory.createCompoundBorder(
+                            BorderFactory.createLineBorder(new Color(203, 213, 225), 1, true),
+                            BorderFactory.createEmptyBorder(0, 10, 0, 4)
+                    ));
+                }
+            });
+
+            return picker;
         }
     }
 
@@ -433,32 +510,7 @@ public class PassengerInfoPanel extends JPanel {
         return num;
     }
 
-    private DatePicker createDatePicker() {
-        DatePickerSettings settings = new DatePickerSettings();
-        settings.setAllowEmptyDates(true);
-        settings.setFormatForDatesCommonEra("dd/MM/yyyy");
-        settings.setFontValidDate(new Font("Segoe UI", Font.PLAIN, 15));
 
-        DatePicker picker = new DatePicker(settings);
-        picker.setDate(null);
-
-        JTextField tf = picker.getComponentDateTextField();
-        tf.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "ngày/tháng/năm");
-        tf.putClientProperty(FlatClientProperties.STYLE,
-                "arc:12; borderColor:#cbd5e1; focusedBorderColor:#00668a; padding:0,10,0,10");
-        tf.setPreferredSize(new Dimension(0, 48));
-        tf.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, createIconLabel("📅"));
-
-        JButton btn = picker.getComponentToggleCalendarButton();
-        btn.setText("");
-        btn.putClientProperty(FlatClientProperties.STYLE, "arc:0 12 12 0; borderWidth:0; background:#ffffff");
-        btn.setPreferredSize(new Dimension(30, 0));
-
-        picker.setBackground(Color.WHITE);
-        picker.setBorder(null);
-
-        return picker;
-    }
 
     private JComboBox<String> createGenderCombo() {
         JComboBox<String> cb = new JComboBox<>(new String[] { "Nam", "Nữ", "Khác" });
