@@ -28,6 +28,10 @@ public class loginBUS {
             // Lấy nhóm quyền của tài khoản này từ CSDL và gán vào session DTO
             String roleGroup = loginDAO.getRoleGroupName(acc.getAccountID());
             acc.setRoleGroup(roleGroup != null ? roleGroup : "STAFF_GROUP"); // dự phòng mặc định là STAFF
+            
+            // Lấy CustomerID tương ứng nếu có
+            String customerID = loginDAO.getCustomerIDByAccountID(acc.getAccountID());
+            acc.setCustomerID(customerID);
         }
         return acc;
     }

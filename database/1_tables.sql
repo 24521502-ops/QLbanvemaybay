@@ -286,7 +286,7 @@ FROM
     (SELECT SUM(TotalAmount) AS Total_Revenue,
             COUNT(*) AS Total_Bookings
      FROM BOOKING
-     WHERE Status = 'CONFIRMED') b,
+     WHERE Status IN ('CONFIRMED', 'COMPLETED')) b,
 
     (SELECT COUNT(*) AS Completed_Flights
      FROM FLIGHT
@@ -309,7 +309,7 @@ SELECT
     TO_CHAR(BookingDate, 'YYYY-MM') AS Month_Year,
     SUM(TotalAmount) AS Monthly_Revenue
 FROM BOOKING
-WHERE Status = 'CONFIRMED'
+WHERE Status IN ('CONFIRMED', 'COMPLETED')
 GROUP BY TO_CHAR(BookingDate, 'YYYY-MM');
 /
 

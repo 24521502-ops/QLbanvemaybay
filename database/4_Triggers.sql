@@ -64,13 +64,13 @@ DECLARE
     v_SeatAircraftID VARCHAR2(20);   -- Đã sửa thành VARCHAR2
 BEGIN
     -- Lấy AircraftID của chuyến bay
-    SELECT AircraftID INTO v_FlightAircraftID 
-    FROM FLIGHT 
+    SELECT AircraftID INTO v_FlightAircraftID
+    FROM FLIGHT
     WHERE FlightID = :NEW.FlightID;
-    
+
     -- Lấy AircraftID của ghế được chọn
-    SELECT AircraftID INTO v_SeatAircraftID 
-    FROM SEAT 
+    SELECT AircraftID INTO v_SeatAircraftID
+    FROM SEAT
     WHERE SeatID = :NEW.SeatID;
 
     -- Kiểm tra đối chiếu
