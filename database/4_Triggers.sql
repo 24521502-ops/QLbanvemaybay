@@ -231,4 +231,136 @@ END;
 /
 
 
-DROP TRIGGER TRG_No_Duplicate_Seat;
+-- =========================================================================
+-- PHẦN 4: TRIGGERS RÀNG BUỘC LIÊN QUAN ĐẾN VÉ, ĐƠN HÀNG VÀ THANH TOÁN/ wang
+-- =========================================================================
+
+-- 1. Trigger kiểm tra số vé không vượt quá sức chứa máy bay (Overbooking)
+CREATE OR REPLACE TRIGGER TRG_PREVENT_OVERBOOKING
+BEFORE INSERT ON TICKET
+FOR EACH ROW
+DECLARE
+    v_CurrentTickets NUMBER; v_MaxCapacity NUMBER;
+BEGIN
+    SELECT COUNT(*) INTO v_CurrentTickets FROM TICKET WHERE FlightID = :NEW.FlightID AND TicketStatus != 'CANCELLED';
+    SELECT a.Capacity INTO v_MaxCapacity FROM FLIGHT f JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID WHERE f.FlightID = :NEW.FlightID;
+
+    IF v_CurrentTickets >= v_MaxCapacity THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Lỗi: Chuyến bay đã hết chỗ (Overbooking).');
+    END IF;
+END;
+/
+
+-- 2. Trigger cập nhật TotalAmount của BOOKING tự động theo giá vé
+CREATE OR REPLACE TRIGGER TRG_UPDATE_BOOKING_TOTAL
+AFTER INSERT OR UPDATE OF Price OR DELETE ON TICKET
+FOR EACH ROW
+BEGIN
+    IF INSERTING THEN
+        UPDATE BOOKING SET TotalAmount = NVL(TotalAmount, 0) + NVL(:NEW.Price, 0) WHERE BookingID = :NEW.BookingID;
+    ELSIF UPDATING THEN
+        UPDATE BOOKING SET TotalAmount = NVL(TotalAmount, 0) - NVL(:OLD.Price, 0) + NVL(:NEW.Price, 0) WHERE BookingID = :NEW.BookingID;
+    ELSIF DELETING THEN
+        UPDATE BOOKING SET TotalAmount = NVL(TotalAmount, 0) - NVL(:OLD.Price, 0) WHERE BookingID = :OLD.BookingID;
+    END IF;
+END;
+/
+
+-- 3. Trigger không cho phép giữ ghế/đặt vé khi chuyến bay đã khởi hành
+CREATE OR REPLACE TRIGGER TRG_PREVENT_PAST_BOOKING
+BEFORE INSERT ON TICKET
+FOR EACH ROW
+DECLARE
+    v_DepartureTime DATE;
+BEGIN
+    SELECT DepartureTime INTO v_DepartureTime FROM FLIGHT WHERE FlightID = :NEW.FlightID;
+    IF SYSDATE >= v_DepartureTime THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Lỗi: Chuyến bay đã hoặc đang khởi hành.');
+    END IF;
+END;
+/
+
+-- 4. Trigger đối chiếu đảm bảo ghế chọn thuộc về đúng máy bay thực hiện chuyến bay
+CREATE OR REPLACE TRIGGER TRG_RB65_CHECK_SEAT_AIRCRAFT
+BEFORE INSERT OR UPDATE ON TICKET
+FOR EACH ROW
+DECLARE
+    v_FlightAircraftID VARCHAR2(20);
+    v_SeatAircraftID   VARCHAR2(20);
+BEGIN
+    -- Bỏ qua khi SeatID = NULL (vé bị CANCELLED, ghế đã được giải phóng)
+    IF :NEW.SeatID IS NULL THEN
+        RETURN;
+    END IF;
+
+    SELECT AircraftID INTO v_FlightAircraftID FROM FLIGHT WHERE FlightID = :NEW.FlightID;
+    SELECT AircraftID INTO v_SeatAircraftID   FROM SEAT  WHERE SeatID   = :NEW.SeatID;
+
+    IF v_FlightAircraftID != v_SeatAircraftID THEN
+        RAISE_APPLICATION_ERROR(-20004, 'RB65: Lỗi! Ghế được chọn không thuộc về máy bay thực hiện chuyến bay này.');
+    END IF;
+END;
+/
+
+-- 5. Trigger đảm bảo chỉ được cập nhật trạng thái vé PAID khi đã thanh toán thành công
+CREATE OR REPLACE TRIGGER TRG_RB64_CHECK_TICKET_PAYMENT
+BEFORE UPDATE ON TICKET
+FOR EACH ROW
+DECLARE
+    v_PaymentCount NUMBER;
+BEGIN
+    IF :NEW.TicketStatus = 'PAID' THEN
+        SELECT COUNT(*) INTO v_PaymentCount FROM PAYMENT WHERE BookingID = :NEW.BookingID AND PaymentStatus = 'SUCCESS';
+        IF v_PaymentCount = 0 THEN
+            RAISE_APPLICATION_ERROR(-20006, 'RB64: Lỗi! Vé chỉ được cập nhật trạng thái PAID khi Booking đã thanh toán.');
+        END IF;
+    END IF;
+END;
+/
+
+-- 6. Trigger tự động lưu nhật ký giao dịch (Transaction History) khi thanh toán thành công
+CREATE OR REPLACE TRIGGER TRG_LOG_SUCCESSFUL_PAYMENT
+AFTER INSERT OR UPDATE OF PaymentStatus ON PAYMENT
+FOR EACH ROW
+WHEN (NEW.PaymentStatus = 'SUCCESS')
+DECLARE
+    v_CustomerID VARCHAR2(20);
+BEGIN
+    SELECT CustomerID INTO v_CustomerID FROM BOOKING WHERE BookingID = :NEW.BookingID;
+
+    INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, PaymentID, TransactionType, Amount, TransactionDate, Description)
+    VALUES (v_CustomerID, :NEW.BookingID, :NEW.PaymentID, 'PAYMENT', :NEW.Amount, SYSDATE, 'Thanh toán thành công qua ' || :NEW.PaymentMethod);
+END;
+/
+
+-- 7. Trigger không cho phép nhập số tiền thanh toán vượt quá hóa đơn Booking
+CREATE OR REPLACE TRIGGER TRG_RB60_CHECK_PAYMENT_AMOUNT
+BEFORE INSERT OR UPDATE ON PAYMENT
+FOR EACH ROW
+DECLARE
+    v_TotalAmount NUMBER;
+BEGIN
+    SELECT TotalAmount INTO v_TotalAmount FROM BOOKING WHERE BookingID = :NEW.BookingID;
+
+    IF :NEW.Amount > v_TotalAmount THEN
+        RAISE_APPLICATION_ERROR(-20005, 'RB60: Lỗi! Số tiền thanh toán không được vượt quá tổng tiền của Booking.');
+    END IF;
+END;
+/
+
+-- 8. Trigger bắt buộc mỗi hóa đơn xác nhận (CONFIRMED hoặc COMPLETED) phải có ít nhất một vé
+CREATE OR REPLACE TRIGGER TRG_RB66_BOOKING_MUST_HAVE_TICKET
+BEFORE UPDATE ON BOOKING
+FOR EACH ROW
+DECLARE
+    v_TicketCount NUMBER;
+BEGIN
+    -- Kiểm tra khi Booking được chốt (sang trạng thái CONFIRMED hoặc COMPLETED)
+    IF :NEW.Status IN ('CONFIRMED', 'COMPLETED') AND :OLD.Status NOT IN ('CONFIRMED', 'COMPLETED') THEN
+        SELECT COUNT(*) INTO v_TicketCount FROM TICKET WHERE BookingID = :NEW.BookingID;
+        IF v_TicketCount = 0 THEN
+            RAISE_APPLICATION_ERROR(-20007, 'RB66: Lỗi! Không thể xác nhận Booking vì chưa có vé nào.');
+        END IF;
+    END IF;
+END;
+/

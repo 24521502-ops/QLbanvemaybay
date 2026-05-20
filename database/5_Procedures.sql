@@ -705,3 +705,301 @@ BEGIN
     COMMIT;
 END;
 /
+
+-- =========================================================================
+-- PHẦN 3: PROCEDURES LIÊN QUAN (SỬ DỤNG TRONG BOOKINGDAO.JAVA)/ wang
+-- =========================================================================
+
+-- 1. SP_GET_OR_CREATE_PASSENGER (Tìm/tạo Hành khách bằng PassportNumber)
+CREATE OR REPLACE PROCEDURE SP_GET_OR_CREATE_PASSENGER (
+    p_FullName IN VARCHAR2,
+    p_Gender IN VARCHAR2,
+    p_DateOfBirth IN DATE,
+    p_PassportNumber IN VARCHAR2,
+    p_PassengerID OUT VARCHAR2
+) AS
+BEGIN
+    SELECT PassengerID INTO p_PassengerID
+    FROM PASSENGER
+    WHERE PassportNumber = p_PassportNumber
+      AND ROWNUM = 1;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        INSERT INTO PASSENGER (FullName, Gender, DateOfBirth, PassportNumber)
+        VALUES (p_FullName, p_Gender, p_DateOfBirth, p_PassportNumber)
+        RETURNING PassengerID INTO p_PassengerID;
+END;
+/
+
+-- 2. SP_INIT_PENDING_BOOKING (Khởi tạo Booking PENDING)
+CREATE OR REPLACE PROCEDURE SP_INIT_PENDING_BOOKING (
+    p_CustomerID IN VARCHAR2,
+    p_BookingID OUT VARCHAR2
+) AS
+BEGIN
+    INSERT INTO BOOKING (CustomerID, TotalAmount, Status, BookingDate)
+    VALUES (p_CustomerID, 0, 'PENDING', CURRENT_TIMESTAMP)
+    RETURNING BookingID INTO p_BookingID;
+END;
+/
+
+-- 3. SP_CLEANUP_AND_BOOK_TICKET (Dọn rác giữ chỗ cũ của ghế đó và tạo giữ chỗ mới)
+CREATE OR REPLACE PROCEDURE SP_CLEANUP_AND_BOOK_TICKET (
+    p_BookingID   IN VARCHAR2,
+    p_FlightID    IN VARCHAR2,
+    p_SeatNumber  IN VARCHAR2,
+    p_PassengerID IN VARCHAR2,
+    p_Price       IN NUMBER
+) AS
+    v_SeatID VARCHAR2(20);
+BEGIN
+    -- Lấy SeatID từ Số ghế và máy bay của Flight
+    SELECT s.SeatID INTO v_SeatID
+    FROM SEAT s JOIN FLIGHT f ON s.AircraftID = f.AircraftID
+    WHERE f.FlightID = p_FlightID AND s.SeatNumber = TRIM(p_SeatNumber)
+      AND ROWNUM = 1;
+
+    -- Giải phóng ghế cũ: đánh dấu CANCELLED + xóa SeatID để tránh 2 vấn đề:
+    --   (1) Nếu chỉ CANCELLED mà giữ SeatID → UNIQUE(FlightID,SeatID) bị vi phạm khi INSERT mới
+    --   (2) Nếu chỉ SET NULL mà không CANCELLED → TRG_UPDATE_BOOKING_TOTAL trừ tiền âm (ORA-02290)
+    UPDATE TICKET
+    SET TicketStatus = 'CANCELLED',
+        SeatID       = NULL
+    WHERE FlightID = p_FlightID
+      AND SeatID   = v_SeatID
+      AND TicketStatus NOT IN ('PAID', 'CHECKED-IN', 'CANCELLED');
+
+    -- Chèn vé giữ chỗ mới
+    INSERT INTO TICKET (BookingID, FlightID, SeatID, PassengerID, Price, TicketStatus)
+    VALUES (p_BookingID, p_FlightID, v_SeatID, p_PassengerID, p_Price, 'BOOKED');
+END;
+/
+
+-- 4. SP_FINALIZE_BOOKING (Hoàn tất thanh toán đơn hàng)
+CREATE OR REPLACE PROCEDURE SP_FINALIZE_BOOKING (
+    p_BookingID IN VARCHAR2,
+    p_PaymentMethod IN VARCHAR2,
+    p_Amount IN NUMBER
+) AS
+BEGIN
+    -- Chèn bản ghi thanh toán thành công
+    INSERT INTO PAYMENT (BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus)
+    VALUES (p_BookingID, CURRENT_TIMESTAMP, p_Amount, p_PaymentMethod, 'SUCCESS');
+
+    -- Chuyển trạng thái vé sang PAID
+    UPDATE TICKET SET TicketStatus = 'PAID' WHERE BookingID = p_BookingID;
+
+    -- Chuyển trạng thái đơn hàng sang CONFIRMED
+    UPDATE BOOKING SET Status = 'CONFIRMED' WHERE BookingID = p_BookingID;
+END;
+/
+
+-- 5. SP_UPDATE_BOOKING_PASSENGER (Cập nhật thông tin khách cho từng vé theo thứ tự)
+CREATE OR REPLACE PROCEDURE SP_UPDATE_BOOKING_PASSENGER (
+    p_BookingID IN VARCHAR2,
+    p_FullName IN VARCHAR2,
+    p_Gender IN VARCHAR2,
+    p_DateOfBirth IN DATE,
+    p_PassportNumber IN VARCHAR2,
+    p_Index IN NUMBER -- 1-based index tương ứng với vé
+) AS
+    v_PassengerID VARCHAR2(20);
+    v_TicketID VARCHAR2(20);
+BEGIN
+    -- Lấy hoặc tự tạo mới Hành khách
+    BEGIN
+        SELECT PassengerID INTO v_PassengerID
+        FROM PASSENGER
+        WHERE PassportNumber = p_PassportNumber
+          AND ROWNUM = 1;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            INSERT INTO PASSENGER (FullName, Gender, DateOfBirth, PassportNumber)
+            VALUES (p_FullName, p_Gender, p_DateOfBirth, p_PassportNumber)
+            RETURNING PassengerID INTO v_PassengerID;
+    END;
+
+    -- Tìm TicketID ở vị trí thứ p_Index thuộc Booking đó
+    SELECT TicketID INTO v_TicketID
+    FROM (
+        SELECT TicketID, ROW_NUMBER() OVER (ORDER BY TicketID) as rn
+        FROM TICKET
+        WHERE BookingID = p_BookingID
+    )
+    WHERE rn = p_Index;
+
+    -- Cập nhật PassengerID cho vé tương ứng
+    IF v_TicketID IS NOT NULL AND v_PassengerID IS NOT NULL THEN
+        UPDATE TICKET SET PassengerID = v_PassengerID WHERE TicketID = v_TicketID;
+    END IF;
+END;
+/
+
+-- 6. SP_CANCEL_BOOKING (Được gọi bởi cancelBooking trong BookingDAO.java để hủy đơn và hoàn tiền tự động)
+CREATE OR REPLACE PROCEDURE SP_CANCEL_BOOKING (p_BookingID IN VARCHAR2, p_CancelReason IN VARCHAR2) AS
+    v_Status VARCHAR2(50); v_CustomerID VARCHAR2(20); v_TotalAmount NUMBER;
+BEGIN
+    SELECT Status, CustomerID, TotalAmount INTO v_Status, v_CustomerID, v_TotalAmount FROM BOOKING WHERE BookingID = p_BookingID;
+    IF v_Status = 'CONFIRMED' THEN
+        INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
+        VALUES (v_CustomerID, p_BookingID, 'REFUND', v_TotalAmount, 'Hoàn tiền do: ' || p_CancelReason);
+    END IF;
+
+    UPDATE BOOKING SET Status = 'CANCELLED' WHERE BookingID = p_BookingID;
+    UPDATE TICKET SET TicketStatus = 'CANCELLED' WHERE BookingID = p_BookingID;
+    COMMIT;
+END;
+/
+
+-- 7. PROC_RECALCULATE_BOOKING_TOTAL (Tính toán lại tổng tiền Booking gồm giá vé + 10% thuế mỗi vé)
+CREATE OR REPLACE PROCEDURE PROC_RECALCULATE_BOOKING_TOTAL (p_BookingID IN VARCHAR2) AS
+    v_BaseTotal NUMBER;
+BEGIN
+    -- Tính tổng giá vé cơ bản của các vé chưa hủy thuộc BookingID
+    SELECT SUM(Price) INTO v_BaseTotal
+    FROM TICKET 
+    WHERE BookingID = p_BookingID AND TicketStatus != 'CANCELLED';
+
+    -- Cập nhật lại hóa đơn với công thức: Tổng Giá Vé * 1.10 (Giá vé + 10% thuế VAT)
+    UPDATE BOOKING 
+    SET TotalAmount = NVL(v_BaseTotal, 0) * 1.10
+    WHERE BookingID = p_BookingID;
+END;
+/
+
+-- 8. SP_GET_SEATS_BY_FLIGHT_AND_CLASS (Lấy danh sách ghế theo chuyến bay và hạng ghế)
+CREATE OR REPLACE PROCEDURE SP_GET_SEATS_BY_FLIGHT_AND_CLASS (
+    p_FlightID IN VARCHAR2,
+    p_Class IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT SeatID, SeatNumber, Class, IsBooked
+        FROM VIEW_FLIGHT_SEAT_STATUS
+        WHERE FlightID = p_FlightID
+          AND UPPER(TRIM(Class)) = UPPER(TRIM(p_Class))
+        ORDER BY SeatNumber;
+END;
+/
+
+-- 9. SP_SEARCH_FLIGHTS (Tìm kiếm chuyến bay theo điểm khởi hành, điểm đến và ngày đi)
+CREATE OR REPLACE PROCEDURE SP_SEARCH_FLIGHTS (
+    p_DepCode IN VARCHAR2,
+    p_ArrCode IN VARCHAR2,
+    p_DateStr IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT FlightID, AirlineName, AircraftModel, DepCode, ArrCode, DepartureTime, ArrivalTime, ClassName, Price, Seats
+        FROM VIEW_FLIGHT_SEARCH
+        WHERE TRIM(UPPER(DepCode)) = TRIM(UPPER(p_DepCode))
+          AND TRIM(UPPER(ArrCode)) = TRIM(UPPER(p_ArrCode))
+          AND TRUNC(DepartureTime) = TO_DATE(p_DateStr, 'YYYY-MM-DD')
+          AND DepartureTime > SYSDATE
+        ORDER BY DepartureTime ASC, Price ASC;
+END;
+/
+
+-- 10. SP_GET_MIN_PRICES_FOR_WEEK (Lấy giá vé rẻ nhất trong tuần xung quanh một ngày)
+CREATE OR REPLACE PROCEDURE SP_GET_MIN_PRICES_FOR_WEEK (
+    p_DepCode IN VARCHAR2,
+    p_ArrCode IN VARCHAR2,
+    p_StartDate IN VARCHAR2,
+    p_EndDate IN VARCHAR2,
+    p_ResultSet OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_ResultSet FOR
+        SELECT TRUNC(DepartureTime) as d, MIN(Price) as min_p
+        FROM VIEW_FLIGHT_MIN_PRICES
+        WHERE TRIM(UPPER(DepCode)) = TRIM(UPPER(p_DepCode))
+          AND TRIM(UPPER(ArrCode)) = TRIM(UPPER(p_ArrCode))
+          AND TRUNC(DepartureTime) BETWEEN TO_DATE(p_StartDate, 'YYYY-MM-DD') AND TO_DATE(p_EndDate, 'YYYY-MM-DD')
+          AND DepartureTime > SYSDATE
+        GROUP BY TRUNC(DepartureTime);
+END;
+/
+
+-- 1. THỦ TỤC LẤY DANH SÁCH CHUYẾN BAY SẮP TỚI CỦA KHÁCH HÀNG
+CREATE OR REPLACE PROCEDURE SP_GET_MY_FLIGHTS (
+    p_account_id IN VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT 
+            b.BookingID,
+            f.FlightID,
+            dep.IATACode as DepartureIATA,
+            arr.IATACode as ArrivalIATA,
+            dep.City as DepartureCity,
+            arr.City as ArrivalCity,
+            al.AirlineName,
+            f.FlightNumber,
+            MAX(t.TicketStatus) as TicketStatus,
+            f.DepartureTime,
+            f.ArrivalTime,
+            f.Gate,
+            LISTAGG(s.SeatNumber, ', ') WITHIN GROUP (ORDER BY s.SeatNumber) as Seats,
+            r.EstimatedTime
+        FROM ACCOUNT acc
+        JOIN CUSTOMER c ON acc.AccountID = c.AccountID
+        JOIN BOOKING b ON c.CustomerID = b.CustomerID
+        JOIN TICKET t ON b.BookingID = t.BookingID
+        JOIN FLIGHT f ON t.FlightID = f.FlightID
+        JOIN ROUTE r ON f.RouteID = r.RouteID
+        JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
+        JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
+        JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID
+        JOIN AIRLINE al ON a.AirlineID = al.AirlineID
+        LEFT JOIN SEAT s ON t.SeatID = s.SeatID
+        WHERE acc.AccountID = p_account_id
+          AND f.DepartureTime > SYSDATE
+          AND b.Status != 'CANCELLED'
+          AND t.TicketStatus != 'CANCELLED'
+        GROUP BY b.BookingID, f.FlightID, dep.IATACode, arr.IATACode, dep.City, arr.City, 
+                 al.AirlineName, f.FlightNumber, f.DepartureTime, f.ArrivalTime, f.Gate, r.EstimatedTime
+        ORDER BY f.DepartureTime ASC;
+END SP_GET_MY_FLIGHTS;
+/
+
+-- 2. THỦ TỤC LẤY LỊCH SỬ GIAO DỊCH ĐẶT VÉ CỦA KHÁCH HÀNG
+CREATE OR REPLACE PROCEDURE SP_GET_BOOKING_HISTORY (
+    p_account_id IN VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT 
+            b.BookingID, 
+            b.BookingDate, 
+            b.TotalAmount, 
+            b.Status as BookingStatus,
+            p.PaymentMethod,
+            f.DepartureTime,
+            dep.IATACode as DepIATA,
+            arr.IATACode as ArrIATA,
+            (SELECT COUNT(*) FROM TICKET t2 WHERE t2.BookingID = b.BookingID) as TicketCount,
+            (SELECT COUNT(*) FROM TICKET t3 WHERE t3.BookingID = b.BookingID AND t3.TicketStatus = 'CHECKED-IN') as CheckedInCount
+        FROM ACCOUNT acc
+        JOIN CUSTOMER c ON acc.AccountID = c.AccountID
+        JOIN BOOKING b ON c.CustomerID = b.CustomerID
+        LEFT JOIN PAYMENT p ON b.BookingID = p.BookingID
+        LEFT JOIN (
+            SELECT t.BookingID, MIN(t.FlightID) as FlightID 
+            FROM TICKET t 
+            GROUP BY t.BookingID
+        ) first_flight ON b.BookingID = first_flight.BookingID
+        LEFT JOIN FLIGHT f ON first_flight.FlightID = f.FlightID
+        LEFT JOIN ROUTE r ON f.RouteID = r.RouteID
+        LEFT JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
+        LEFT JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
+        WHERE acc.AccountID = p_account_id
+          AND NOT (b.Status = 'CANCELLED' AND NOT EXISTS (
+              SELECT 1 FROM PAYMENT p2 WHERE p2.BookingID = b.BookingID
+          ))
+        ORDER BY b.BookingDate DESC;
+END SP_GET_BOOKING_HISTORY;
+/

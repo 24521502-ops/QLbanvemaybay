@@ -169,9 +169,30 @@ public class BaoCaoTKGUI extends JPanel {
         cboHangBay.setUI(new javax.swing.plaf.basic.BasicComboBoxUI() {
             @Override
             protected JButton createArrowButton() {
-                JButton b = new JButton("∨");
-                b.setFont(new Font("Segoe UI", Font.PLAIN, 9));
-                b.setForeground(GRAY);
+                JButton b = new JButton(new javax.swing.Icon() {
+                    @Override
+                    public void paintIcon(Component c, Graphics g, int x, int y) {
+                        Graphics2D g2 = (Graphics2D) g.create();
+                        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                        g2.translate(x, y);
+                        g2.setColor(GRAY);
+                        g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                        // Chevron centered in a 12x12 box (from x=2 to 10, y=4 to 8)
+                        g2.drawLine(2, 4, 6, 8);
+                        g2.drawLine(6, 8, 10, 4);
+                        g2.dispose();
+                    }
+
+                    @Override
+                    public int getIconWidth() {
+                        return 12;
+                    }
+
+                    @Override
+                    public int getIconHeight() {
+                        return 12;
+                    }
+                });
                 b.setContentAreaFilled(false);
                 b.setBorderPainted(false);
                 b.setFocusPainted(false);
@@ -930,6 +951,10 @@ public class BaoCaoTKGUI extends JPanel {
         private JPopupMenu popup;
         private JPanel daysPanel;
         private JLabel monthLabel;
+        private JLabel yearLabel;
+        private JPanel centerContainer;
+        private CardLayout cardLayout;
+        private JList<Integer> yearList;
         private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         CalendarPanel(Date initialDate, JTextField target, JPopupMenu popup) {
@@ -949,7 +974,10 @@ public class BaoCaoTKGUI extends JPanel {
             JButton btnPrev = mkNavBtn("<");
             JButton btnNext = mkNavBtn(">");
 
-            monthLabel = new JLabel("", SwingConstants.CENTER);
+            JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 4, 0));
+            labelPanel.setOpaque(false);
+
+            monthLabel = new JLabel();
             monthLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
             monthLabel.setForeground(DARK);
             monthLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -971,6 +999,42 @@ public class BaoCaoTKGUI extends JPanel {
                 }
             });
 
+            yearLabel = new JLabel();
+            yearLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            yearLabel.setForeground(DARK);
+            yearLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            yearLabel.setToolTipText("Nhấn để chọn năm");
+
+            yearLabel.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    if ("YEARS".equals(centerContainer.getClientProperty("currentView"))) {
+                        cardLayout.show(centerContainer, "DAYS");
+                        centerContainer.putClientProperty("currentView", "DAYS");
+                    } else {
+                        cardLayout.show(centerContainer, "YEARS");
+                        centerContainer.putClientProperty("currentView", "YEARS");
+                        int currentYear = calendar.get(Calendar.YEAR);
+                        yearList.setSelectedValue(currentYear, true);
+                        int selectedIndex = yearList.getSelectedIndex();
+                        if (selectedIndex >= 0) {
+                            SwingUtilities.invokeLater(() -> yearList.ensureIndexIsVisible(selectedIndex));
+                        }
+                    }
+                }
+                @Override
+                public void mouseEntered(java.awt.event.MouseEvent e) {
+                    yearLabel.setForeground(BLUE);
+                }
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    yearLabel.setForeground(DARK);
+                }
+            });
+
+            labelPanel.add(monthLabel);
+            labelPanel.add(yearLabel);
+
             btnPrev.addActionListener(e -> {
                 calendar.add(Calendar.MONTH, -1);
                 updateCalendar();
@@ -981,7 +1045,7 @@ public class BaoCaoTKGUI extends JPanel {
             });
 
             header.add(btnPrev, BorderLayout.WEST);
-            header.add(monthLabel, BorderLayout.CENTER);
+            header.add(labelPanel, BorderLayout.CENTER);
             header.add(btnNext, BorderLayout.EAST);
 
             // Weekdays Header
@@ -1003,8 +1067,22 @@ public class BaoCaoTKGUI extends JPanel {
             daysPanel.setOpaque(false);
             center.add(daysPanel, BorderLayout.CENTER);
 
+            cardLayout = new CardLayout();
+            centerContainer = new JPanel(cardLayout);
+            centerContainer.setOpaque(false);
+            centerContainer.add(center, "DAYS");
+            
+            yearList = buildYearList();
+            JScrollPane yearScroll = new JScrollPane(yearList);
+            yearScroll.setBorder(null);
+            yearScroll.getVerticalScrollBar().setUnitIncrement(12);
+            yearScroll.getVerticalScrollBar().setUI(new ModernScrollBarUI());
+            centerContainer.add(yearScroll, "YEARS");
+            
+            centerContainer.putClientProperty("currentView", "DAYS");
+
             add(header, BorderLayout.NORTH);
-            add(center, BorderLayout.CENTER);
+            add(centerContainer, BorderLayout.CENTER);
 
             updateCalendar();
         }
@@ -1029,15 +1107,15 @@ public class BaoCaoTKGUI extends JPanel {
             monthBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             monthBox.setPreferredSize(new Dimension(120, 32));
 
-            // Year spinner
+            // Year selection
+            JComboBox<Integer> yearBox = new JComboBox<>();
             int currentYear = calendar.get(Calendar.YEAR);
-            SpinnerNumberModel yearModel = new SpinnerNumberModel(currentYear, 1900, 2100, 1);
-            JSpinner yearSpinner = new JSpinner(yearModel);
-            yearSpinner.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-            yearSpinner.setPreferredSize(new Dimension(80, 32));
-            // Remove thousands separator
-            JSpinner.NumberEditor editor = new JSpinner.NumberEditor(yearSpinner, "#");
-            yearSpinner.setEditor(editor);
+            for (int y = 1900; y <= 2100; y++) {
+                yearBox.addItem(y);
+            }
+            yearBox.setSelectedItem(currentYear);
+            yearBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            yearBox.setPreferredSize(new Dimension(80, 32));
 
             gbc.gridx = 0; gbc.gridy = 0;
             content.add(new JLabel("Tháng:"), gbc);
@@ -1046,7 +1124,7 @@ public class BaoCaoTKGUI extends JPanel {
             gbc.gridx = 0; gbc.gridy = 1;
             content.add(new JLabel("Năm:"), gbc);
             gbc.gridx = 1;
-            content.add(yearSpinner, gbc);
+            content.add(yearBox, gbc);
 
             // Buttons
             JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -1063,7 +1141,7 @@ public class BaoCaoTKGUI extends JPanel {
             btnOk.setPreferredSize(new Dimension(90, 30));
             btnOk.addActionListener(ev -> {
                 calendar.set(Calendar.MONTH, monthBox.getSelectedIndex());
-                calendar.set(Calendar.YEAR, (Integer) yearSpinner.getValue());
+                calendar.set(Calendar.YEAR, (Integer) yearBox.getSelectedItem());
                 updateCalendar();
                 dialog.dispose();
             });
@@ -1082,6 +1160,82 @@ public class BaoCaoTKGUI extends JPanel {
             dialog.pack();
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
+        }
+
+        private JList<Integer> buildYearList() {
+            int currentYear = Calendar.getInstance().get(Calendar.YEAR);
+            DefaultListModel<Integer> listModel = new DefaultListModel<>();
+            for (int y = currentYear - 50; y <= currentYear + 20; y++) {
+                listModel.addElement(y);
+            }
+
+            JList<Integer> list = new JList<>(listModel);
+            list.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            list.setBackground(Color.WHITE);
+            list.setForeground(DARK);
+            list.setSelectionBackground(new Color(0xEBF5FF));
+            list.setSelectionForeground(BLUE);
+            list.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            list.setCellRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> l, Object value, int index,
+                                                              boolean isSelected, boolean cellHasFocus) {
+                    JLabel label = (JLabel) super.getListCellRendererComponent(l, value, index, isSelected, cellHasFocus);
+                    label.setBorder(BorderFactory.createEmptyBorder(6, 16, 6, 16));
+                    label.setHorizontalAlignment(SwingConstants.CENTER);
+                    
+                    Integer hoverIdx = (Integer) l.getClientProperty("hoverIndex");
+                    if (isSelected) {
+                        label.setBackground(new Color(0xEBF5FF));
+                        label.setForeground(BLUE);
+                        label.setFont(label.getFont().deriveFont(Font.BOLD));
+                    } else if (hoverIdx != null && hoverIdx == index) {
+                        label.setBackground(new Color(0xF1F5F9));
+                        label.setForeground(DARK);
+                        label.setFont(label.getFont().deriveFont(Font.PLAIN));
+                    } else {
+                        label.setBackground(Color.WHITE);
+                        label.setForeground(DARK);
+                        label.setFont(label.getFont().deriveFont(Font.PLAIN));
+                    }
+                    return label;
+                }
+            });
+
+            list.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+                @Override
+                public void mouseMoved(java.awt.event.MouseEvent e) {
+                    int index = list.locationToIndex(e.getPoint());
+                    if (index > -1 && index != list.getSelectedIndex()) {
+                        list.putClientProperty("hoverIndex", index);
+                        list.repaint();
+                    }
+                }
+            });
+            list.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseExited(java.awt.event.MouseEvent e) {
+                    list.putClientProperty("hoverIndex", -1);
+                    list.repaint();
+                }
+                
+                @Override
+                public void mousePressed(java.awt.event.MouseEvent e) {
+                    int index = list.locationToIndex(e.getPoint());
+                    if (index > -1) {
+                        Integer selectedYear = list.getModel().getElementAt(index);
+                        if (selectedYear != null) {
+                            calendar.set(Calendar.YEAR, selectedYear);
+                            updateCalendar();
+                            cardLayout.show(centerContainer, "DAYS");
+                            centerContainer.putClientProperty("currentView", "DAYS");
+                        }
+                    }
+                }
+            });
+            return list;
         }
 
         private JButton mkNavBtn(String t) {
@@ -1103,8 +1257,9 @@ public class BaoCaoTKGUI extends JPanel {
             int startDay = cal.get(Calendar.DAY_OF_WEEK); // 1 = Sunday
             int maxDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-            SimpleDateFormat monthSdf = new SimpleDateFormat("'Tháng' MM, yyyy", Locale.of("vi", "VN"));
+            SimpleDateFormat monthSdf = new SimpleDateFormat("'Tháng' MM,", Locale.of("vi", "VN"));
             monthLabel.setText(monthSdf.format(cal.getTime()));
+            yearLabel.setText(String.valueOf(cal.get(Calendar.YEAR)));
 
             // Days of previous month
             cal.add(Calendar.MONTH, -1);

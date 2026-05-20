@@ -105,3 +105,80 @@ EXCEPTION
         RETURN NULL;
 END;
 /
+
+-- =========================================================================
+-- PHẦN 1: FUNCTIONS LIÊN QUAN (TÍNH TOÁN GHẾ TRỐNG VÀ GIÁ ĐỘNG)/ wang
+-- =========================================================================
+
+-- 8. Lấy số ghế trống theo hạng (Được gọi bởi VIEW_FLIGHT_SEARCH)
+CREATE OR REPLACE FUNCTION FUNC_GET_AVAILABLE_SEATS (p_FlightID IN VARCHAR2, p_Class IN VARCHAR2) RETURN NUMBER AS
+    v_TotalSeats NUMBER; v_BookedSeats NUMBER; v_AircraftID VARCHAR2(20);
+BEGIN
+    SELECT AircraftID INTO v_AircraftID FROM FLIGHT WHERE FlightID = p_FlightID;
+    SELECT COUNT(*) INTO v_TotalSeats FROM SEAT WHERE AircraftID = v_AircraftID AND Class = p_Class;
+    SELECT COUNT(*) INTO v_BookedSeats FROM TICKET t JOIN SEAT s ON t.SeatID = s.SeatID
+    WHERE t.FlightID = p_FlightID AND s.Class = p_Class AND t.TicketStatus != 'CANCELLED';
+
+    RETURN v_TotalSeats - v_BookedSeats;
+END;
+/
+
+-- 9. Tính giá vé động (Được gọi bởi các View tìm kiếm chuyến bay & BookingDAO)
+CREATE OR REPLACE FUNCTION FUNC_GET_DYNAMIC_PRICE (p_FlightID IN VARCHAR2, p_Class IN VARCHAR2) RETURN NUMBER AS
+    v_BasePrice NUMBER; v_DepartureTime DATE; v_DaysDifference NUMBER;
+BEGIN
+    SELECT Price INTO v_BasePrice FROM SEATCLASSPRICE WHERE FlightID = p_FlightID AND Class = p_Class;
+    SELECT DepartureTime INTO v_DepartureTime FROM FLIGHT WHERE FlightID = p_FlightID;
+    
+    v_DaysDifference := v_DepartureTime - SYSDATE;
+    IF v_DaysDifference >= 30 THEN RETURN v_BasePrice * 0.9;
+    ELSIF v_DaysDifference <= 3 THEN RETURN v_BasePrice * 1.2;
+    ELSE RETURN v_BasePrice; END IF;
+END;
+/
+
+-- 3. HÀM TÍNH THỜI GIAN GIỮ CHỖ CÒN LẠI (GIỚI HẠN 20 PHÚT)
+CREATE OR REPLACE FUNCTION FN_GET_REMAINING_PAYMENT_SEC (
+    p_booking_id IN VARCHAR2
+) RETURN NUMBER AS
+    v_elapsed_sec NUMBER;
+    v_remaining_sec NUMBER := 0;
+BEGIN
+    SELECT ROUND((SYSDATE - BookingDate) * 86400)
+    INTO v_elapsed_sec
+    FROM BOOKING
+    WHERE BookingID = p_booking_id AND Status = 'PENDING';
+    
+    v_remaining_sec := 1200 - v_elapsed_sec;
+    IF v_remaining_sec < 0 THEN
+        v_remaining_sec := 0;
+    END IF;
+    
+    RETURN v_remaining_sec;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN 0;
+END FN_GET_REMAINING_PAYMENT_SEC;
+/
+
+-- 4. HÀM LẤY TÊN THÀNH PHỐ THEO MÃ SÂN BAY IATA
+CREATE OR REPLACE FUNCTION FN_GET_CITY_BY_IATA (
+    p_iata_code IN VARCHAR2
+) RETURN VARCHAR2 AS
+    v_city VARCHAR2(100);
+BEGIN
+    SELECT City
+    INTO v_city
+    FROM AIRPORT
+    WHERE IATACode = p_iata_code;
+    
+    RETURN v_city;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN p_iata_code;
+    WHEN OTHERS THEN
+        RETURN p_iata_code;
+END FN_GET_CITY_BY_IATA;
+/
