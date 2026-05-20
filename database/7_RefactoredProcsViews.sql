@@ -176,8 +176,8 @@ BEGIN
     -- Chuyển trạng thái vé sang PAID
     UPDATE TICKET SET TicketStatus = 'PAID' WHERE BookingID = p_BookingID;
 
-    -- Chuyển trạng thái đơn hàng sang COMPLETED
-    UPDATE BOOKING SET Status = 'COMPLETED' WHERE BookingID = p_BookingID;
+    -- Chuyển trạng thái đơn hàng sang CONFIRMED
+    UPDATE BOOKING SET Status = 'CONFIRMED' WHERE BookingID = p_BookingID;
 END;
 /
 
