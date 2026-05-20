@@ -719,7 +719,7 @@ public class BookingHomePanel extends JPanel {
         mainGrid.add(rightGrid, "grow");
 
         panel.add(mainGrid, "growx");
-        wrapper.add(panel, "growx, wmax 1200");
+        wrapper.add(panel, "growx");
 
         return wrapper;
     }

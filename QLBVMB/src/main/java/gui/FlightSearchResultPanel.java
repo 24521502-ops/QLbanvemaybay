@@ -8,7 +8,6 @@ import dao.DatVeDAO.BookingFlightDAO;
 import dto.FlightSearchResultDTO;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -488,7 +487,30 @@ public class FlightSearchResultPanel extends JPanel {
         JLabel lblDur = new JLabel("2h 15m"); // Sample duration
         lblDur.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblDur.setForeground(TEXT_GRAY);
-        JLabel lblLine = new JLabel("<html>- - - - - - -  <font face='Segoe UI Emoji'>🛫</font>  - - - - - - -</html>"); // Sử dụng dấu gạch ngang chuẩn Segoe UI và bọc emoji trong font Segoe UI Emoji để không bao giờ bị lỗi ô vuông
+        JLabel lblLine = new JLabel("<html>- - - - - - -  <font face='Segoe UI Emoji'>🛫</font>  - - - - - - -</html>"); // Sử
+                                                                                                                         // dụng
+                                                                                                                         // dấu
+                                                                                                                         // gạch
+                                                                                                                         // ngang
+                                                                                                                         // chuẩn
+                                                                                                                         // Segoe
+                                                                                                                         // UI
+                                                                                                                         // và
+                                                                                                                         // bọc
+                                                                                                                         // emoji
+                                                                                                                         // trong
+                                                                                                                         // font
+                                                                                                                         // Segoe
+                                                                                                                         // UI
+                                                                                                                         // Emoji
+                                                                                                                         // để
+                                                                                                                         // không
+                                                                                                                         // bao
+                                                                                                                         // giờ
+                                                                                                                         // bị
+                                                                                                                         // lỗi
+                                                                                                                         // ô
+                                                                                                                         // vuông
         lblLine.setFont(new Font("Segoe UI", Font.PLAIN, 14)); // Sử dụng Segoe UI chuẩn vẽ gạch ngang tuyệt đẹp
         lblLine.setForeground(new Color(203, 213, 225));
         mid.add(lblDur, "center");

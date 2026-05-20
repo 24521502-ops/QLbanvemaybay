@@ -4,17 +4,16 @@ import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.DecimalFormat;
 
 public class PaymentDialog extends JDialog {
 
-    private static final Color PRIMARY      = new Color(0, 102, 138);
-    private static final Color TEXT_DARK    = new Color(11, 28, 48);
-    private static final Color TEXT_GRAY    = new Color(100, 116, 139);
-    private static final Color SURFACE      = Color.WHITE;
-    private static final Color BG_PAGE      = new Color(248, 249, 255);
+    private static final Color PRIMARY = new Color(0, 102, 138);
+    private static final Color TEXT_DARK = new Color(11, 28, 48);
+    private static final Color TEXT_GRAY = new Color(100, 116, 139);
+    private static final Color SURFACE = Color.WHITE;
+    private static final Color BG_PAGE = new Color(248, 249, 255);
 
     private JPanel methodCardsContainer;
     private JPanel dynamicFormContainer;
@@ -49,8 +48,13 @@ public class PaymentDialog extends JDialog {
         startTimer();
     }
 
-    public boolean isPaid() { return isPaid; }
-    public String getSelectedMethod() { return finalPaymentMethod; }
+    public boolean isPaid() {
+        return isPaid;
+    }
+
+    public String getSelectedMethod() {
+        return finalPaymentMethod;
+    }
 
     private void initComponents() {
         JPanel root = new JPanel(new BorderLayout());
@@ -70,7 +74,8 @@ public class PaymentDialog extends JDialog {
         timerPnl.setBackground(new Color(255, 247, 237));
         timerPnl.putClientProperty(FlatClientProperties.STYLE, "arc:8; borderColor:#fdba74; borderWidth:1");
 
-        JLabel lblMsg = new JLabel("(!) Vui l\u00f2ng ho\u00e0n t\u1ea5t thanh to\u00e1n \u0111\u1ec3 gi\u1eef ch\u1ed7");
+        JLabel lblMsg = new JLabel(
+                "(!) Vui l\u00f2ng ho\u00e0n t\u1ea5t thanh to\u00e1n \u0111\u1ec3 gi\u1eef ch\u1ed7");
         lblMsg.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblMsg.setForeground(new Color(154, 52, 18));
 
@@ -179,7 +184,10 @@ public class PaymentDialog extends JDialog {
         btnCancel.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btnCancel.putClientProperty(FlatClientProperties.STYLE, "arc:8; background:#fee2e2; color:#ef4444");
         btnCancel.setPreferredSize(new Dimension(150, 45));
-        btnCancel.addActionListener(e -> { stopTimer(); dispose(); });
+        btnCancel.addActionListener(e -> {
+            stopTimer();
+            dispose();
+        });
 
         JButton btnPay = new JButton("Thanh to\u00e1n ngay");
         btnPay.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -222,7 +230,9 @@ public class PaymentDialog extends JDialog {
         card.add(lblTitle);
         card.add(lblSub);
         card.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent e) { selectMethod(method, card); }
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                selectMethod(method, card);
+            }
         });
         return card;
     }
@@ -230,7 +240,8 @@ public class PaymentDialog extends JDialog {
     private void selectMethod(String method, JPanel selectedCard) {
         this.selectedMethod = method;
         for (Component c : methodCardsContainer.getComponents()) {
-            if (c instanceof JPanel) updateCardStyle((JPanel) c, c == selectedCard);
+            if (c instanceof JPanel)
+                updateCardStyle((JPanel) c, c == selectedCard);
         }
         ((CardLayout) dynamicFormContainer.getLayout()).show(dynamicFormContainer, method);
     }
@@ -293,7 +304,8 @@ public class PaymentDialog extends JDialog {
                 "X\u00e1c nh\u1eadn b\u1ea1n \u0111\u00e3 th\u1ef1c hi\u1ec7n thanh to\u00e1n s\u1ed1 ti\u1ec1n "
                         + df.format(amount) + " VND?",
                 "X\u00e1c nh\u1eadn thanh to\u00e1n", JOptionPane.YES_NO_OPTION);
-        if (choice != JOptionPane.YES_OPTION) return;
+        if (choice != JOptionPane.YES_OPTION)
+            return;
 
         // Bước 2: Loading dialog (y hệt PaymentPanel)
         JDialog loadingDialog = new JDialog(this, "\u0110ang ki\u1ec3m tra", true);
@@ -361,6 +373,7 @@ public class PaymentDialog extends JDialog {
     }
 
     private void stopTimer() {
-        if (countdownTimer != null) countdownTimer.stop();
+        if (countdownTimer != null)
+            countdownTimer.stop();
     }
 }
