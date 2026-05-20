@@ -21,7 +21,6 @@ public class PassengerInfoPanel extends JPanel {
     private static final Color BG_SECTION_HEADER = new Color(240, 245, 255);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
     private static final Color TEXT_GRAY = new Color(100, 116, 139);
-    private static final Color BORDER_COLOR = new Color(226, 232, 240);
 
     private final BookingProcessPanel navigationListener;
     private final bus.DatVeBUS.BookingPassengerBUS passengerBUS = new bus.DatVeBUS.BookingPassengerBUS();

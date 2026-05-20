@@ -562,6 +562,7 @@ public class BookingHomePanel extends JPanel {
         return rb;
     }
 
+    @SuppressWarnings("unchecked")
     private JComboBox<String> getComboBoxFromGroup(JPanel group) {
         JPanel field = (JPanel) group.getComponent(1);
         return (JComboBox<String>) field.getComponent(1);

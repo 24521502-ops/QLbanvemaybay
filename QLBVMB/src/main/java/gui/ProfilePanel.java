@@ -9,7 +9,6 @@ import com.github.lgooddatepicker.components.DatePicker;
 import com.github.lgooddatepicker.components.DatePickerSettings;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -17,15 +16,12 @@ import java.util.regex.Pattern;
 
 public class ProfilePanel extends JPanel {
 
-    private static final Color PRIMARY   = new Color(0, 102, 138);
-    private static final Color BG_PAGE   = new Color(245, 247, 252);
-    private static final Color BG_CARD   = Color.WHITE;
+    private static final Color PRIMARY = new Color(0, 102, 138);
+    private static final Color BG_PAGE = new Color(245, 247, 252);
+    private static final Color BG_CARD = Color.WHITE;
     private static final Color TEXT_DARK = new Color(15, 23, 42);
     private static final Color TEXT_GRAY = new Color(100, 116, 139);
-    private static final Color DIVIDER   = new Color(226, 232, 240);
-    private static final Color BLUE_BG   = new Color(239, 246, 255);
-    private static final Color BLUE_TEXT = new Color(29, 78, 216);
-    private static final Color FIELD_BG  = new Color(248, 250, 252);
+    private static final Color DIVIDER = new Color(226, 232, 240);
 
     private final AccountDTO account;
     private final ProfileDAO profileDAO = new ProfileDAO();
@@ -118,7 +114,8 @@ public class ProfilePanel extends JPanel {
         lblHeaderName.setForeground(TEXT_DARK);
 
         String emailStr = customer != null && customer.getEmail() != null
-                ? customer.getEmail() : (account != null ? nvl(account.getUserName()) : "");
+                ? customer.getEmail()
+                : (account != null ? nvl(account.getUserName()) : "");
         lblHeaderEmail = new JLabel(emailStr);
         lblHeaderEmail.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblHeaderEmail.setForeground(TEXT_GRAY);
@@ -142,7 +139,8 @@ public class ProfilePanel extends JPanel {
 
         String fullName = nvl(customer != null ? customer.getFullName() : null);
         String dobStr = customer != null && customer.getDateOfBirth() != null
-                ? new SimpleDateFormat("dd/MM/yyyy").format(customer.getDateOfBirth()) : "";
+                ? new SimpleDateFormat("dd/MM/yyyy").format(customer.getDateOfBirth())
+                : "";
         String phone = nvl(customer != null ? customer.getPhone() : null);
         String gender = formatGender(customer != null ? customer.getGender() : null);
         String email = nvl(customer != null ? customer.getEmail() : null);
@@ -159,7 +157,7 @@ public class ProfilePanel extends JPanel {
         tfPhone = new JTextField();
         lblPhoneVal = new JLabel();
 
-        cbGender = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
+        cbGender = new JComboBox<>(new String[] { "Nam", "Nữ", "Khác" });
         lblGenderVal = new JLabel();
 
         tfEmail = new JTextField();
@@ -173,22 +171,22 @@ public class ProfilePanel extends JPanel {
 
         // Xây dựng lưới grid bento 2 cột cân xứng
         JPanel g1 = grid();
-        
+
         // Dòng 1: Họ và tên | Ngày sinh
         g1.add(editableFieldBlock("Họ và tên", fullName, tfFullName, lblFullNameVal));
         g1.add(editableDateBlock("Ngày sinh", dobStr, dpDob, lblDobVal), "wrap");
-        
+
         // Dòng 2: Số điện thoại | Giới tính
         g1.add(editableFieldBlock("Số điện thoại", phone, tfPhone, lblPhoneVal));
         g1.add(editableGenderBlock("Giới tính", gender, cbGender, lblGenderVal), "wrap");
-        
+
         // Dòng 3: Email | Quốc tịch
         g1.add(editableFieldBlock("Email", email, tfEmail, lblEmailVal));
         g1.add(editableFieldBlock("Quốc tịch", nationality, tfNationality, lblNationalityVal), "wrap");
-        
+
         // Dòng 4: Số CCCD / Hộ chiếu
         g1.add(editableFieldBlock("Số CCCD / Hộ chiếu", passport, tfPassport, lblPassportVal), "wrap");
-        
+
         card.add(g1, "growx, gapy 0 24");
 
         card.add(divider(), "growx, h 1!, gapy 0 24");
@@ -200,7 +198,7 @@ public class ProfilePanel extends JPanel {
         btnEdit.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btnEdit.putClientProperty(FlatClientProperties.STYLE,
                 "arc:10; background:#00668a; foreground:white; borderWidth:0; " +
-                "hoverBackground:#005577; pressedBackground:#004466");
+                        "hoverBackground:#005577; pressedBackground:#004466");
         btnEdit.setPreferredSize(new Dimension(140, 40));
         btnEdit.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btnEdit.addActionListener(e -> toggleEdit());
@@ -305,15 +303,16 @@ public class ProfilePanel extends JPanel {
         return p;
     }
 
-    // ── Chuyển đổi qua lại chế độ Xem / Sửa và cập nhật CSDL ──────────────────────────
+    // ── Chuyển đổi qua lại chế độ Xem / Sửa và cập nhật CSDL
+    // ──────────────────────────
     private void toggleEdit() {
         if (!editMode) {
             editMode = true;
             btnEdit.setText("<html><font face='Segoe UI Emoji'>💾</font>&nbsp;&nbsp;Lưu</html>");
             btnEdit.putClientProperty(FlatClientProperties.STYLE,
                     "arc:10; background:#16a34a; foreground:white; borderWidth:0; " +
-                    "hoverBackground:#15803d");
-            
+                            "hoverBackground:#15803d");
+
             // Ẩn tất cả nhãn hiển thị xem
             lblFullNameVal.setVisible(false);
             lblDobVal.setVisible(false);
@@ -349,12 +348,14 @@ public class ProfilePanel extends JPanel {
                 return;
             }
             if (newPhone.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
                 tfPhone.requestFocus();
                 return;
             }
             if (!Pattern.matches("(0[3|5|7|8|9])+([0-9]{8})\\b", newPhone)) {
-                JOptionPane.showMessageDialog(this, "Số điện thoại không đúng định dạng Việt Nam!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Số điện thoại không đúng định dạng Việt Nam!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
                 tfPhone.requestFocus();
                 return;
             }
@@ -374,7 +375,8 @@ public class ProfilePanel extends JPanel {
                 return;
             }
             if (newPassport.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Số CCCD / Hộ chiếu không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Số CCCD / Hộ chiếu không được để trống!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
                 tfPassport.requestFocus();
                 return;
             }
@@ -415,10 +417,11 @@ public class ProfilePanel extends JPanel {
                     lblNationalityVal.setText(newNationality);
                     lblPassportVal.setText(newPassport);
                     lblGenderVal.setText(selectedGender);
-                    
+
                     String dobStr = "";
                     if (newDobLocalDate != null) {
-                        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter
+                                .ofPattern("dd/MM/yyyy");
                         dobStr = newDobLocalDate.format(dtf);
                     }
                     lblDobVal.setText(dobStr.isEmpty() ? "—" : dobStr);
@@ -449,7 +452,7 @@ public class ProfilePanel extends JPanel {
             btnEdit.setText("<html><font face='Segoe UI Emoji'>✏</font>&nbsp;&nbsp;Chỉnh sửa</html>");
             btnEdit.putClientProperty(FlatClientProperties.STYLE,
                     "arc:10; background:#00668a; foreground:white; borderWidth:0; " +
-                    "hoverBackground:#005577");
+                            "hoverBackground:#005577");
 
             // Ẩn tất cả thành phần nhập liệu
             tfFullName.setVisible(false);
@@ -478,13 +481,6 @@ public class ProfilePanel extends JPanel {
         JLabel l = new JLabel(text);
         l.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         l.setForeground(TEXT_GRAY);
-        return l;
-    }
-
-    private JLabel boldLabel(String text) {
-        JLabel l = new JLabel(text);
-        l.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        l.setForeground(TEXT_DARK);
         return l;
     }
 
@@ -544,7 +540,8 @@ public class ProfilePanel extends JPanel {
     }
 
     private String getInitials(String name) {
-        if (name == null || name.isBlank()) return "?";
+        if (name == null || name.isBlank())
+            return "?";
         String[] p = name.trim().split("\\s+");
         return p.length >= 2
                 ? (p[0].substring(0, 1) + p[p.length - 1].substring(0, 1)).toUpperCase()
@@ -552,13 +549,19 @@ public class ProfilePanel extends JPanel {
     }
 
     private String formatGender(String g) {
-        if (g == null) return "";
+        if (g == null)
+            return "";
         switch (g.toLowerCase()) {
-            case "male":   return "Nam";
-            case "female": return "Nữ";
-            default:       return "Khác";
+            case "male":
+                return "Nam";
+            case "female":
+                return "Nữ";
+            default:
+                return "Khác";
         }
     }
 
-    private String nvl(String s) { return s != null ? s : ""; }
+    private String nvl(String s) {
+        return s != null ? s : "";
+    }
 }

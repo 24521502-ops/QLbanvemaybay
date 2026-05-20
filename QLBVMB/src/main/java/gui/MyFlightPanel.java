@@ -19,7 +19,6 @@ public class MyFlightPanel extends JPanel {
     private MyFlightBUS flightBUS;
     private JPanel listPanel;
 
-    private static final Color BLUE = new Color(29, 78, 216);
     private static final Color TEXT_DARK = new Color(15, 23, 42);
     private static final Color TEXT_GRAY = new Color(71, 85, 105);
     private static final Color BORDER = new Color(226, 232, 240);

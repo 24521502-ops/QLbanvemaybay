@@ -4,7 +4,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -18,7 +17,6 @@ public class PaymentPanel extends JPanel {
     private static final Color BG_PAGE = new Color(248, 249, 255);
     private static final Color TEXT_DARK = new Color(11, 28, 48);
     private static final Color TEXT_GRAY = new Color(100, 116, 139);
-    private static final Color BORDER_COLOR = new Color(226, 232, 240);
     private static final Color SURFACE = Color.WHITE;
 
     private JPanel methodCardsContainer;
@@ -106,7 +104,8 @@ public class PaymentPanel extends JPanel {
         methodCardsContainer.setOpaque(false);
 
         methodCardsContainer.add(
-                createMethodCard("Chuyển khoản ngân hàng", "VietQR, Internet Banking", "/image/mbbank.jpg", "BANK TRANSFER", true));
+                createMethodCard("Chuyển khoản ngân hàng", "VietQR, Internet Banking", "/image/mbbank.jpg",
+                        "BANK TRANSFER", true));
         methodCardsContainer.add(
                 createMethodCard("Ví MoMo", "MoMo", "/image/momo.jpg", "MOMO", false));
 
@@ -153,7 +152,8 @@ public class PaymentPanel extends JPanel {
         return p;
     }
 
-    private JPanel createMethodCard(String title, String subtitle, String iconPathOrEmoji, String method, boolean selected) {
+    private JPanel createMethodCard(String title, String subtitle, String iconPathOrEmoji, String method,
+            boolean selected) {
         JPanel card = new JPanel(new MigLayout("wrap, insets 16, gapy 4", "[grow, fill]"));
         card.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
@@ -216,22 +216,6 @@ public class PaymentPanel extends JPanel {
         card.repaint();
     }
 
-    private JPanel createCreditCardForm() {
-        JPanel p = new JPanel(new MigLayout("wrap, insets 0, fillx, gapy 16", "[grow, fill]"));
-        p.setOpaque(false);
-
-        p.add(createInputGroup("SỐ THẺ", "0000 0000 0000 0000", "💳"));
-        p.add(createInputGroup("TÊN CHỦ THẺ", "NGUYEN VAN A", null));
-
-        JPanel row = new JPanel(new MigLayout("insets 0, fillx, gapx 16", "[grow, fill] [grow, fill]"));
-        row.setOpaque(false);
-        row.add(createInputGroup("NGÀY HẾT HẠN", "MM/YY", null));
-        row.add(createInputGroup("MÃ BẢO MẬT (CVV)", "123", "ⓘ"));
-
-        p.add(row);
-        return p;
-    }
-
     private JPanel createBankTransferInfo() {
         JPanel p = new JPanel(new MigLayout("wrap, insets 20, center", "[center]"));
         p.setBackground(new Color(250, 250, 250));
@@ -276,32 +260,6 @@ public class PaymentPanel extends JPanel {
         p.add(new JLabel("Quét mã MoMo để thanh toán"), "gapy 0 10");
         p.add(lblQR);
 
-        return p;
-    }
-
-    private JPanel createInputGroup(String label, String placeholder, String icon) {
-        JPanel p = new JPanel(new MigLayout("wrap, insets 0, gapy 4", "[grow, fill]"));
-        p.setOpaque(false);
-
-        JLabel lbl = new JLabel(label);
-        lbl.setFont(new Font("Segoe UI", Font.BOLD, 11));
-        lbl.setForeground(new Color(71, 85, 105));
-        p.add(lbl);
-
-        JTextField tf = new JTextField();
-        tf.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
-        tf.putClientProperty(FlatClientProperties.STYLE,
-                "arc:8; borderColor:#cbd5e1; focusedBorderColor:#00668a; padding:0,12,0,12");
-        tf.setPreferredSize(new Dimension(0, 45));
-
-        if (icon != null) {
-            JLabel lblIcon = new JLabel(icon);
-            lblIcon.setBorder(new EmptyBorder(0, 0, 0, 10));
-            lblIcon.setForeground(TEXT_GRAY);
-            tf.putClientProperty(FlatClientProperties.TEXT_FIELD_LEADING_COMPONENT, lblIcon);
-        }
-
-        p.add(tf);
         return p;
     }
 
@@ -401,7 +359,6 @@ public class PaymentPanel extends JPanel {
         title.setFont(new Font("Segoe UI", Font.BOLD, 18));
         p.add(title, "gapy 0 8");
 
-        double totalBasePrice = 0;
         int passCount = multiSeats.get(0).size();
 
         for (int i = 0; i < flights.size(); i++) {
@@ -421,13 +378,6 @@ public class PaymentPanel extends JPanel {
             JLabel lblS = new JLabel("Ghế " + String.join(", ", seats) + " (" + seatClass + ")");
             lblS.setFont(new Font("Segoe UI", Font.BOLD, 14));
             p.add(lblS, "gapy 0 12");
-
-            for (dto.FlightSearchResultDTO.SeatClassInfo sc : flight.getSeatClasses()) {
-                if (sc.getClassName().equalsIgnoreCase(seatClass)) {
-                    totalBasePrice += sc.getPrice() * seats.size();
-                    break;
-                }
-            }
         }
 
         p.add(createSectionLabel("HÀNH KHÁCH"));

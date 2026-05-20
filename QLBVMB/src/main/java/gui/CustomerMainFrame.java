@@ -1,6 +1,5 @@
 package gui;
 
-import net.miginfocom.swing.MigLayout;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -26,7 +25,6 @@ public class CustomerMainFrame extends JFrame {
     private static final Color TEXT_GRAY = new Color(71, 85, 105);
     private static final Color BORDER = new Color(226, 232, 240);
     private static final Color BG_CONTENT = new Color(248, 249, 255);
-    private static final Color SECONDARY = new Color(0, 102, 138);
 
     public CustomerMainFrame(dto.AccountDTO account) {
         this.account = account;
@@ -279,18 +277,18 @@ public class CustomerMainFrame extends JFrame {
                 int size = 36 - 2; // Subtract 2 to prevent clipping of the border
                 int x = (getWidth() - size) / 2;
                 int y = (getHeight() - size) / 2;
-                
+
                 // Gradient nền sky sang trọng khớp 100% với ProfilePanel
                 GradientPaint gp = new GradientPaint(x, y, new Color(186, 230, 253),
                         x + size, y + size, new Color(147, 197, 253));
                 g2.setPaint(gp);
                 g2.fillOval(x, y, size, size);
-                
+
                 // Viền
                 g2.setColor(new Color(0, 102, 138));
                 g2.setStroke(new BasicStroke(1.2f));
                 g2.drawOval(x, y, size, size);
-                
+
                 // Initials
                 g2.setColor(new Color(0, 102, 138));
                 g2.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -325,7 +323,8 @@ public class CustomerMainFrame extends JFrame {
     }
 
     private String getInitials(String name) {
-        if (name == null || name.isBlank()) return "?";
+        if (name == null || name.isBlank())
+            return "?";
         String[] p = name.trim().split("\\s+");
         return p.length >= 2
                 ? (p[0].substring(0, 1) + p[p.length - 1].substring(0, 1)).toUpperCase()
@@ -373,7 +372,9 @@ public class CustomerMainFrame extends JFrame {
         return account;
     }
 
-    /** Chuyển sang một tab bất kỳ đúng cách (cập nhật cả nav highlight lẫn nội dung) */
+    /**
+     * Chuyển sang một tab bất kỳ đúng cách (cập nhật cả nav highlight lẫn nội dung)
+     */
     public void navigateTo(String menuName) {
         JPanel navItem = navItems.get(menuName);
         if (navItem != null) {

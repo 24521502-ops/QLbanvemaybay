@@ -39,9 +39,6 @@ public class BookingProcessPanel extends JPanel {
     private int activeLegIndex = 0;
     private List<dto.FlightSearchResultDTO> selectedFlights = new ArrayList<>();
     private List<String> selectedClasses = new ArrayList<>();
-
-    // Multi-City Seat Selection State (Traveloka style)
-    private int seatSelectionLegIndex = 0;
     private List<List<String>> multiCitySeats = new ArrayList<>();
 
     // Passenger Data
@@ -436,13 +433,15 @@ public class BookingProcessPanel extends JPanel {
     }
 
     public void payLater() {
-        if (currentBookingID == null) return;
+        if (currentBookingID == null)
+            return;
 
         stopTimer(); // Dừng timer nhưng KHÔNG hủy booking
 
         JOptionPane.showMessageDialog(this,
-                "V\u00e9 c\u1ee7a b\u1ea1n \u0111\u00e3 \u0111\u01b0\u1ee3c gi\u1eef ch\u1ed7 th\u00e0nh c\u00f4ng!\nM\u00e3 \u0111\u1eb7t ch\u1ed7: " + currentBookingID +
-                "\n\nVui l\u00f2ng thanh to\u00e1n t\u1ea1i m\u1ee5c 'L\u1ecbch s\u1eed v\u00e9' tr\u01b0\u1edbc khi h\u1ebft th\u1eddi gian gi\u1eef ch\u1ed7.",
+                "V\u00e9 c\u1ee7a b\u1ea1n \u0111\u00e3 \u0111\u01b0\u1ee3c gi\u1eef ch\u1ed7 th\u00e0nh c\u00f4ng!\nM\u00e3 \u0111\u1eb7t ch\u1ed7: "
+                        + currentBookingID +
+                        "\n\nVui l\u00f2ng thanh to\u00e1n t\u1ea1i m\u1ee5c 'L\u1ecbch s\u1eed v\u00e9' tr\u01b0\u1edbc khi h\u1ebft th\u1eddi gian gi\u1eef ch\u1ed7.",
                 "Gi\u1eef ch\u1ed7 th\u00e0nh c\u00f4ng", JOptionPane.INFORMATION_MESSAGE);
 
         currentBookingID = null;
@@ -501,9 +500,7 @@ public class BookingProcessPanel extends JPanel {
 
     class BookingProgressSidebar extends JPanel {
         private List<StepItem> steps = new ArrayList<>();
-        private static final Color ACTIVE_COLOR = new Color(0, 102, 138);
         private static final Color ACTIVE_BG = new Color(240, 249, 255);
-        private static final Color INACTIVE_COLOR = new Color(100, 116, 139);
         private JPanel multiCityCardContainer;
 
         public BookingProgressSidebar() {
@@ -546,12 +543,10 @@ public class BookingProcessPanel extends JPanel {
 
         class StepItem extends JPanel {
             private JLabel lblIcon, lblText;
-            private int index;
             private String[] icons = { "🔍", "🛫", "👤", "💳" }; // Thứ tự icon: Tìm kiếm -> Chọn ghế -> Thông tin khách
                                                                  // -> Thanh toán
 
             public StepItem(String title, int index) {
-                this.index = index;
                 setLayout(new MigLayout("insets 12 16, gapx 12", "[][grow]"));
                 setOpaque(false);
                 setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -562,25 +557,25 @@ public class BookingProcessPanel extends JPanel {
                 addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
-                    if (index == 0) {
-                        stopTimer();
-                        // Hủy booking nếu đang ở bước thanh toán (ghế đang bị giữ)
-                        if (currentBookingID != null) {
-                            bookingDAO.cancelBooking(currentBookingID);
-                            currentBookingID = null;
+                        if (index == 0) {
+                            stopTimer();
+                            // Hủy booking nếu đang ở bước thanh toán (ghế đang bị giữ)
+                            if (currentBookingID != null) {
+                                bookingDAO.cancelBooking(currentBookingID);
+                                currentBookingID = null;
+                            }
+                            showStep(0);
+                        } else if (index == 1) {
+                            if (!selectedFlights.isEmpty()) {
+                                showStep(1);
+                            }
+                        } else if (index == 2) {
+                            if (!multiCitySeats.isEmpty()) {
+                                showStep(2);
+                            }
+                        } else if (index == 3 && currentBookingID != null) {
+                            showStep(3);
                         }
-                        showStep(0);
-                    } else if (index == 1) {
-                        if (!selectedFlights.isEmpty()) {
-                            showStep(1);
-                        }
-                    } else if (index == 2) {
-                        if (!multiCitySeats.isEmpty()) {
-                            showStep(2);
-                        }
-                    } else if (index == 3 && currentBookingID != null) {
-                        showStep(3);
-                    }
                     }
                 });
             }
