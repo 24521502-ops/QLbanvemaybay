@@ -56,12 +56,12 @@ public class RoleGroupDAO {
 
     // Thêm nhóm quyền mới
     public boolean insert(RoleGroupDTO dto) {
-        String sql = "INSERT INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, Created_At, Updated_At, IsDeleted) VALUES (?, ?, SYSDATE, SYSDATE, 0)";
+        String sql = "{CALL SP_ADD_ROLE_GROUP(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getRoleGroupID());
-            ps.setString(2, dto.getNameRoleGroup());
-            return ps.executeUpdate() > 0;
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, dto.getNameRoleGroup());
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -70,12 +70,13 @@ public class RoleGroupDAO {
 
     // Cập nhật nhóm quyền
     public boolean update(RoleGroupDTO dto) {
-        String sql = "UPDATE ROLE_GROUP SET NameRoleGroup = ?, Updated_At = SYSDATE WHERE RoleGroupID = ?";
+        String sql = "{CALL SP_UPDATE_ROLE_GROUP(?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getNameRoleGroup());
-            ps.setString(2, dto.getRoleGroupID());
-            return ps.executeUpdate() > 0;
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, dto.getRoleGroupID());
+            cst.setString(2, dto.getNameRoleGroup());
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -84,11 +85,12 @@ public class RoleGroupDAO {
 
     // Xóa mềm nhóm quyền
     public boolean delete(String roleGroupID) {
-        String sql = "UPDATE ROLE_GROUP SET IsDeleted = 1, Updated_At = SYSDATE WHERE RoleGroupID = ?";
+        String sql = "{CALL SP_DELETE_ROLE_GROUP(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, roleGroupID);
-            return ps.executeUpdate() > 0;
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, roleGroupID);
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -132,34 +134,13 @@ public class RoleGroupDAO {
 
     // Gán quyền (role) cho nhóm quyền
     public boolean assignRole(String roleGroupID, String roleID) {
-        // Kiểm tra xem đã tồn tại chưa (có thể đã bị xóa mềm)
-        String checkSql = "SELECT IsDeleted FROM ROLE_GROUP_ASSIGN_ROLE WHERE RoleGroupID = ? AND RoleID = ?";
+        String sql = "{CALL SP_ASSIGN_ROLE_TO_GROUP(?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement checkPs = conn.prepareStatement(checkSql)) {
-            checkPs.setString(1, roleGroupID);
-            checkPs.setString(2, roleID);
-            try (ResultSet rs = checkPs.executeQuery()) {
-                if (rs.next()) {
-                    // Đã tồn tại, cập nhật lại IsDeleted = 0
-                    String updateSql = "UPDATE ROLE_GROUP_ASSIGN_ROLE SET IsDeleted = 0, Updated_At = SYSDATE WHERE RoleGroupID = ? AND RoleID = ?";
-                    try (PreparedStatement updatePs = conn.prepareStatement(updateSql)) {
-                        updatePs.setString(1, roleGroupID);
-                        updatePs.setString(2, roleID);
-                        return updatePs.executeUpdate() > 0;
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
-        // Chưa tồn tại, insert mới
-        String insertSql = "INSERT INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, Created_At, Updated_At, IsDeleted) VALUES (?, ?, SYSDATE, SYSDATE, 0)";
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(insertSql)) {
-            ps.setString(1, roleGroupID);
-            ps.setString(2, roleID);
-            return ps.executeUpdate() > 0;
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, roleGroupID);
+            cst.setString(2, roleID);
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -168,11 +149,11 @@ public class RoleGroupDAO {
 
     // Xóa mềm tất cả quyền đã gán cho nhóm quyền
     public boolean removeAllRoles(String roleGroupID) {
-        String sql = "UPDATE ROLE_GROUP_ASSIGN_ROLE SET IsDeleted = 1, Updated_At = SYSDATE WHERE RoleGroupID = ?";
+        String sql = "{CALL SP_REMOVE_ALL_ROLES_FROM_GROUP(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, roleGroupID);
-            ps.executeUpdate();
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, roleGroupID);
+            cst.execute();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

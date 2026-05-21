@@ -46,12 +46,13 @@ public class BookingHistoryDAO {
     }
 
     public boolean updateBookingStatus(String bookingID, String status) {
-        String sql = "UPDATE BOOKING SET Status = ? WHERE BookingID = ?";
+        String sql = "{CALL SP_UPDATE_BOOKING_STATUS(?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, status);
-            pst.setString(2, bookingID);
-            return pst.executeUpdate() > 0;
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.setString(2, status);
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -59,14 +60,14 @@ public class BookingHistoryDAO {
     }
 
     public boolean insertPayment(String bookingID, double amount, String paymentMethod) {
-        String sql = "INSERT INTO PAYMENT (PaymentID, BookingID, PaymentDate, Amount, PaymentMethod, PaymentStatus) " +
-                     "VALUES ('PAY-' || TO_CHAR(SYSDATE, 'YYYYMMDDHH24MISS'), ?, SYSDATE, ?, ?, 'SUCCESS')";
+        String sql = "{CALL SP_INSERT_PAYMENT(?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, bookingID);
-            pst.setDouble(2, amount);
-            pst.setString(3, paymentMethod);
-            return pst.executeUpdate() > 0;
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.setDouble(2, amount);
+            cst.setString(3, paymentMethod);
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -74,12 +75,13 @@ public class BookingHistoryDAO {
     }
 
     public boolean updateTicketsStatus(String bookingID, String status) {
-        String sql = "UPDATE TICKET SET TicketStatus = ? WHERE BookingID = ?";
+        String sql = "{CALL SP_UPDATE_TICKETS_STATUS(?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, status);
-            pst.setString(2, bookingID);
-            return pst.executeUpdate() > 0;
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.setString(2, status);
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -87,22 +89,22 @@ public class BookingHistoryDAO {
     }
 
     public void applyCancellationFee(String bookingID) {
-        String sql = "UPDATE BOOKING SET TotalAmount = TotalAmount * 0.3 WHERE BookingID = ?";
+        String sql = "{CALL SP_APPLY_CANCELLATION_FEE(?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, bookingID);
-            pst.executeUpdate();
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void refundPayment(String bookingID) {
-        String sql = "UPDATE PAYMENT SET PaymentStatus = 'REFUNDED' WHERE BookingID = ?";
+        String sql = "{CALL SP_REFUND_PAYMENT(?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, bookingID);
-            pst.executeUpdate();
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.execute();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -93,13 +93,13 @@ public class CustomerDAO {
 
     // 4. Xóa Khách hàng (Bắt lỗi nếu khách đã từng mua vé)
     public String xoaKhachHang(String customerID) {
-        String sql = "DELETE FROM CUSTOMER WHERE CustomerID = ?";
+        String sql = "{CALL SP_DELETE_CUSTOMER(?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
              
-            pst.setString(1, customerID);
-            int row = pst.executeUpdate();
-            return row > 0 ? "SUCCESS" : "FAIL";
+            cst.setString(1, customerID);
+            cst.execute();
+            return "SUCCESS";
             
         } catch (SQLException e) {
             // Lỗi 2292 của Oracle là vi phạm khóa ngoại (Foreign Key)

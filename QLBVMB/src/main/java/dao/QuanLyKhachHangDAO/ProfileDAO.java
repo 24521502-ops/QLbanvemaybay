@@ -51,22 +51,23 @@ public class ProfileDAO {
     }
 
     public boolean updateProfile(CustomerDTO customer) {
-        String sql = "UPDATE CUSTOMER SET FullName = ?, Gender = ?, DateOfBirth = ?, Phone = ?, Email = ?, PassportNumber = ?, Nationality = ? WHERE CustomerID = ?";
+        String sql = "{CALL SP_UPDATE_CUSTOMER_FULL(?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, customer.getFullName());
-            pst.setString(2, customer.getGender());
+             CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, customer.getCustomerID());
+            cst.setString(2, customer.getFullName());
+            cst.setString(3, customer.getGender());
             if (customer.getDateOfBirth() != null) {
-                pst.setDate(3, new java.sql.Date(customer.getDateOfBirth().getTime()));
+                cst.setDate(4, new java.sql.Date(customer.getDateOfBirth().getTime()));
             } else {
-                pst.setNull(3, Types.DATE);
+                cst.setNull(4, Types.DATE);
             }
-            pst.setString(4, customer.getPhone());
-            pst.setString(5, customer.getEmail());
-            pst.setString(6, customer.getPassportNumber());
-            pst.setString(7, customer.getNationality());
-            pst.setString(8, customer.getCustomerID());
-            return pst.executeUpdate() > 0;
+            cst.setString(5, customer.getPhone());
+            cst.setString(6, customer.getEmail());
+            cst.setString(7, customer.getPassportNumber());
+            cst.setString(8, customer.getNationality());
+            cst.execute();
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

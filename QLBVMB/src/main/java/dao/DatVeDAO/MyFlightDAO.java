@@ -78,15 +78,15 @@ public class MyFlightDAO {
     }
 
     public boolean checkIn(String bookingID, String flightID) {
-        String sql = "UPDATE TICKET SET TicketStatus = 'CHECKED-IN' WHERE BookingID = ? AND FlightID = ?";
+        String sql = "{CALL SP_CHECK_IN_TICKET(?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql)) {
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
 
-            pst.setString(1, bookingID);
-            pst.setString(2, flightID);
+            cst.setString(1, bookingID);
+            cst.setString(2, flightID);
 
-            int rowsAffected = pst.executeUpdate();
-            return rowsAffected > 0;
+            cst.execute();
+            return true;
 
         } catch (SQLException e) {
             e.printStackTrace();

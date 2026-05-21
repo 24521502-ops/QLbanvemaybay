@@ -16,29 +16,24 @@ public class BookingPassengerDAO {
      * @return PassengerID được sinh ra, hoặc null nếu thất bại.
      */
     public String addPassenger(PassengerDTO p) {
-        String sql = "INSERT INTO PASSENGER (FullName, Gender, DateOfBirth, PassportNumber) VALUES (?, ?, ?, ?)";
+        String sql = "{CALL SP_GET_OR_CREATE_PASSENGER(?, ?, ?, ?, ?)}";
         String generatedId = null;
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement pst = conn.prepareStatement(sql, new String[] { "PASSENGERID" })) {
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
 
-            pst.setString(1, p.getFullName());
-            pst.setString(2, p.getGender());
+            cst.setString(1, p.getFullName());
+            cst.setString(2, p.getGender());
             if (p.getDateOfBirth() != null) {
-                pst.setDate(3, new java.sql.Date(p.getDateOfBirth().getTime()));
+                cst.setDate(3, new java.sql.Date(p.getDateOfBirth().getTime()));
             } else {
-                pst.setNull(3, Types.DATE);
+                cst.setNull(3, Types.DATE);
             }
-            pst.setString(4, p.getPassportNumber());
+            cst.setString(4, p.getPassportNumber());
+            cst.registerOutParameter(5, Types.VARCHAR);
 
-            int rows = pst.executeUpdate();
-            if (rows > 0) {
-                try (ResultSet rs = pst.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        generatedId = rs.getString(1);
-                    }
-                }
-            }
+            cst.execute();
+            generatedId = cst.getString(5);
         } catch (SQLException e) {
             System.err.println("Error adding passenger: " + e.getMessage());
             e.printStackTrace();

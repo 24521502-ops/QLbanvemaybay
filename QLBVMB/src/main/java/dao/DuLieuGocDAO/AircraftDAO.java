@@ -58,15 +58,14 @@ public class AircraftDAO {
     }
 
     public boolean insert(AircraftDTO dto) {
-        String sql = "INSERT INTO AIRCRAFT (AircraftID, AirlineID, Model, Capacity, ManufactureYear) VALUES (?, ?, ?, ?, ?)";
+        String sql = "{call SP_ADD_AIRCRAFT(?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAircraftID());
-            ps.setString(2, dto.getAirlineID());
-            ps.setString(3, dto.getModel());
-            ps.setInt(4, dto.getCapacity());
-            ps.setInt(5, dto.getManufactureYear());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAirlineID());
+            cs.setString(2, dto.getModel());
+            cs.setInt(3, dto.getCapacity());
+            cs.setInt(4, dto.getManufactureYear());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -74,15 +73,15 @@ public class AircraftDAO {
     }
 
     public boolean update(AircraftDTO dto) {
-        String sql = "UPDATE AIRCRAFT SET AirlineID = ?, Model = ?, Capacity = ?, ManufactureYear = ? WHERE AircraftID = ?";
+        String sql = "{call SP_UPDATE_AIRCRAFT(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAirlineID());
-            ps.setString(2, dto.getModel());
-            ps.setInt(3, dto.getCapacity());
-            ps.setInt(4, dto.getManufactureYear());
-            ps.setString(5, dto.getAircraftID());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAircraftID());
+            cs.setString(2, dto.getAirlineID());
+            cs.setString(3, dto.getModel());
+            cs.setInt(4, dto.getCapacity());
+            cs.setInt(5, dto.getManufactureYear());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -90,11 +89,11 @@ public class AircraftDAO {
     }
 
     public boolean delete(String aircraftID) {
-        String sql = "DELETE FROM AIRCRAFT WHERE AircraftID = ?";
+        String sql = "{call SP_DELETE_AIRCRAFT(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, aircraftID);
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, aircraftID);
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

@@ -58,15 +58,14 @@ public class AirlineDAO {
     }
 
     public boolean insert(AirlineDTO dto) {
-        String sql = "INSERT INTO AIRLINE (AirlineID, AirlineName, Country, Phone, Email) VALUES (?, ?, ?, ?, ?)";
+        String sql = "{call SP_ADD_AIRLINE(?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAirlineID());
-            ps.setString(2, dto.getAirlineName());
-            ps.setString(3, dto.getCountry());
-            ps.setString(4, dto.getPhone());
-            ps.setString(5, dto.getEmail());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAirlineName());
+            cs.setString(2, dto.getCountry());
+            cs.setString(3, dto.getPhone());
+            cs.setString(4, dto.getEmail());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -74,15 +73,15 @@ public class AirlineDAO {
     }
 
     public boolean update(AirlineDTO dto) {
-        String sql = "UPDATE AIRLINE SET AirlineName = ?, Country = ?, Phone = ?, Email = ? WHERE AirlineID = ?";
+        String sql = "{call SP_UPDATE_AIRLINE(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAirlineName());
-            ps.setString(2, dto.getCountry());
-            ps.setString(3, dto.getPhone());
-            ps.setString(4, dto.getEmail());
-            ps.setString(5, dto.getAirlineID());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAirlineID());
+            cs.setString(2, dto.getAirlineName());
+            cs.setString(3, dto.getCountry());
+            cs.setString(4, dto.getPhone());
+            cs.setString(5, dto.getEmail());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -90,11 +89,11 @@ public class AirlineDAO {
     }
 
     public boolean delete(String airlineID) {
-        String sql = "DELETE FROM AIRLINE WHERE AirlineID = ?";
+        String sql = "{call SP_DELETE_AIRLINE(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, airlineID);
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, airlineID);
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

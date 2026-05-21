@@ -56,35 +56,6 @@ EXCEPTION
 END;
 /
 
--- 5. Tạo mã vé PNR tự động 
-CREATE OR REPLACE FUNCTION FUNC_GENERATE_TICKET_CODE (p_FlightID IN VARCHAR2, p_SeatID IN VARCHAR2) RETURN VARCHAR2 AS
-    v_FlightNum VARCHAR2(50); v_SeatNum VARCHAR2(10);
-BEGIN
-    SELECT FlightNumber INTO v_FlightNum FROM FLIGHT WHERE FlightID = p_FlightID;
-    SELECT SeatNumber INTO v_SeatNum FROM SEAT WHERE SeatID = p_SeatID;
-    
-    RETURN v_FlightNum || '-' || v_SeatNum || '-' || TO_CHAR(SYSDATE, 'MMDD');
-END;
-/
-
--- 6. Kiểm tra điều kiện Check-in 
-CREATE OR REPLACE FUNCTION FUNC_CHECK_VALID_CHECKIN (p_TicketID IN VARCHAR2) RETURN VARCHAR2 AS
-    v_TicketStatus VARCHAR2(50); v_DepartureTime DATE; v_HoursToFlight NUMBER;
-BEGIN
-    SELECT t.TicketStatus, f.DepartureTime INTO v_TicketStatus, v_DepartureTime
-    FROM TICKET t JOIN FLIGHT f ON t.FlightID = f.FlightID WHERE t.TicketID = p_TicketID;
-
-    IF v_TicketStatus != 'PAID' THEN RETURN 'TỪ CHỐI: Vé chưa thanh toán/hủy.'; END IF;
-
-    v_HoursToFlight := (v_DepartureTime - SYSDATE) * 24;
-    IF v_HoursToFlight < 0 THEN RETURN 'TỪ CHỐI: Chuyến bay đã cất cánh.';
-    ELSIF v_HoursToFlight > 24 THEN RETURN 'TỪ CHỐI: Chỉ mở check-in trước 24h.';
-    ELSE RETURN 'HỢP LỆ: Đủ điều kiện check-in.'; END IF;
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN RETURN 'LỖI: Vé không tồn tại.';
-END;
-/
-
 -- 7. Function tính "Giờ Lên Máy Bay" để in vé (Page 14)
 CREATE OR REPLACE FUNCTION FUNC_CALCULATE_BOARDING_TIME (p_FlightID IN VARCHAR2) 
 RETURN DATE AS

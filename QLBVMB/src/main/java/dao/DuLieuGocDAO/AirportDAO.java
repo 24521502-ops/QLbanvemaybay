@@ -62,15 +62,14 @@ public class AirportDAO {
 
     // Thêm sân bay
     public boolean insert(AirportDTO dto) {
-        String sql = "INSERT INTO AIRPORT (AirportID, AirportName, City, Country, IATACode) VALUES (?, ?, ?, ?, ?)";
+        String sql = "{call SP_ADD_AIRPORT(?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAirportID());
-            ps.setString(2, dto.getAirportName());
-            ps.setString(3, dto.getCity());
-            ps.setString(4, dto.getCountry());
-            ps.setString(5, dto.getIataCode());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAirportName());
+            cs.setString(2, dto.getCity());
+            cs.setString(3, dto.getCountry());
+            cs.setString(4, dto.getIataCode());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -79,15 +78,15 @@ public class AirportDAO {
 
     // Cập nhật sân bay
     public boolean update(AirportDTO dto) {
-        String sql = "UPDATE AIRPORT SET AirportName = ?, City = ?, Country = ?, IATACode = ? WHERE AirportID = ?";
+        String sql = "{call SP_UPDATE_AIRPORT(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, dto.getAirportName());
-            ps.setString(2, dto.getCity());
-            ps.setString(3, dto.getCountry());
-            ps.setString(4, dto.getIataCode());
-            ps.setString(5, dto.getAirportID());
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, dto.getAirportID());
+            cs.setString(2, dto.getAirportName());
+            cs.setString(3, dto.getCity());
+            cs.setString(4, dto.getCountry());
+            cs.setString(5, dto.getIataCode());
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -96,11 +95,11 @@ public class AirportDAO {
 
     // Xóa sân bay
     public boolean delete(String airportID) {
-        String sql = "DELETE FROM AIRPORT WHERE AirportID = ?";
+        String sql = "{call SP_DELETE_AIRPORT(?)}";
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, airportID);
-            return ps.executeUpdate() > 0;
+                CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, airportID);
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

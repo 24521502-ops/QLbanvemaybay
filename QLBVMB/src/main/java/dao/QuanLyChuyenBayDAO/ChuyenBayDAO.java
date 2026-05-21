@@ -52,66 +52,22 @@ public class ChuyenBayDAO {
     // LƯU CẬP NHẬT TOÀN BỘ CHUYẾN BAY
     public boolean capNhatToanBoChuyenBay(String flightID, String flightNum, String airlineID, String aircraftID,
             String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate) {
-        Connection conn = null;
-        try {
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false); // Dùng Transaction cho an toàn
-            String routeID = null;
-
-            // 1. Tìm Tuyến bay cũ
-            String sqlRoute = "SELECT RouteID FROM ROUTE WHERE DepartureAirportID = ? AND ArrivalAirportID = ? AND ROWNUM = 1";
-            try (PreparedStatement ps = conn.prepareStatement(sqlRoute)) {
-                ps.setString(1, depAirport);
-                ps.setString(2, arrAirport);
-                ResultSet rs = ps.executeQuery();
-                if (rs.next())
-                    routeID = rs.getString(1);
-            }
-
-            // 2. Nếu Tuyến bay chưa có, tự tạo Tuyến bay mới
-            if (routeID == null) {
-                String insertRoute = "INSERT INTO ROUTE (DepartureAirportID, ArrivalAirportID) VALUES (?, ?)";
-                try (PreparedStatement ps = conn.prepareStatement(insertRoute, new String[] { "ROUTEID" })) {
-                    ps.setString(1, depAirport);
-                    ps.setString(2, arrAirport);
-                    ps.executeUpdate();
-                    ResultSet rs = ps.getGeneratedKeys();
-                    if (rs.next())
-                        routeID = rs.getString(1);
-                }
-            }
-
-            // 3. Cập nhật vào chuyến bay
-            String sqlUpd = "UPDATE FLIGHT SET FlightNumber=?, AirlineID=?, AircraftID=?, RouteID=?, DepartureTime=?, ArrivalTime=?, Gate=? WHERE FlightID=?";
-            try (PreparedStatement ps = conn.prepareStatement(sqlUpd)) {
-                ps.setString(1, flightNum);
-                ps.setString(2, airlineID);
-                ps.setString(3, aircraftID);
-                ps.setString(4, routeID);
-                ps.setTimestamp(5, new java.sql.Timestamp(depTime.getTime()));
-                ps.setTimestamp(6, new java.sql.Timestamp(arrTime.getTime()));
-                ps.setString(7, gate);
-                ps.setString(8, flightID);
-                ps.executeUpdate();
-            }
-
-            conn.commit();
+        String sql = "{CALL SP_UPDATE_FLIGHT_FULL(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection conn = DBConnection.getConnection(); CallableStatement cs = conn.prepareCall(sql)) {
+            cs.setString(1, flightID);
+            cs.setString(2, flightNum);
+            cs.setString(3, airlineID);
+            cs.setString(4, aircraftID);
+            cs.setString(5, depAirport);
+            cs.setString(6, arrAirport);
+            cs.setTimestamp(7, new java.sql.Timestamp(depTime.getTime()));
+            cs.setTimestamp(8, new java.sql.Timestamp(arrTime.getTime()));
+            cs.setString(9, gate);
+            cs.execute();
             return true;
-        } catch (Exception e) {
-            if (conn != null)
-                try {
-                    conn.rollback();
-                } catch (Exception ex) {
-                }
+        } catch (SQLException e) {
             e.printStackTrace();
             return false;
-        } finally {
-            if (conn != null)
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (Exception ex) {
-                }
         }
     }
 
