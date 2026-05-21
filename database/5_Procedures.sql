@@ -548,21 +548,6 @@ BEGIN
 END;
 /
 
--- 6. SP_CANCEL_BOOKING (Được gọi bởi cancelBooking trong BookingDAO.java để hủy đơn và hoàn tiền tự động)
-CREATE OR REPLACE PROCEDURE SP_CANCEL_BOOKING (p_BookingID IN VARCHAR2, p_CancelReason IN VARCHAR2) AS
-    v_Status VARCHAR2(50); v_CustomerID VARCHAR2(20); v_TotalAmount NUMBER;
-BEGIN
-    SELECT Status, CustomerID, TotalAmount INTO v_Status, v_CustomerID, v_TotalAmount FROM BOOKING WHERE BookingID = p_BookingID;
-    IF v_Status = 'CONFIRMED' THEN
-        INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
-        VALUES (v_CustomerID, p_BookingID, 'REFUND', v_TotalAmount, 'Hoàn tiền do: ' || p_CancelReason);
-    END IF;
-
-    UPDATE BOOKING SET Status = 'CANCELLED' WHERE BookingID = p_BookingID;
-    UPDATE TICKET SET TicketStatus = 'CANCELLED' WHERE BookingID = p_BookingID;
-    COMMIT;
-END;
-/
 
 -- 7. PROC_RECALCULATE_BOOKING_TOTAL (Tính toán lại tổng tiền Booking gồm giá vé + 10% thuế mỗi vé)
 CREATE OR REPLACE PROCEDURE PROC_RECALCULATE_BOOKING_TOTAL (p_BookingID IN VARCHAR2) AS
