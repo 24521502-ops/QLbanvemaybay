@@ -18,7 +18,7 @@ public class regesterBUS {
      *
      * @return null nếu đăng ký thành công, chuỗi lỗi nếu thất bại
      */
-    public String register(String fullName, String email, String phone,
+    public String register(String fullName, String email, String phone, String username,
                            String password, String confirmPassword) {
 
         // ─── Validate input ───
@@ -32,6 +32,8 @@ public class regesterBUS {
             return "Vui lòng nhập số điện thoại.";
         if (!phone.matches("^(0|\\+84)[0-9]{8,10}$"))
             return "Số điện thoại không hợp lệ (VD: 0912345678).";
+        if (username == null || username.isBlank())
+            return "Vui lòng nhập tên đăng nhập.";
         if (password == null || password.isBlank())
             return "Vui lòng nhập mật khẩu.";
         if (password.length() < 6)
@@ -40,8 +42,8 @@ public class regesterBUS {
             return "Mật khẩu xác nhận không khớp.";
 
         // ─── Kiểm tra trùng lặp ───
-        if (loginDAO.isUserNameExisted(email))
-            return "Email này đã được sử dụng để đăng nhập. Vui lòng chọn email khác.";
+        if (loginDAO.isUserNameExisted(username))
+            return "Tên đăng nhập đã tồn tại. Vui lòng chọn tên khác.";
         if (regesterDAO.isEmailExisted(email))
             return "Email đã tồn tại trong hệ thống.";
         if (regesterDAO.isPhoneExisted(phone))
@@ -49,7 +51,7 @@ public class regesterBUS {
 
         // ─── Thực hiện INSERT ───
         boolean success = regesterDAO.register(
-                fullName.trim(), email.trim(), phone.trim(), password);
+                fullName.trim(), email.trim(), phone.trim(), username.trim(), password);
 
         return success ? null : "Đăng ký thất bại. Vui lòng thử lại sau.";
     }

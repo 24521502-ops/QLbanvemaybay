@@ -736,7 +736,104 @@ public class FrameAdmin extends JFrame {
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        
+        // Thêm sự kiện click hiện Popup thông tin nhân viên
+        btn.addActionListener(e -> showProfilePopup(btn));
+        
         return btn;
+    }
+
+    private void showProfilePopup(Component invoker) {
+        JPopupMenu popup = new JPopupMenu();
+        popup.putClientProperty(com.formdev.flatlaf.FlatClientProperties.STYLE, "arc: 12; insets: 10,14,10,14; borderColor: #e2e8f0; borderWidth: 1");
+        
+        JPanel pnl = new JPanel(new java.awt.BorderLayout(0, 12));
+        pnl.setBackground(UIManager.getColor("Popup.background"));
+        
+        // Header (Avatar lớn + Tên + Chức vụ)
+        JPanel header = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 12, 0));
+        header.setOpaque(false);
+        
+        JLabel lblAvt = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(59, 130, 246));
+                g2.fillOval(0, 0, 42, 42);
+                g2.setColor(Color.WHITE);
+                g2.fillOval(16, 8, 10, 10);
+                g2.fillArc(10, 22, 22, 16, 0, 180);
+                g2.dispose();
+            }
+        };
+        lblAvt.setPreferredSize(new Dimension(42, 42));
+        header.add(lblAvt);
+        
+        JPanel namePnl = new JPanel(new java.awt.GridLayout(2, 1, 0, 2));
+        namePnl.setOpaque(false);
+        String name = currentAccount != null ? currentAccount.getUserName() : "Admin";
+        JLabel lblName = new JLabel(name);
+        lblName.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblName.setForeground(new Color(15, 23, 42)); // Slate 900
+        
+        String roleStr = currentAccount != null ? currentAccount.getRoleGroup() : "ADMIN_GROUP";
+        String roleDisplay = "Quản trị viên";
+        if ("MANAGER_GROUP".equals(roleStr)) roleDisplay = "Quản lý";
+        else if ("STAFF_GROUP".equals(roleStr)) roleDisplay = "Nhân viên";
+        
+        JLabel lblRole = new JLabel(roleDisplay);
+        lblRole.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        lblRole.setForeground(new Color(100, 116, 139)); // Slate 500
+        
+        namePnl.add(lblName);
+        namePnl.add(lblRole);
+        header.add(namePnl);
+        pnl.add(header, java.awt.BorderLayout.NORTH);
+        
+        // Chi tiết
+        JPanel body = new JPanel(new java.awt.GridLayout(3, 1, 0, 8));
+        body.setOpaque(false);
+        
+        String email = "";
+        String phone = "";
+        if (currentAccount != null && currentAccount.getAccountID() != null) {
+            String sql = "SELECT u.FullName, u.Email, e.Phone FROM USERS u JOIN ACCOUNT a ON u.UserID = a.UserID LEFT JOIN EMPLOYEE e ON a.AccountID = e.AccountID WHERE a.AccountID = ?";
+            try (java.sql.Connection conn = util.DBConnection.getConnection();
+                 java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, currentAccount.getAccountID());
+                try (java.sql.ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        String fn = rs.getString("FullName");
+                        if (fn != null && !fn.isBlank()) lblName.setText(fn);
+                        email = rs.getString("Email");
+                        phone = rs.getString("Phone");
+                    }
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        
+        JLabel lblAcc = new JLabel("<html><font color='#64748b'>Tài khoản:</font> " + (currentAccount != null ? currentAccount.getUserName() : "N/A") + "</html>");
+        lblAcc.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        body.add(lblAcc);
+        
+        if (email != null && !email.isBlank()) {
+            JLabel lblEmail = new JLabel("<html><font color='#64748b'>Email:</font> " + email + "</html>");
+            lblEmail.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            body.add(lblEmail);
+        }
+        if (phone != null && !phone.isBlank()) {
+            JLabel lblPhone = new JLabel("<html><font color='#64748b'>SĐT:</font> " + phone + "</html>");
+            lblPhone.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            body.add(lblPhone);
+        }
+        
+        pnl.add(body, java.awt.BorderLayout.CENTER);
+        
+        popup.add(pnl);
+        popup.show(invoker, invoker.getWidth() - popup.getPreferredSize().width, invoker.getHeight() + 4);
     }
 
     // ==================== MENU ICON DRAWING ====================

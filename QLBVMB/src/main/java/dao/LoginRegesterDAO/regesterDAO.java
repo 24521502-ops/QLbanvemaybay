@@ -52,15 +52,16 @@ public class regesterDAO {
      *
      * @return true nếu thành công, false nếu thất bại
      */
-    public boolean register(String fullName, String email, String phone, String password) {
-        String sql = "{call SP_REGISTER_ACCOUNT(?, ?, ?, ?)}";
+    public boolean register(String fullName, String email, String phone, String username, String password) {
+        String sql = "{call SP_REGISTER_ACCOUNT(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
                 CallableStatement cs = conn.prepareCall(sql)) {
 
             cs.setString(1, fullName);
             cs.setString(2, email);
             cs.setString(3, phone);
-            cs.setString(4, password);
+            cs.setString(4, username);
+            cs.setString(5, password);
 
             cs.execute();
             return true;

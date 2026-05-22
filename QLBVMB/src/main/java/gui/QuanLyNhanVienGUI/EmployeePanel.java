@@ -64,13 +64,7 @@ public class EmployeePanel extends JPanel {
         titleBlock.add(subtitleLabel);
         headerPanel.add(titleBlock, BorderLayout.WEST);
 
-        // Nút Thêm nhân viên
-        JButton btnAdd = createPrimaryButton("+ Thêm Nhân viên");
-        btnAdd.addActionListener(e -> openAddDialog());
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
-        btnPanel.setOpaque(false);
-        btnPanel.add(btnAdd);
-        headerPanel.add(btnPanel, BorderLayout.EAST);
+        // Đã bỏ nút Thêm ở Header để chuyển xuống hàng filter
 
         add(headerPanel, BorderLayout.NORTH);
 
@@ -202,6 +196,14 @@ public class EmployeePanel extends JPanel {
         pnlLeftTools.add(btnSort);
 
         filterCard.add(pnlLeftTools, BorderLayout.WEST);
+
+        // Nhóm công cụ bên Phải (Nút Thêm)
+        JPanel pnlRightTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        pnlRightTools.setOpaque(false);
+        JButton btnAdd = createPrimaryButton("+ Thêm Nhân viên");
+        btnAdd.addActionListener(e -> openAddDialog());
+        pnlRightTools.add(btnAdd);
+        filterCard.add(pnlRightTools, BorderLayout.EAST);
 
         JPanel topWrapper = new JPanel(new BorderLayout(0, 8));
         topWrapper.setOpaque(false);

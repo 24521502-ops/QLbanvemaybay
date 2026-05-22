@@ -23,6 +23,7 @@ public class regesterGUI extends JFrame {
     private JTextField txtFullName;
     private JTextField txtEmail;
     private JTextField txtPhone;
+    private JTextField txtUserName;
     private JPasswordField txtPassword;
     private JPasswordField txtConfirmPassword;
     private JButton btnRegister;
@@ -170,7 +171,7 @@ public class regesterGUI extends JFrame {
 
         int cx = 60;
         int fw = 340;
-        int y = 40;
+        int y = 20; // Đẩy lên một chút
 
         // Tiêu đề
         JLabel lblTitle = new JLabel("Tạo tài khoản mới");
@@ -185,49 +186,56 @@ public class regesterGUI extends JFrame {
         lblSub.setBounds(cx, y + 40, fw, 20);
         panel.add(lblSub);
 
-        y += 80;
+        y += 70;
 
         // ─── Họ và Tên ───
         panel.add(makeLabel("HỌ VÀ TÊN", cx, y, fw));
         txtFullName = createStyledField("Nguyễn Văn A", "USER");
         txtFullName.setBounds(cx, y + 20, fw, 40);
         panel.add(txtFullName);
-        y += 72;
+        y += 66;
 
         // ─── Email ───
         panel.add(makeLabel("EMAIL", cx, y, fw));
         txtEmail = createStyledField("nguyenvana@example.com", "EMAIL");
         txtEmail.setBounds(cx, y + 20, fw, 40);
         panel.add(txtEmail);
-        y += 72;
+        y += 66;
 
         // ─── Số điện thoại ───
         panel.add(makeLabel("SỐ ĐIỆN THOẠI", cx, y, fw));
         txtPhone = createStyledField("0123 456 789", "PHONE");
         txtPhone.setBounds(cx, y + 20, fw, 40);
         panel.add(txtPhone);
-        y += 72;
+        y += 66;
+
+        // ─── Tên đăng nhập ───
+        panel.add(makeLabel("TÊN ĐĂNG NHẬP", cx, y, fw));
+        txtUserName = createStyledField("nguyenvana", "USER");
+        txtUserName.setBounds(cx, y + 20, fw, 40);
+        panel.add(txtUserName);
+        y += 66;
 
         // ─── Mật khẩu ───
         panel.add(makeLabel("MẬT KHẨU", cx, y, fw));
         txtPassword = createStyledPassword("PASSWORD");
         txtPassword.setBounds(cx, y + 20, fw, 40);
         panel.add(txtPassword);
-        y += 72;
+        y += 66;
 
         // ─── Xác nhận mật khẩu ───
         panel.add(makeLabel("XÁC NHẬN MẬT KHẨU", cx, y, fw));
         txtConfirmPassword = createStyledPassword("CONFIRM_PASSWORD");
         txtConfirmPassword.setBounds(cx, y + 20, fw, 40);
         panel.add(txtConfirmPassword);
-        y += 68;
+        y += 66;
 
         // ─── Nút Đăng ký ───
         btnRegister = createStyledButton("Đăng ký", COLOR_BTN, Color.WHITE);
         btnRegister.setBounds(cx, y, fw, 44);
         panel.add(btnRegister);
 
-        y += 60;
+        y += 56;
 
         // ─── Link đăng nhập ───
         JLabel lblPrompt = new JLabel("Đã có tài khoản?");
@@ -262,10 +270,11 @@ public class regesterGUI extends JFrame {
         String fullName = getFieldText(txtFullName, "Nguyễn Văn A");
         String email = getFieldText(txtEmail, "nguyenvana@example.com");
         String phone = getFieldText(txtPhone, "0123 456 789");
+        String username = getFieldText(txtUserName, "nguyenvana");
         String password = new String(txtPassword.getPassword()).trim();
         String confirmPassword = new String(txtConfirmPassword.getPassword()).trim();
 
-        String error = regesterBUS.register(fullName, email, phone, password, confirmPassword);
+        String error = regesterBUS.register(fullName, email, phone, username, password, confirmPassword);
         if (error != null) {
             showError(error);
         } else {

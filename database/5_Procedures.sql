@@ -209,12 +209,14 @@ CREATE OR REPLACE PROCEDURE SP_REGISTER_ACCOUNT (
     p_FullName IN VARCHAR2,
     p_Email IN VARCHAR2,
     p_Phone IN VARCHAR2,
+    p_UserName IN VARCHAR2,
     p_Password IN VARCHAR2
 ) AS
     v_UserID VARCHAR2(20);
     v_AccountID VARCHAR2(20);
     v_HashedPassword VARCHAR2(256);
     v_CheckEmail NUMBER;
+    v_CheckUserName NUMBER;
 BEGIN
     -- Check Email
     SELECT COUNT(*)
@@ -229,6 +231,19 @@ BEGIN
         );
     END IF;
 
+    -- Check UserName
+    SELECT COUNT(*)
+    INTO v_CheckUserName
+    FROM ACCOUNT
+    WHERE UserName = p_UserName;
+
+    IF v_CheckUserName > 0 THEN
+        RAISE_APPLICATION_ERROR(
+            -20011,
+            'Lỗi: Tên đăng nhập này đã tồn tại!'
+        );
+    END IF;
+
     -- Insert User
     INSERT INTO USERS (FullName, Email, IsDeleted)
     VALUES (p_FullName, p_Email, 0)
@@ -236,7 +251,7 @@ BEGIN
 
     -- Insert Account (Lưu mật khẩu gốc nguyên bản)
     INSERT INTO ACCOUNT (UserID, UserName, Password, IsDeleted)
-    VALUES (v_UserID, p_Email, p_Password, 0)
+    VALUES (v_UserID, p_UserName, p_Password, 0)
     RETURNING AccountID INTO v_AccountID;
 
     -- Insert Customer

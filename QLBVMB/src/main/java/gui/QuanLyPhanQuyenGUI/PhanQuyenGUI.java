@@ -66,11 +66,7 @@ public class PhanQuyenGUI extends JPanel {
         titlePanel.add(lblSub);
         headerPanel.add(titlePanel, BorderLayout.WEST);
 
-        JButton btnAdd = createPrimaryButton("Tạo vai trò mới");
-        btnAdd.setIcon(new PlusIcon());
-        btnAdd.setIconTextGap(10);
-        btnAdd.addActionListener(e -> openDialog(null));
-        headerPanel.add(btnAdd, BorderLayout.EAST);
+        // Đã chuyển nút Tạo vai trò mới xuống filterCard
         add(headerPanel, BorderLayout.NORTH);
 
         // === CONTENT WRAPPER ===
@@ -174,6 +170,17 @@ public class PhanQuyenGUI extends JPanel {
         pnlLeftTools.add(btnSort);
 
         filterCard.add(pnlLeftTools, BorderLayout.WEST);
+        
+        // Nhóm công cụ bên Phải (Nút Thêm)
+        JPanel pnlRightTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 0));
+        pnlRightTools.setOpaque(false);
+        JButton btnAdd = createPrimaryButton("Tạo vai trò mới");
+        btnAdd.setIcon(new PlusIcon());
+        btnAdd.setIconTextGap(10);
+        btnAdd.addActionListener(e -> openDialog(null));
+        pnlRightTools.add(btnAdd);
+        filterCard.add(pnlRightTools, BorderLayout.EAST);
+        
         mainWrapper.add(filterCard, BorderLayout.NORTH);
 
         // ===== TABLE CARD =====
