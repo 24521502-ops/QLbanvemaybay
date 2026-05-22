@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 
 public class ForgotPasswordDialog extends JDialog {
 
+    private JTextField txtUserName;
     private JTextField txtEmail;
     private JPasswordField txtNewPassword;
     private JPasswordField txtConfirmPassword;
@@ -21,7 +22,7 @@ public class ForgotPasswordDialog extends JDialog {
     public ForgotPasswordDialog(JFrame parent) {
         super(parent, "Quên mật khẩu", true);
         initComponents();
-        setSize(400, 480);
+        setSize(400, 560);
         setLocationRelativeTo(parent);
         setResizable(false);
     }
@@ -39,6 +40,12 @@ public class ForgotPasswordDialog extends JDialog {
         lblDesc.putClientProperty(FlatClientProperties.STYLE, "foreground: tint(@foreground, 50%)");
         lblDesc.setHorizontalAlignment(SwingConstants.CENTER);
         panel.add(lblDesc);
+
+        txtUserName = new JTextField();
+        txtUserName.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Tên đăng nhập của bạn");
+        txtUserName.putClientProperty(FlatClientProperties.STYLE, "showClearButton: true");
+        panel.add(new JLabel("Tên đăng nhập:"));
+        panel.add(txtUserName, "h 35!");
 
         txtEmail = new JTextField();
         txtEmail.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Email đã đăng ký");
@@ -80,12 +87,12 @@ public class ForgotPasswordDialog extends JDialog {
     }
 
     private void handleResetPassword(ActionEvent e) {
+        String userName = txtUserName.getText();
         String email = txtEmail.getText();
         String newPass = new String(txtNewPassword.getPassword());
         String confirmPass = new String(txtConfirmPassword.getPassword());
 
-        // Vì tên đăng nhập của Khách hàng cũng chính là Email nên ta truyền email 2 lần.
-        String errorMsg = bus.verifyAndResetPassword(email, email, newPass, confirmPass);
+        String errorMsg = bus.verifyAndResetPassword(userName, email, newPass, confirmPass);
         if (errorMsg != null) {
             JOptionPane.showMessageDialog(this, errorMsg, "Lỗi", JOptionPane.ERROR_MESSAGE);
         } else {

@@ -19,15 +19,17 @@ public class loginDAO {
      * @param password mật khẩu (plain-text hoặc hash tuỳ hệ thống)
      * @return AccountDTO nếu tìm thấy, null nếu sai thông tin
      */
-    public AccountDTO findAccount(String userName, String password) {
-        String sql = "SELECT accountID, userID, userName, password, status "
-                   + "FROM Account "
-                   + "WHERE userName = ? AND password = ? AND (isDeleted = 0 OR isDeleted IS NULL)";
+    public AccountDTO findAccount(String userNameOrEmail, String password) {
+        String sql = "SELECT a.accountID, a.userID, a.userName, a.password, a.status "
+                   + "FROM Account a "
+                   + "LEFT JOIN USERS u ON a.userID = u.userID "
+                   + "WHERE (a.userName = ? OR u.email = ?) AND a.password = ? AND (a.isDeleted = 0 OR a.isDeleted IS NULL)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, userName);
-            ps.setString(2, password);
+            ps.setString(1, userNameOrEmail);
+            ps.setString(2, userNameOrEmail);
+            ps.setString(3, password);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
