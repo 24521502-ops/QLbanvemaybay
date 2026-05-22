@@ -811,7 +811,7 @@ public class BookingHomePanel extends JPanel {
         d.setOpaque(false);
         d.setEditable(false);
 
-        JLabel link = new JLabel("<html><u>Tìm hiểu thêm ➔</u></html>");
+        JLabel link = new JLabel("<html><u>Tìm hiểu thêm -></u></html>");
         link.setFont(new Font("Segoe UI", Font.BOLD, 13));
         link.setForeground(SECONDARY);
         link.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

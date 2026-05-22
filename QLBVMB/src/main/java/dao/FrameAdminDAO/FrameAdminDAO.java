@@ -55,7 +55,7 @@ public class FrameAdminDAO {
                     while (rs.next()) {
                         String id = rs.getString("FlightID");
                         String title = "Chuyến bay: " + rs.getString("FlightNumber");
-                        String sub = rs.getString("DepIATA") + " ➔ " + rs.getString("ArrIATA") + " (" + rs.getString("DepTime") + ")";
+                        String sub = rs.getString("DepIATA") + " - " + rs.getString("ArrIATA") + " (" + rs.getString("DepTime") + ")";
                         results.add(new SearchResultDTO("FLIGHT", id, title, sub));
                     }
                 }

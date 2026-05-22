@@ -886,3 +886,28 @@ BEGIN
 END;
 /
 
+
+
+CREATE OR REPLACE PROCEDURE SP_RESET_PASSWORD (
+    p_UserName IN VARCHAR2,
+    p_Email IN VARCHAR2,
+    p_NewPassword IN VARCHAR2
+) AS
+    v_AccountID VARCHAR2(20);
+BEGIN
+    -- Verify if the UserName and Email match
+    SELECT a.AccountID INTO v_AccountID
+    FROM ACCOUNT a
+    JOIN USERS u ON a.UserID = u.UserID
+    WHERE a.UserName = p_UserName AND u.Email = p_Email AND (a.IsDeleted = 0 OR a.IsDeleted IS NULL);
+
+    -- Update the password
+    UPDATE ACCOUNT SET Password = p_NewPassword, Updated_At = SYSDATE WHERE AccountID = v_AccountID;
+
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RAISE_APPLICATION_ERROR(-20062, 'Lỗi: Tên đăng nhập hoặc Email không đúng.');
+END;
+/
+

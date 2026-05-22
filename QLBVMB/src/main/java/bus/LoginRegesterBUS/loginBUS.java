@@ -48,4 +48,20 @@ public class loginBUS {
             return "Vui lòng nhập mật khẩu.";
         return null;
     }
+
+    /**
+     * Xác thực thông tin và đổi mật khẩu mới.
+     *
+     * @return null nếu thành công, chuỗi lỗi nếu thất bại
+     */
+    public String verifyAndResetPassword(String userName, String email, String newPassword, String confirmPassword) {
+        if (userName == null || userName.isBlank()) return "Vui lòng nhập Tên đăng nhập.";
+        if (email == null || email.isBlank()) return "Vui lòng nhập Email.";
+        if (newPassword == null || newPassword.isBlank()) return "Vui lòng nhập Mật khẩu mới.";
+        if (!newPassword.equals(confirmPassword)) return "Xác nhận mật khẩu không khớp.";
+        if (newPassword.length() < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
+
+        String dbError = loginDAO.resetPassword(userName.trim(), email.trim(), newPassword);
+        return dbError; // null nếu thành công, chuỗi lỗi nếu thất bại
+    }
 }

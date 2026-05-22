@@ -100,4 +100,32 @@ public class loginDAO {
         }
         return null;
     }
+
+    /**
+     * Xác minh danh tính qua userName và email, sau đó reset mật khẩu.
+     * Cập nhật theo thủ tục SP_RESET_PASSWORD.
+     *
+     * @return null nếu thành công, message lỗi nếu thất bại
+     */
+    public String resetPassword(String userName, String email, String newPassword) {
+        String sql = "{CALL SP_RESET_PASSWORD(?, ?, ?)}";
+        try (Connection conn = DBConnection.getConnection();
+             CallableStatement cst = conn.prepareCall(sql)) {
+
+            cst.setString(1, userName);
+            cst.setString(2, email);
+            cst.setString(3, newPassword);
+
+            cst.execute();
+            return null;
+        } catch (SQLException e) {
+            System.err.println("[loginDAO] Lỗi khi đổi mật khẩu: " + e.getMessage());
+            // Oracle lỗi trả về thường có định dạng: ORA-20062: Lỗi: ...
+            String msg = e.getMessage();
+            if (msg.contains("ORA-")) {
+                msg = msg.substring(msg.indexOf(":") + 1).split("\n")[0].trim();
+            }
+            return msg;
+        }
+    }
 }

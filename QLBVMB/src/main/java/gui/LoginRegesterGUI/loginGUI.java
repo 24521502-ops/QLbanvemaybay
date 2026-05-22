@@ -215,6 +215,20 @@ public class loginGUI extends JFrame {
                 txtPassword.setEchoChar('●');
         });
         panel.add(chkShowPassword);
+
+        JLabel lblForgot = new JLabel("<html><u>Quên mật khẩu?</u></html>");
+        lblForgot.setFont(FONT_SMALL);
+        lblForgot.setForeground(COLOR_LINK);
+        lblForgot.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblForgot.setBounds(cx + fw - 110, y, 110, 24);
+        lblForgot.setHorizontalAlignment(SwingConstants.RIGHT);
+        lblForgot.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                new ForgotPasswordDialog(loginGUI.this).setVisible(true);
+            }
+        });
+        panel.add(lblForgot);
+
         y += 40;
 
         // ─── Nút đăng nhập ───
