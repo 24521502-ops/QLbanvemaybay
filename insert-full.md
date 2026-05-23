@@ -138,11 +138,11 @@ END;
    ========================================================= */
 -- BẢNG NGƯỜI DÙNG CHUNG (USERS)
 INSERT ALL
-    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US01', 'Nhan Vien 1', 'admin@mail.com', 0)
-    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US02', 'Nhan Vien 2', 'staff2@mail.com', 0)
-    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US03', 'Nhan Vien 3', 'staff3@mail.com', 0)
-    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US04', 'Nhan Vien 4', 'staff4@mail.com', 0)
-    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US05', 'Nhan Vien 5', 'staff5@mail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US01', 'Admin He Thong', 'admin@mail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US02', 'Quan Ly Chi Nhanh 1', 'manager1@mail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US03', 'Quan Ly Chi Nhanh 2', 'manager2@mail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US04', 'Nhan Vien 1', 'staff1@mail.com', 0)
+    INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US05', 'Nhan Vien 2', 'staff2@mail.com', 0)
     INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US06', 'Khach Hang 1', 'customer1@mail.com', 0)
     INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US07', 'Khach Hang 2', 'customer2@mail.com', 0)
     INTO USERS (UserID, FullName, Email, IsDeleted) VALUES ('US08', 'Khach Hang 3', 'customer3@mail.com', 0)
@@ -183,10 +183,10 @@ SELECT 1 FROM DUAL;
 -- BẢNG TÀI KHOẢN ĐĂNG NHẬP (ACCOUNT)
 INSERT ALL
     INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC01', 'US01', 'admin', 'pass', 'ACTIVE', 0)
-    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC02', 'US02', 'staff2', 'pass', 'ACTIVE', 0)
-    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC03', 'US03', 'staff3', 'pass', 'ACTIVE', 0)
-    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC04', 'US04', 'staff4', 'pass', 'ACTIVE', 0)
-    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC05', 'US05', 'staff5', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC02', 'US02', 'manager1', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC03', 'US03', 'manager2', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC04', 'US04', 'staff1', 'pass', 'ACTIVE', 0)
+    INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC05', 'US05', 'staff2', 'pass', 'ACTIVE', 0)
     INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC06', 'US06', 'customer1', 'pass', 'ACTIVE', 0)
     INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC07', 'US07', 'customer2', 'pass', 'ACTIVE', 0)
     INTO ACCOUNT (AccountID, UserID, UserName, Password, Status, IsDeleted) VALUES ('ACC08', 'US08', 'customer3', 'pass', 'ACTIVE', 0)
@@ -226,11 +226,11 @@ SELECT 1 FROM DUAL;
 
 -- BẢNG NHÂN VIÊN (EMPLOYEE)
 INSERT ALL
-    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP01', 'ACC01', 'Nhan Vien 1', 'System Admin', '099000001', 'staff1@mail.com')
-    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP02', 'ACC02', 'Nhan Vien 2', 'Ticketing Staff', '099000002', 'staff2@mail.com')
-    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP03', 'ACC03', 'Nhan Vien 3', 'Ticketing Staff', '099000003', 'staff3@mail.com')
-    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP04', 'ACC04', 'Nhan Vien 4', 'Ticketing Staff', '099000004', 'staff4@mail.com')
-    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP05', 'ACC05', 'Nhan Vien 5', 'Ticketing Staff', '099000005', 'staff5@mail.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP01', 'ACC01', 'Admin He Thong', 'System Admin', '099000001', 'admin@mail.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP02', 'ACC02', 'Quan Ly Chi Nhanh 1', 'Manager', '099000002', 'manager1@mail.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP03', 'ACC03', 'Quan Ly Chi Nhanh 2', 'Manager', '099000003', 'manager2@mail.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP04', 'ACC04', 'Nhan Vien 1', 'Ticketing Staff', '099000004', 'staff1@mail.com')
+    INTO EMPLOYEE (EmployeeID, AccountID, FullName, Position, Phone, Email) VALUES ('EMP05', 'ACC05', 'Nhan Vien 2', 'Ticketing Staff', '099000005', 'staff2@mail.com')
 SELECT 1 FROM DUAL;
 
 -- BẢNG KHÁCH HÀNG THÀNH VIÊN (CUSTOMER)
