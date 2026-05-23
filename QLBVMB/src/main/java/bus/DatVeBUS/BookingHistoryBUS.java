@@ -17,15 +17,7 @@ public class BookingHistoryBUS {
     }
 
     public boolean cancelBooking(String bookingID) {
-        // Cancel booking and tickets
-        boolean bUpdated = dao.updateBookingStatus(bookingID, "CANCELLED");
-        if (bUpdated) {
-            dao.updateTicketsStatus(bookingID, "CANCELLED");
-            dao.applyCancellationFee(bookingID); // Set TotalAmount to 30% as cancellation fee
-            dao.refundPayment(bookingID); // Mark payment as REFUNDED if exists
-            return true;
-        }
-        return false;
+        return dao.cancelBooking(bookingID, "Khách hàng yêu cầu hủy");
     }
 
     public boolean payBooking(String bookingID, double amount, String paymentMethod) {
@@ -45,5 +37,9 @@ public class BookingHistoryBUS {
     /** Số giây còn lại trong cửa sổ 20 phút. Trả 0 nếu đã hết hạn. */
     public int getRemainingPaymentSeconds(String bookingID) {
         return dao.getRemainingPaymentSeconds(bookingID);
+    }
+
+    public List<dto.MyFlightPassengerDTO> getPassengersByBooking(String bookingID) {
+        return dao.getPassengersByBooking(bookingID);
     }
 }

@@ -989,10 +989,12 @@ public class BaoCaoTKGUI extends JPanel {
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     showMonthYearPicker();
                 }
+
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
                     monthLabel.setForeground(BLUE);
                 }
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
                     monthLabel.setForeground(DARK);
@@ -1022,10 +1024,12 @@ public class BaoCaoTKGUI extends JPanel {
                         }
                     }
                 }
+
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
                     yearLabel.setForeground(BLUE);
                 }
+
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
                     yearLabel.setForeground(DARK);
@@ -1071,14 +1075,14 @@ public class BaoCaoTKGUI extends JPanel {
             centerContainer = new JPanel(cardLayout);
             centerContainer.setOpaque(false);
             centerContainer.add(center, "DAYS");
-            
+
             yearList = buildYearList();
             JScrollPane yearScroll = new JScrollPane(yearList);
             yearScroll.setBorder(null);
             yearScroll.getVerticalScrollBar().setUnitIncrement(12);
             yearScroll.getVerticalScrollBar().setUI(new ModernScrollBarUI());
             centerContainer.add(yearScroll, "YEARS");
-            
+
             centerContainer.putClientProperty("currentView", "DAYS");
 
             add(header, BorderLayout.NORTH);
@@ -1088,7 +1092,8 @@ public class BaoCaoTKGUI extends JPanel {
         }
 
         private void showMonthYearPicker() {
-            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Chọn Tháng / Năm", java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+            JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), "Chọn Tháng / Năm",
+                    java.awt.Dialog.ModalityType.APPLICATION_MODAL);
             dialog.setLayout(new BorderLayout(10, 10));
             dialog.setUndecorated(false);
             dialog.setResizable(false);
@@ -1100,8 +1105,8 @@ public class BaoCaoTKGUI extends JPanel {
             gbc.insets = new Insets(4, 6, 4, 6);
 
             // Month spinner
-            String[] months = { "Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6",
-                                 "Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12" };
+            String[] months = { "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+                    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12" };
             JComboBox<String> monthBox = new JComboBox<>(months);
             monthBox.setSelectedIndex(calendar.get(Calendar.MONTH));
             monthBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -1117,11 +1122,13 @@ public class BaoCaoTKGUI extends JPanel {
             yearBox.setFont(new Font("Segoe UI", Font.PLAIN, 13));
             yearBox.setPreferredSize(new Dimension(80, 32));
 
-            gbc.gridx = 0; gbc.gridy = 0;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
             content.add(new JLabel("Tháng:"), gbc);
             gbc.gridx = 1;
             content.add(monthBox, gbc);
-            gbc.gridx = 0; gbc.gridy = 1;
+            gbc.gridx = 0;
+            gbc.gridy = 1;
             content.add(new JLabel("Năm:"), gbc);
             gbc.gridx = 1;
             content.add(yearBox, gbc);
@@ -1181,11 +1188,12 @@ public class BaoCaoTKGUI extends JPanel {
             list.setCellRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> l, Object value, int index,
-                                                              boolean isSelected, boolean cellHasFocus) {
-                    JLabel label = (JLabel) super.getListCellRendererComponent(l, value, index, isSelected, cellHasFocus);
+                        boolean isSelected, boolean cellHasFocus) {
+                    JLabel label = (JLabel) super.getListCellRendererComponent(l, value, index, isSelected,
+                            cellHasFocus);
                     label.setBorder(BorderFactory.createEmptyBorder(6, 16, 6, 16));
                     label.setHorizontalAlignment(SwingConstants.CENTER);
-                    
+
                     Integer hoverIdx = (Integer) l.getClientProperty("hoverIndex");
                     if (isSelected) {
                         label.setBackground(new Color(0xEBF5FF));
@@ -1220,7 +1228,7 @@ public class BaoCaoTKGUI extends JPanel {
                     list.putClientProperty("hoverIndex", -1);
                     list.repaint();
                 }
-                
+
                 @Override
                 public void mousePressed(java.awt.event.MouseEvent e) {
                     int index = list.locationToIndex(e.getPoint());
