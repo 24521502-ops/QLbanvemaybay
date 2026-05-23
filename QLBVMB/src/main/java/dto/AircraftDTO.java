@@ -6,6 +6,11 @@ public class AircraftDTO {
     private String model;
     private Integer capacity;
     private Integer manufactureYear;
+    
+    private int firstSeats;
+    private int busSeats;
+    private int premSeats;
+    private int ecoSeats;
 
     public AircraftDTO() {}
 
@@ -23,4 +28,13 @@ public class AircraftDTO {
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
     public Integer getManufactureYear() { return manufactureYear; }
     public void setManufactureYear(Integer manufactureYear) { this.manufactureYear = manufactureYear; }
+
+    public int getFirstSeats() { return firstSeats; }
+    public void setFirstSeats(int firstSeats) { this.firstSeats = firstSeats; }
+    public int getBusSeats() { return busSeats; }
+    public void setBusSeats(int busSeats) { this.busSeats = busSeats; }
+    public int getPremSeats() { return premSeats; }
+    public void setPremSeats(int premSeats) { this.premSeats = premSeats; }
+    public int getEcoSeats() { return ecoSeats; }
+    public void setEcoSeats(int ecoSeats) { this.ecoSeats = ecoSeats; }
 }

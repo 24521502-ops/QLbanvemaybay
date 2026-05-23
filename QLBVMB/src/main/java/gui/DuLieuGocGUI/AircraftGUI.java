@@ -185,7 +185,26 @@ public class AircraftGUI extends JPanel {
                 return column == 4;
             }
         };
-        table = new JTable(tableModel);
+        table = new JTable(tableModel) {
+            @Override
+            public String getToolTipText(MouseEvent e) {
+                java.awt.Point p = e.getPoint();
+                int rowIndex = rowAtPoint(p);
+                int colIndex = columnAtPoint(p);
+                if (rowIndex >= 0 && colIndex == 3 && allData != null) {
+                    int modelRow = convertRowIndexToModel(rowIndex);
+                    if (modelRow < allData.size()) {
+                        AircraftDTO dto = allData.get(modelRow);
+                        return "<html><b>Số ghế chi tiết:</b><br>" +
+                               "First Class: " + dto.getFirstSeats() + "<br>" +
+                               "Business: " + dto.getBusSeats() + "<br>" +
+                               "Premium Economy: " + dto.getPremSeats() + "<br>" +
+                               "Economy: " + dto.getEcoSeats() + "</html>";
+                    }
+                }
+                return super.getToolTipText(e);
+            }
+        };
         table.setRowHeight(52);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setGridColor(AppColor.BORDER);
@@ -332,12 +351,11 @@ public class AircraftGUI extends JPanel {
 
         for (AircraftDTO dto : allData) {
             int cap = dto.getCapacity() != null ? dto.getCapacity() : 0;
-            int low = Math.max(0, cap - (int) (cap * 0.12));
             tableModel.addRow(new Object[] {
                     dto.getAircraftID(),
                     dto.getModel(),
                     dto.getManufactureYear() != null ? String.valueOf(dto.getManufactureYear()) : "",
-                    low + " - " + cap,
+                    String.valueOf(cap),
                     "actions"
             });
         }
@@ -488,10 +506,10 @@ public class AircraftGUI extends JPanel {
             txtBusSeats.setEditable(false);
             txtPremSeats.setEditable(false);
             txtEcoSeats.setEditable(false);
-            txtFirstSeats.setText("-");
-            txtBusSeats.setText("-");
-            txtPremSeats.setText("-");
-            txtEcoSeats.setText("-");
+            txtFirstSeats.setText(String.valueOf(dto.getFirstSeats()));
+            txtBusSeats.setText(String.valueOf(dto.getBusSeats()));
+            txtPremSeats.setText(String.valueOf(dto.getPremSeats()));
+            txtEcoSeats.setText(String.valueOf(dto.getEcoSeats()));
         }
 
         JPanel row1 = new JPanel(new java.awt.GridLayout(1, dto != null ? 2 : 1, 16, 0));

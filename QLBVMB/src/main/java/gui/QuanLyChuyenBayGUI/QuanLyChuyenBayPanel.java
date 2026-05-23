@@ -376,7 +376,10 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 if (!sel)
                     setBackground(r % 2 == 0 ? AppColor.SURFACE : new Color(252, 252, 253));
 
-                if (c == 7 && val != null) {
+                if (c == 0 && val != null) {
+                    setFont(new Font("Segoe UI", Font.BOLD, 14));
+                    setForeground(AppColor.TEXT_PRIMARY);
+                } else if (c == 7 && val != null) {
                     setFont(new Font("Segoe UI", Font.BOLD, 13));
                     String status = val.toString().toUpperCase();
                     if (status.contains("CANCEL"))
@@ -386,11 +389,24 @@ public class QuanLyChuyenBayPanel extends JPanel {
                     else
                         setForeground(AppColor.SUCCESS);
                 } else {
+                    setFont(new Font("Segoe UI", Font.PLAIN, 14));
                     setForeground(AppColor.TEXT_PRIMARY);
                 }
                 return this;
             }
         };
+        
+        // Cấu hình độ rộng các cột
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(70);  // SỐ HIỆU
+        columnModel.getColumn(1).setPreferredWidth(90);  // HÀNH TRÌNH
+        columnModel.getColumn(2).setPreferredWidth(150); // KHỞI HÀNH
+        columnModel.getColumn(3).setPreferredWidth(150); // HẠ CÁNH
+        columnModel.getColumn(4).setPreferredWidth(180); // TÀU BAY
+        columnModel.getColumn(5).setPreferredWidth(50);  // CỔNG
+        columnModel.getColumn(6).setPreferredWidth(160); // BẢNG GIÁ
+        columnModel.getColumn(7).setPreferredWidth(110); // TRẠNG THÁI
+
         for (int i = 0; i < table.getColumnModel().getColumnCount() - 1; i++)
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
     }

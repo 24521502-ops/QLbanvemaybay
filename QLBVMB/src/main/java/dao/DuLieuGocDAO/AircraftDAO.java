@@ -11,7 +11,15 @@ public class AircraftDAO {
 
     public List<AircraftDTO> getAll() {
         List<AircraftDTO> list = new ArrayList<>();
-        String sql = "SELECT AircraftID, AirlineID, Model, Capacity, ManufactureYear FROM AIRCRAFT ORDER BY AircraftID";
+        String sql = "SELECT A.AircraftID, A.AirlineID, A.Model, A.Capacity, A.ManufactureYear, " +
+                     "SUM(CASE WHEN S.Class = 'First Class' THEN 1 ELSE 0 END) AS FirstSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Business' THEN 1 ELSE 0 END) AS BusSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Premium Economy' THEN 1 ELSE 0 END) AS PremSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Economy' THEN 1 ELSE 0 END) AS EcoSeats " +
+                     "FROM AIRCRAFT A " +
+                     "LEFT JOIN SEAT S ON A.AircraftID = S.AircraftID " +
+                     "GROUP BY A.AircraftID, A.AirlineID, A.Model, A.Capacity, A.ManufactureYear " +
+                     "ORDER BY A.AircraftID";
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -22,6 +30,10 @@ public class AircraftDAO {
                 dto.setModel(rs.getString("Model"));
                 dto.setCapacity(rs.getInt("Capacity"));
                 dto.setManufactureYear(rs.getInt("ManufactureYear"));
+                dto.setFirstSeats(rs.getInt("FirstSeats"));
+                dto.setBusSeats(rs.getInt("BusSeats"));
+                dto.setPremSeats(rs.getInt("PremSeats"));
+                dto.setEcoSeats(rs.getInt("EcoSeats"));
                 list.add(dto);
             }
         } catch (SQLException e) {
@@ -32,9 +44,16 @@ public class AircraftDAO {
 
     public List<AircraftDTO> search(String keyword) {
         List<AircraftDTO> list = new ArrayList<>();
-        String sql = "SELECT AircraftID, AirlineID, Model, Capacity, ManufactureYear FROM AIRCRAFT " +
-                "WHERE UPPER(AircraftID) LIKE ? OR UPPER(Model) LIKE ? OR UPPER(AirlineID) LIKE ? " +
-                "ORDER BY AircraftID";
+        String sql = "SELECT A.AircraftID, A.AirlineID, A.Model, A.Capacity, A.ManufactureYear, " +
+                     "SUM(CASE WHEN S.Class = 'First Class' THEN 1 ELSE 0 END) AS FirstSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Business' THEN 1 ELSE 0 END) AS BusSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Premium Economy' THEN 1 ELSE 0 END) AS PremSeats, " +
+                     "SUM(CASE WHEN S.Class = 'Economy' THEN 1 ELSE 0 END) AS EcoSeats " +
+                     "FROM AIRCRAFT A " +
+                     "LEFT JOIN SEAT S ON A.AircraftID = S.AircraftID " +
+                     "WHERE UPPER(A.AircraftID) LIKE ? OR UPPER(A.Model) LIKE ? OR UPPER(A.AirlineID) LIKE ? " +
+                     "GROUP BY A.AircraftID, A.AirlineID, A.Model, A.Capacity, A.ManufactureYear " +
+                     "ORDER BY A.AircraftID";
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)) {
             String kw = "%" + keyword.toUpperCase() + "%";
@@ -48,6 +67,10 @@ public class AircraftDAO {
                     dto.setModel(rs.getString("Model"));
                     dto.setCapacity(rs.getInt("Capacity"));
                     dto.setManufactureYear(rs.getInt("ManufactureYear"));
+                    dto.setFirstSeats(rs.getInt("FirstSeats"));
+                    dto.setBusSeats(rs.getInt("BusSeats"));
+                    dto.setPremSeats(rs.getInt("PremSeats"));
+                    dto.setEcoSeats(rs.getInt("EcoSeats"));
                     list.add(dto);
                 }
             }
