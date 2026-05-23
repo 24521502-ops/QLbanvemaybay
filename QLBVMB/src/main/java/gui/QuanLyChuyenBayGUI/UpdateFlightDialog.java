@@ -22,6 +22,7 @@ public class UpdateFlightDialog extends javax.swing.JDialog {
     private ChuyenBayBUS bus = new ChuyenBayBUS();
 
     private JTextField txtSoHieu, txtGate;
+    private JTextField txtPriceEco, txtPriceBus, txtPricePrem, txtPriceFirst;
     private JComboBox<String> cbHangBay, cbTauBay, cbSanBayDi, cbSanBayDen;
 
     // Thay JTextField bằng JSpinner
@@ -83,6 +84,22 @@ public class UpdateFlightDialog extends javax.swing.JDialog {
 
         txtGate = makeInputField();
         body.add(makeFieldBlock("CỔNG (GATE)", txtGate));
+        body.add(Box.createVerticalStrut(12));
+
+        txtPriceFirst = makeInputField();
+        body.add(makeFieldBlock("GIÁ VÉ FIRST CLASS (VNĐ)", txtPriceFirst));
+        body.add(Box.createVerticalStrut(12));
+
+        txtPriceBus = makeInputField();
+        body.add(makeFieldBlock("GIÁ VÉ BUSINESS (VNĐ)", txtPriceBus));
+        body.add(Box.createVerticalStrut(12));
+
+        txtPricePrem = makeInputField();
+        body.add(makeFieldBlock("GIÁ VÉ PREMIUM ECONOMY (VNĐ)", txtPricePrem));
+        body.add(Box.createVerticalStrut(12));
+
+        txtPriceEco = makeInputField();
+        body.add(makeFieldBlock("GIÁ VÉ ECONOMY (VNĐ)", txtPriceEco));
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footer.setBackground(SURFACE_LOW);
@@ -141,6 +158,15 @@ public class UpdateFlightDialog extends javax.swing.JDialog {
 
             txtGate.setText(oldData[7] != null ? oldData[7].toString() : "");
         }
+
+        // Tải giá vé
+        double[] prices = bus.layGiaChuyenBay(flightID);
+        if (prices != null && prices.length == 4) {
+            txtPriceEco.setText(String.format("%.0f", prices[0]));
+            txtPriceBus.setText(String.format("%.0f", prices[1]));
+            txtPricePrem.setText(String.format("%.0f", prices[2]));
+            txtPriceFirst.setText(String.format("%.0f", prices[3]));
+        }
     }
 
     private void setSelectedCombo(JComboBox<String> cb, String id) {
@@ -174,8 +200,20 @@ public class UpdateFlightDialog extends javax.swing.JDialog {
                 return;
             }
 
+            // Parse prices
+            double pEco = 0, pBus = 0, pPrem = 0, pFirst = 0;
+            try {
+                pEco = Double.parseDouble(txtPriceEco.getText().replace(",", ""));
+                pBus = Double.parseDouble(txtPriceBus.getText().replace(",", ""));
+                pPrem = Double.parseDouble(txtPricePrem.getText().replace(",", ""));
+                pFirst = Double.parseDouble(txtPriceFirst.getText().replace(",", ""));
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Giá vé phải là số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             if (bus.capNhatToanBoChuyenBay(flightID, txtSoHieu.getText(), airline, aircraft, depAp, arrAp, depD, arrD,
-                    txtGate.getText())) {
+                    txtGate.getText(), pEco, pBus, pPrem, pFirst)) {
                 JOptionPane.showMessageDialog(this, "Sửa chuyến bay thành công!");
                 parentPanel.loadDataToTable();
                 dispose();

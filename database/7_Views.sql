@@ -11,7 +11,29 @@ SELECT
     f.ArrivalTime,
     a.Model AS AircraftModel,
     f.Gate,
-    f.FlightStatus
+    f.FlightStatus,
+    (
+        SELECT '<html><div style="font-family: Arial; font-size: 10px;">' || 
+               LISTAGG(
+                   '<b>' ||
+                   CASE Class 
+                       WHEN 'First Class' THEN 'First'
+                       WHEN 'Business' THEN 'Bus'
+                       WHEN 'Premium Economy' THEN 'Prem'
+                       WHEN 'Economy' THEN 'Eco'
+                   END || ':</b> <font color="blue">' || TO_CHAR(Price, 'FM999,999,999,999') || 'đ</font>', 
+                   '<br>'
+               ) WITHIN GROUP (ORDER BY 
+                   CASE Class 
+                       WHEN 'First Class' THEN 1
+                       WHEN 'Business' THEN 2
+                       WHEN 'Premium Economy' THEN 3
+                       WHEN 'Economy' THEN 4
+                   END
+               ) || '</div></html>'
+        FROM SEATCLASSPRICE 
+        WHERE FlightID = f.FlightID
+    ) AS PricesHTML
 FROM FLIGHT f
 JOIN ROUTE r ON f.RouteID = r.RouteID
 JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID

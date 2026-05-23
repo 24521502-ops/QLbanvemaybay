@@ -28,6 +28,14 @@ public class AircraftBUS {
         return dao.insert(dto);
     }
 
+    public boolean insertWithSeats(AircraftDTO dto, int first, int busi, int prem, int eco) {
+        if (dto.getAirlineID() == null || dto.getAirlineID().trim().isEmpty())
+            return false;
+        if (dto.getModel() == null || dto.getModel().trim().isEmpty())
+            return false;
+        return dao.insertWithSeats(dto, first, busi, prem, eco);
+    }
+
     public boolean update(AircraftDTO dto) {
         if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty())
             return false;

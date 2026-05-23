@@ -356,7 +356,7 @@ public class AircraftGUI extends JPanel {
     private void showCustomDialog(String title, String subtitle, AircraftDTO dto, int row) {
         JDialog dialog = new JDialog((java.awt.Frame) javax.swing.SwingUtilities.getWindowAncestor(this), title, true);
         dialog.setUndecorated(true);
-        dialog.setSize(580, 520);
+        dialog.setSize(580, 680);
         dialog.setLocationRelativeTo(this);
         dialog.getRootPane()
                 .setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(203, 213, 225), 1));
@@ -446,36 +446,96 @@ public class AircraftGUI extends JPanel {
         gbc.weightx = 1;
 
         JTextField txtID = new JTextField();
-        JTextField txtAirlineID = new JTextField();
+        JComboBox<String> cbAirlineID = new JComboBox<>();
+        try (java.sql.Connection conn = util.DBConnection.getConnection();
+             java.sql.Statement stmt = conn.createStatement();
+             java.sql.ResultSet rs = stmt.executeQuery("SELECT AirlineID, AirlineName FROM AIRLINE")) {
+            while (rs.next()) {
+                cbAirlineID.addItem(rs.getString("AirlineID") + " - " + rs.getString("AirlineName"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        cbAirlineID.setBackground(new java.awt.Color(248, 250, 252));
+        cbAirlineID.setFont(new java.awt.Font("Segoe UI", java.awt.Font.PLAIN, 14));
+
         JTextField txtModel = new JTextField();
         JTextField txtCapacity = new JTextField();
         JTextField txtYear = new JTextField();
 
+        JTextField txtFirstSeats = new JTextField("0");
+        JTextField txtBusSeats = new JTextField("0");
+        JTextField txtPremSeats = new JTextField("0");
+        JTextField txtEcoSeats = new JTextField("0");
+
         if (dto != null) {
             txtID.setText(dto.getAircraftID());
             txtID.setEditable(false);
-            txtAirlineID.setText(dto.getAirlineID());
+            
+            for (int i = 0; i < cbAirlineID.getItemCount(); i++) {
+                if (cbAirlineID.getItemAt(i).startsWith(dto.getAirlineID() + " -")) {
+                    cbAirlineID.setSelectedIndex(i);
+                    break;
+                }
+            }
+            cbAirlineID.setEnabled(false); // Thường không cho đổi hãng khi sửa máy bay
+            
             txtModel.setText(dto.getModel());
             txtCapacity.setText(dto.getCapacity() != null ? String.valueOf(dto.getCapacity()) : "");
             txtYear.setText(dto.getManufactureYear() != null ? String.valueOf(dto.getManufactureYear()) : "");
+            
+            txtFirstSeats.setEditable(false);
+            txtBusSeats.setEditable(false);
+            txtPremSeats.setEditable(false);
+            txtEcoSeats.setEditable(false);
+            txtFirstSeats.setText("-");
+            txtBusSeats.setText("-");
+            txtPremSeats.setText("-");
+            txtEcoSeats.setText("-");
         }
 
-        JPanel row1 = new JPanel(new java.awt.GridLayout(1, 2, 16, 0));
+        JPanel row1 = new JPanel(new java.awt.GridLayout(1, dto != null ? 2 : 1, 16, 0));
         row1.setBackground(java.awt.Color.WHITE);
-        row1.add(createFieldPanel("MÃ MÁY BAY *", "#", txtID, "Ví dụ: AC01"));
-        row1.add(createFieldPanel("MÃ HÃNG *", "🏢", txtAirlineID, "Ví dụ: VN"));
+        
+        if (dto != null) {
+            row1.add(createFieldPanel("MÃ MÁY BAY", "#", txtID, "Tự động sinh..."));
+        }
+        
+        JPanel pnlAirline = new JPanel(new java.awt.BorderLayout(0, 8));
+        pnlAirline.setBackground(java.awt.Color.WHITE);
+        JLabel lblAirline = new JLabel("HÃNG BAY *");
+        lblAirline.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 11));
+        lblAirline.setForeground(new java.awt.Color(71, 85, 105));
+        pnlAirline.add(lblAirline, java.awt.BorderLayout.NORTH);
+        pnlAirline.add(cbAirlineID, java.awt.BorderLayout.CENTER);
+        row1.add(pnlAirline);
+        
         gbc.gridy = 0;
         form.add(row1, gbc);
 
         gbc.gridy = 1;
         form.add(createFieldPanel("TÊN LOẠI (MODEL) *", "✈", txtModel, "Ví dụ: Boeing 787"), gbc);
 
+        JPanel row2 = new JPanel(new java.awt.GridLayout(1, 2, 16, 0));
+        row2.setBackground(java.awt.Color.WHITE);
+        row2.add(createFieldPanel("TỔNG SỨC CHỨA *", "👥", txtCapacity, "Tổng số ghế"));
+        row2.add(createFieldPanel("NĂM SẢN XUẤT", "📅", txtYear, "Năm"));
+        gbc.gridy = 2;
+        form.add(row2, gbc);
+
         JPanel row3 = new JPanel(new java.awt.GridLayout(1, 2, 16, 0));
         row3.setBackground(java.awt.Color.WHITE);
-        row3.add(createFieldPanel("SỨC CHỨA", "👥", txtCapacity, "Số ghế"));
-        row3.add(createFieldPanel("NĂM SẢN XUẤT", "📅", txtYear, "Năm"));
-        gbc.gridy = 2;
+        row3.add(createFieldPanel("SỐ GHẾ FIRST CLASS", "👑", txtFirstSeats, "0"));
+        row3.add(createFieldPanel("SỐ GHẾ BUSINESS", "💼", txtBusSeats, "0"));
+        gbc.gridy = 3;
         form.add(row3, gbc);
+
+        JPanel row4 = new JPanel(new java.awt.GridLayout(1, 2, 16, 0));
+        row4.setBackground(java.awt.Color.WHITE);
+        row4.add(createFieldPanel("SỐ GHẾ PREMIUM", "⭐", txtPremSeats, "0"));
+        row4.add(createFieldPanel("SỐ GHẾ ECONOMY", "💺", txtEcoSeats, "0"));
+        gbc.gridy = 4;
+        form.add(row4, gbc);
 
         mainPanel.add(form, java.awt.BorderLayout.CENTER);
 
@@ -502,16 +562,59 @@ public class AircraftGUI extends JPanel {
         btnSave.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         btnSave.addActionListener(e -> {
             try {
+                if (cbAirlineID.getSelectedItem() == null) {
+                    javax.swing.JOptionPane.showMessageDialog(dialog, "Vui lòng chọn Hãng bay!", "Lỗi",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String model = txtModel.getText().trim();
+                if (model.isEmpty()) {
+                    javax.swing.JOptionPane.showMessageDialog(dialog, "Vui lòng nhập Tên loại máy bay (Model)!", "Lỗi",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
                 AircraftDTO newDto = new AircraftDTO();
                 newDto.setAircraftID(txtID.getText().trim());
-                newDto.setAirlineID(txtAirlineID.getText().trim());
-                newDto.setModel(txtModel.getText().trim());
-                String capStr = txtCapacity.getText().trim();
-                newDto.setCapacity(capStr.isEmpty() ? 0 : Integer.parseInt(capStr));
+                
+                String selectedAirline = cbAirlineID.getSelectedItem().toString();
+                String airlineID = selectedAirline.split(" - ")[0];
+                newDto.setAirlineID(airlineID);
+                newDto.setModel(model);
+                
                 String yearStr = txtYear.getText().trim();
                 newDto.setManufactureYear(yearStr.isEmpty() ? 0 : Integer.parseInt(yearStr));
 
-                boolean success = dto == null ? bus.insert(newDto) : bus.update(newDto);
+                boolean success;
+                if (dto == null) {
+                    String capStr = txtCapacity.getText().trim();
+                    if (capStr.isEmpty()) {
+                        javax.swing.JOptionPane.showMessageDialog(dialog, "Vui lòng nhập Tổng sức chứa!", "Lỗi",
+                                javax.swing.JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    int capacity = Integer.parseInt(txtCapacity.getText().trim());
+                    int first = Integer.parseInt(txtFirstSeats.getText().trim());
+                    int busi = Integer.parseInt(txtBusSeats.getText().trim());
+                    int prem = Integer.parseInt(txtPremSeats.getText().trim());
+                    int eco = Integer.parseInt(txtEcoSeats.getText().trim());
+                    
+                    if (first + busi + prem + eco != capacity) {
+                        javax.swing.JOptionPane.showMessageDialog(dialog, 
+                            "Tổng số ghế các khoang (" + (first + busi + prem + eco) + ") phải bằng Tổng sức chứa (" + capacity + ")!", 
+                            "Lỗi", javax.swing.JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    
+                    newDto.setCapacity(capacity);
+                    success = bus.insertWithSeats(newDto, first, busi, prem, eco);
+                } else {
+                    String capStr = txtCapacity.getText().trim();
+                    newDto.setCapacity(capStr.isEmpty() ? 0 : Integer.parseInt(capStr));
+                    success = bus.update(newDto);
+                }
+
                 if (success) {
                     javax.swing.JOptionPane.showMessageDialog(dialog, "Thành công!", "Thông báo",
                             javax.swing.JOptionPane.INFORMATION_MESSAGE);
@@ -522,7 +625,7 @@ public class AircraftGUI extends JPanel {
                             javax.swing.JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException ex) {
-                javax.swing.JOptionPane.showMessageDialog(dialog, "Sức chứa và năm sản xuất phải là số!", "Lỗi",
+                javax.swing.JOptionPane.showMessageDialog(dialog, "Số lượng ghế và năm sản xuất phải là số hợp lệ!", "Lỗi",
                         javax.swing.JOptionPane.ERROR_MESSAGE);
             }
         });
