@@ -28,6 +28,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
     private QuanLyChuyenBayPanel parentPanel;
     private JTextField txtSoHieu, txtGate;
+    private JTextField txtPriceEco, txtPriceBus, txtPricePrem, txtPriceFirst;
     private JComboBox<String> cbHangBay, cbTauBay, cbSanBayDi, cbSanBayDen;
 
     // Đã thay JTextField thành JSpinner để chọn Ngày Giờ
@@ -96,6 +97,23 @@ public class AddFlightDialog extends javax.swing.JDialog {
 
         txtGate = makeInputField("Nhập cổng ra máy bay...");
         bodyPanel.add(makeFieldBlock("CỔNG (GATE)", txtGate));
+        bodyPanel.add(Box.createVerticalStrut(12));
+
+        // --- BỔ SUNG: GIÁ NỀN CHO CÁC HẠNG GHẾ ---
+        txtPriceEco = makeInputField("Giá hạng Phổ thông (Economy)...");
+        bodyPanel.add(makeFieldBlock("GIÁ PHỔ THÔNG (VND)", txtPriceEco));
+        bodyPanel.add(Box.createVerticalStrut(12));
+
+        txtPriceBus = makeInputField("Giá hạng Thương gia (Business)...");
+        bodyPanel.add(makeFieldBlock("GIÁ THƯƠNG GIA (VND)", txtPriceBus));
+        bodyPanel.add(Box.createVerticalStrut(12));
+
+        txtPricePrem = makeInputField("Giá Phổ thông Đặc biệt (Premium Economy)...");
+        bodyPanel.add(makeFieldBlock("GIÁ PHỔ THÔNG ĐẶC BIỆT (VND)", txtPricePrem));
+        bodyPanel.add(Box.createVerticalStrut(12));
+
+        txtPriceFirst = makeInputField("Giá Hạng nhất (First Class)...");
+        bodyPanel.add(makeFieldBlock("GIÁ HẠNG NHẤT (VND)", txtPriceFirst));
 
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 12, 12));
         footerPanel.setBackground(SURFACE_CONTAINER);
@@ -118,8 +136,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
         getContentPane().add(footerPanel, BorderLayout.SOUTH);
 
         pack();
-        setPreferredSize(new Dimension(500, 680));
-        setSize(500, 680);
+        setPreferredSize(new Dimension(500, 800));
+        setSize(500, 800);
     }
 
     private void loadDropdownData() {
@@ -150,9 +168,27 @@ public class AddFlightDialog extends javax.swing.JDialog {
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {
         try {
             if (txtSoHieu.getText().trim().isEmpty() || cbHangBay.getSelectedItem() == null
-                    || cbSanBayDi.getSelectedItem() == null) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin!", "Cảnh báo",
+                    || cbSanBayDi.getSelectedItem() == null || txtPriceEco.getText().trim().isEmpty()
+                    || txtPriceBus.getText().trim().isEmpty() || txtPricePrem.getText().trim().isEmpty()
+                    || txtPriceFirst.getText().trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin và giá vé!", "Cảnh báo",
                         JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            double priceEco = 0, priceBus = 0, pricePrem = 0, priceFirst = 0;
+            try {
+                priceEco = Double.parseDouble(txtPriceEco.getText().trim());
+                priceBus = Double.parseDouble(txtPriceBus.getText().trim());
+                pricePrem = Double.parseDouble(txtPricePrem.getText().trim());
+                priceFirst = Double.parseDouble(txtPriceFirst.getText().trim());
+
+                if (priceEco <= 0 || priceBus <= 0 || pricePrem <= 0 || priceFirst <= 0) {
+                    JOptionPane.showMessageDialog(this, "Giá vé phải lớn hơn 0!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập giá vé là số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -185,7 +221,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
                     tauBayID, null,
                     depDate, arrDate, txtGate.getText().trim(), "SCHEDULED");
 
-            if (new ChuyenBayBUS().themChuyenBay(newFlight, sbDiID, sbDenID)) {
+            if (new ChuyenBayBUS().themChuyenBay(newFlight, sbDiID, sbDenID, priceEco, priceBus, pricePrem, priceFirst)) {
                 JOptionPane.showMessageDialog(this, "Thêm chuyến bay thành công!", "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
                 if (parentPanel != null)

@@ -20,10 +20,10 @@ public class ChuyenBayBUS {
         return chuyenBayDAO.delayChuyenBay(flightID, newTime);
     }
 
-    public boolean themChuyenBay(FlightDTO flight, String depAirport, String arrAirport) {
+    public boolean themChuyenBay(FlightDTO flight, String depAirport, String arrAirport, double priceEco, double priceBus, double pricePrem, double priceFirst) {
         if (flight.getFlightNumber() == null || flight.getFlightNumber().isEmpty())
             return false;
-        return chuyenBayDAO.themChuyenBayUI(flight, depAirport, arrAirport);
+        return chuyenBayDAO.themChuyenBayUI(flight, depAirport, arrAirport, priceEco, priceBus, pricePrem, priceFirst);
     }
 
     // GỌI HÀM LẤY CHI TIẾT & SỬA
@@ -31,9 +31,18 @@ public class ChuyenBayBUS {
         return chuyenBayDAO.layChiTietChuyenBay(flightID);
     }
 
+    public double[] layGiaChuyenBay(String flightID) {
+        return chuyenBayDAO.layGiaChuyenBay(flightID);
+    }
+
     public boolean capNhatToanBoChuyenBay(String flightID, String flightNum, String airlineID, String aircraftID,
-            String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate) {
-        return chuyenBayDAO.capNhatToanBoChuyenBay(flightID, flightNum, airlineID, aircraftID, depAirport, arrAirport,
+            String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate,
+            double priceEco, double priceBus, double pricePrem, double priceFirst) {
+        boolean flightUpdated = chuyenBayDAO.capNhatToanBoChuyenBay(flightID, flightNum, airlineID, aircraftID, depAirport, arrAirport,
                 depTime, arrTime, gate);
+        if (flightUpdated) {
+            return chuyenBayDAO.capNhatGiaChuyenBay(flightID, priceEco, priceBus, pricePrem, priceFirst);
+        }
+        return false;
     }
 }

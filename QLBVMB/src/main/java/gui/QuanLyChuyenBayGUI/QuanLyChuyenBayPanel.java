@@ -116,7 +116,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         itemTimeAsc.addActionListener(e -> applySorting(2, SortOrder.ASCENDING));
         itemTimeDesc.addActionListener(e -> applySorting(2, SortOrder.DESCENDING));
         itemFlightAsc.addActionListener(e -> applySorting(0, SortOrder.ASCENDING));
-        itemStatus.addActionListener(e -> applySorting(6, SortOrder.DESCENDING));
+        itemStatus.addActionListener(e -> applySorting(7, SortOrder.DESCENDING));
 
         // Thêm Item vào Menu
         sortMenu.add(itemTimeAsc);
@@ -152,7 +152,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         panelTableCard.setBackground(AppColor.SURFACE);
         panelTableCard.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
 
-        String[] cols = { "SỐ HIỆU", "HÀNH TRÌNH", "KHỞI HÀNH", "HẠ CÁNH", "TÀU BAY", "CỔNG", "TRẠNG THÁI", "ID_ẨN" };
+        String[] cols = { "SỐ HIỆU", "HÀNH TRÌNH", "KHỞI HÀNH", "HẠ CÁNH", "TÀU BAY", "CỔNG", "BẢNG GIÁ", "TRẠNG THÁI", "ID_ẨN" };
         tableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -162,8 +162,8 @@ public class QuanLyChuyenBayPanel extends JPanel {
 
         table = new JTable(tableModel);
         table.setAutoCreateRowSorter(true);
-        table.getColumnModel().getColumn(7).setMinWidth(0);
-        table.getColumnModel().getColumn(7).setMaxWidth(0);
+        table.getColumnModel().getColumn(8).setMinWidth(0);
+        table.getColumnModel().getColumn(8).setMaxWidth(0);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.getViewport().setBackground(AppColor.SURFACE);
@@ -186,7 +186,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
                 return;
             }
-            String id = table.getValueAt(row, 7).toString();
+            String id = table.getValueAt(row, 8).toString();
             new UpdateFlightDialog((Frame) SwingUtilities.getWindowAncestor(this), true, this, id).setVisible(true);
         });
 
@@ -196,7 +196,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
                 return;
             }
-            String id = table.getValueAt(row, 7).toString();
+            String id = table.getValueAt(row, 8).toString();
             if (JOptionPane.showConfirmDialog(this, "Hủy chuyến bay này?", "Xác nhận",
                     JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                 if (chuyenBayBUS.huyChuyenBay(id)) {
@@ -211,7 +211,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
                 return;
             }
-            String id = table.getValueAt(row, 7).toString();
+            String id = table.getValueAt(row, 8).toString();
             String flightNum = table.getValueAt(row, 0).toString();
             String displayTime = table.getValueAt(row, 2).toString();
             String formattedOldTime = "";
@@ -340,7 +340,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
     }
 
     private void customizeTable() {
-        table.setRowHeight(50);
+        table.setRowHeight(80);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         table.setShowVerticalLines(false);
         table.setGridColor(AppColor.BORDER);
@@ -376,7 +376,10 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 if (!sel)
                     setBackground(r % 2 == 0 ? AppColor.SURFACE : new Color(252, 252, 253));
 
-                if (c == 6 && val != null) {
+                if (c == 0 && val != null) {
+                    setFont(new Font("Segoe UI", Font.BOLD, 14));
+                    setForeground(AppColor.TEXT_PRIMARY);
+                } else if (c == 7 && val != null) {
                     setFont(new Font("Segoe UI", Font.BOLD, 13));
                     String status = val.toString().toUpperCase();
                     if (status.contains("CANCEL"))
@@ -386,11 +389,24 @@ public class QuanLyChuyenBayPanel extends JPanel {
                     else
                         setForeground(AppColor.SUCCESS);
                 } else {
+                    setFont(new Font("Segoe UI", Font.PLAIN, 14));
                     setForeground(AppColor.TEXT_PRIMARY);
                 }
                 return this;
             }
         };
+        
+        // Cấu hình độ rộng các cột
+        TableColumnModel columnModel = table.getColumnModel();
+        columnModel.getColumn(0).setPreferredWidth(70);  // SỐ HIỆU
+        columnModel.getColumn(1).setPreferredWidth(90);  // HÀNH TRÌNH
+        columnModel.getColumn(2).setPreferredWidth(150); // KHỞI HÀNH
+        columnModel.getColumn(3).setPreferredWidth(150); // HẠ CÁNH
+        columnModel.getColumn(4).setPreferredWidth(180); // TÀU BAY
+        columnModel.getColumn(5).setPreferredWidth(50);  // CỔNG
+        columnModel.getColumn(6).setPreferredWidth(160); // BẢNG GIÁ
+        columnModel.getColumn(7).setPreferredWidth(110); // TRẠNG THÁI
+
         for (int i = 0; i < table.getColumnModel().getColumnCount() - 1; i++)
             table.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
     }
@@ -408,7 +424,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 row[3] = sdf.format(row[3]);
             tableModel.addRow(row);
             total++;
-            String status = row[6].toString().toUpperCase();
+            String status = row[7].toString().toUpperCase();
             if (status.contains("SCHEDULED"))
                 scheduled++;
             if (status.contains("DELAY"))
@@ -422,7 +438,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
     /** Tìm và chọn hàng theo FlightID (cột ẩn 7) - được gọi từ GlobalSearch */
     public void selectById(String flightId) {
         for (int row = 0; row < tableModel.getRowCount(); row++) {
-            Object val = tableModel.getValueAt(row, 7);
+            Object val = tableModel.getValueAt(row, 8);
             if (val != null && flightId.equalsIgnoreCase(val.toString())) {
                 int viewRow = table.convertRowIndexToView(row);
                 if (viewRow >= 0) {
