@@ -31,6 +31,7 @@ public class FlightHistoryPanel extends JPanel {
     private static final Color RED_BG = new Color(254, 226, 226);
     private static final Color RED_TEXT = new Color(220, 38, 38);
     private static final Color BLUE_TEXT = new Color(37, 99, 235);
+    private static final Color BLUE_BG = new Color(219, 234, 254);
 
     public FlightHistoryPanel(AccountDTO account) {
         this.account = account;
@@ -212,6 +213,10 @@ public class FlightHistoryPanel extends JPanel {
         infoGrid.add(payBox, "growx");
         infoGrid.add(dateBox, "growx");
 
+        // Passengers Ticket List Box (hidden until fetched)
+        JPanel passengersContainer = new JPanel(new MigLayout("wrap 1, fillx, insets 0 20 15 20, hidemode 3", "[grow]"));
+        passengersContainer.setBackground(new Color(250, 250, 249));
+
         // Receipt Box
         JPanel receiptBox = new JPanel(new MigLayout("fillx, insets 15 20 15 20", "[grow][]", "[][][]"));
         receiptBox.setBackground(Color.WHITE);
@@ -298,7 +303,7 @@ public class FlightHistoryPanel extends JPanel {
             
             actionBox.add(btnCancel);
             actionBox.add(btnPay);
-        } else if (isConfirmed && hoursToFlight > 48) {
+        } else if (isConfirmed && hoursToFlight > 24) {
             if (booking.getCheckedInCount() > 0) {
                 JLabel lblNote = new JLabel("Đã Check-in, không thể hủy.");
                 lblNote.setForeground(TEXT_GRAY);
@@ -306,8 +311,15 @@ public class FlightHistoryPanel extends JPanel {
                 actionBox.add(lblNote);
             } else {
                 JButton btnCancel = createOutlineButton("Hủy vé & Hoàn tiền", RED_TEXT);
+                final long finalHours = hoursToFlight;
                 btnCancel.addActionListener(e -> {
-                    int ans = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn hủy vé?\nHệ thống sẽ thu phí hủy là 30% giá vé, phần còn lại sẽ được hoàn trả.", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    String msg = "Bạn có chắc muốn hủy vé?\n";
+                    if (finalHours > 72) {
+                        msg += "Chuyến bay còn hơn 72 giờ, phí hủy là 10% giá vé (hoàn lại 90% số tiền).";
+                    } else {
+                        msg += "Chuyến bay còn từ 24 đến 72 giờ, phí hủy là 50% giá vé (hoàn lại 50% số tiền).";
+                    }
+                    int ans = JOptionPane.showConfirmDialog(this, msg, "Xác nhận", JOptionPane.YES_NO_OPTION);
                     if (ans == JOptionPane.YES_OPTION) {
                         if (historyBUS.cancelBooking(booking.getBookingID())) {
                             JOptionPane.showMessageDialog(this, "Hủy vé thành công. Vui lòng kiểm tra email để nhận thông tin hoàn tiền.");
@@ -330,12 +342,18 @@ public class FlightHistoryPanel extends JPanel {
         }
 
         detailsContainer.add(infoGrid, "growx");
+        detailsContainer.add(passengersContainer, "growx");
         detailsContainer.add(receiptBox, "growx");
         detailsContainer.add(actionBox, "growx");
 
         // Toggle logic
         btnToggle.addActionListener(e -> {
             boolean isVis = detailsContainer.isVisible();
+            if (!isVis) {
+                if (passengersContainer.getComponentCount() == 0) {
+                    populatePassengers(passengersContainer, booking.getBookingID());
+                }
+            }
             detailsContainer.setVisible(!isVis);
             btnToggle.setText(!isVis ? "▲" : "▼");
             card.revalidate();
@@ -351,6 +369,73 @@ public class FlightHistoryPanel extends JPanel {
         card.add(detailsContainer, "growx");
 
         return card;
+    }
+
+    private void populatePassengers(JPanel container, String bookingID) {
+        List<dto.MyFlightPassengerDTO> passengers = historyBUS.getPassengersByBooking(bookingID);
+        
+        JSeparator sep = new JSeparator();
+        sep.setForeground(BORDER);
+        container.add(sep, "growx, h 1!, gapy 0 10");
+        
+        JLabel lblTitle = new JLabel("Danh sách vé (" + passengers.size() + ")");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblTitle.setForeground(TEXT_DARK);
+        container.add(lblTitle, "gapy 0 5");
+        
+        for (dto.MyFlightPassengerDTO p : passengers) {
+            try {
+                JPanel pCard = new JPanel(new MigLayout("fillx, insets 10", "[grow][]"));
+                pCard.setBackground(Color.WHITE);
+                pCard.setBorder(new RoundedBorder(8, BORDER));
+                
+                JPanel infoP = new JPanel(new MigLayout("insets 0, wrap 1, gapy 2", "[]", ""));
+                infoP.setBackground(Color.WHITE);
+                
+                String fullNameText = p.getFullName() != null ? p.getFullName() : "Hành khách";
+                JLabel lblName = new JLabel(fullNameText);
+                lblName.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                lblName.setForeground(TEXT_DARK);
+                
+                String subText = (p.isAdult() ? "Người lớn" : "Trẻ em");
+                if (p.getPassportNumber() != null && !p.getPassportNumber().isEmpty()) {
+                    subText += " - CCCD: " + p.getPassportNumber();
+                }
+                JLabel lblSub = new JLabel(subText);
+                lblSub.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                lblSub.setForeground(TEXT_GRAY);
+                
+                String flightInfo = "Chuyến bay: " + (p.getFlightNumber() != null ? p.getFlightNumber() : "N/A") +
+                                    "  (" + (p.getRoute() != null ? p.getRoute() : "Chưa rõ") + ")";
+                JLabel lblFlight = new JLabel(flightInfo);
+                lblFlight.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                lblFlight.setForeground(new Color(14, 165, 233));
+                
+                infoP.add(lblName);
+                infoP.add(lblSub);
+                infoP.add(lblFlight);
+                
+                JLabel lblSeat = new JLabel("Ghế " + (p.getSeatNumber() != null ? p.getSeatNumber() : "?"));
+                lblSeat.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                lblSeat.setForeground(BLUE_TEXT);
+                lblSeat.setBackground(BLUE_BG);
+                lblSeat.setOpaque(true);
+                lblSeat.setBorder(BorderFactory.createCompoundBorder(
+                    new RoundedBorder(10, BLUE_TEXT),
+                    new EmptyBorder(4, 12, 4, 12)
+                ));
+                
+                pCard.add(infoP, "cell 0 0, growx");
+                pCard.add(lblSeat, "cell 1 0, alignx right");
+                
+                container.add(pCard, "growx, gapy 0 8");
+            } catch (Exception ex) {
+                JLabel err = new JLabel("Lỗi hiển thị vé: " + ex.getMessage());
+                err.setForeground(Color.RED);
+                container.add(err, "growx, gapy 10 10");
+                ex.printStackTrace();
+            }
+        }
     }
 
     private JPanel createDetailBox(String title, String value) {

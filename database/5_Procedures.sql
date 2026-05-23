@@ -187,17 +187,45 @@ END;
 
 
 
-CREATE OR REPLACE PROCEDURE SP_CANCEL_BOOKING (p_BookingID IN VARCHAR2, p_CancelReason IN VARCHAR2) AS
-    v_Status VARCHAR2(50); v_CustomerID VARCHAR2(20); v_TotalAmount NUMBER;
+CREATE OR REPLACE PROCEDURE SP_CANCEL_BOOKING (
+    p_BookingID IN VARCHAR2, 
+    p_CancelReason IN VARCHAR2
+) AS
+    v_Status VARCHAR2(50); 
+    v_CustomerID VARCHAR2(20); 
+    v_TotalRefund NUMBER := 0;
+    v_TicketRefund NUMBER;
 BEGIN
-    SELECT Status, CustomerID, TotalAmount INTO v_Status, v_CustomerID, v_TotalAmount FROM BOOKING WHERE BookingID = p_BookingID;
+    SELECT Status, CustomerID INTO v_Status, v_CustomerID 
+    FROM BOOKING 
+    WHERE BookingID = p_BookingID;
+    
     IF v_Status = 'CONFIRMED' THEN
-        INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
-        VALUES (v_CustomerID, p_BookingID, 'REFUND', v_TotalAmount, 'Hoàn tiền do: ' || p_CancelReason);
+        -- Duyệt qua toàn bộ các vé chưa hủy thuộc BookingID
+        FOR r IN (SELECT TicketID FROM TICKET WHERE BookingID = p_BookingID AND TicketStatus != 'CANCELLED') LOOP
+            v_TicketRefund := FUNC_CALCULATE_REFUND(r.TicketID);
+            v_TotalRefund := v_TotalRefund + v_TicketRefund;
+            
+            IF v_TicketRefund > 0 THEN
+                INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
+                VALUES (v_CustomerID, p_BookingID, 'REFUND', v_TicketRefund * 1.10, 'Hoàn tiền vé ' || r.TicketID || ' do: ' || p_CancelReason);
+            END IF;
+        END LOOP;
+        
+        -- Cập nhật tổng tiền đơn đặt vé (giữ lại phần phí phạt không hoàn tiền, bao gồm cả VAT)
+        UPDATE BOOKING SET TotalAmount = TotalAmount - (v_TotalRefund * 1.10) WHERE BookingID = p_BookingID;
+        
+        -- Cập nhật trạng thái thanh toán sang REFUNDED
+        UPDATE PAYMENT SET PaymentStatus = 'REFUNDED' WHERE BookingID = p_BookingID;
+    ELSIF v_Status = 'PENDING' THEN
+        -- Nếu là PENDING (chưa thanh toán), khi hủy thì tổng tiền hóa đơn đặt vé về 0
+        UPDATE BOOKING SET TotalAmount = 0 WHERE BookingID = p_BookingID;
     END IF;
 
+    -- Cập nhật trạng thái Booking và Tickets sang CANCELLED
     UPDATE BOOKING SET Status = 'CANCELLED' WHERE BookingID = p_BookingID;
     UPDATE TICKET SET TicketStatus = 'CANCELLED' WHERE BookingID = p_BookingID;
+    
     COMMIT;
 END;
 /
@@ -426,9 +454,9 @@ BEGIN
 
     IF v_RefundAmount > 0 THEN
         INSERT INTO TRANSACTION_HISTORY (CustomerID, BookingID, TransactionType, Amount, Description)
-        VALUES (v_CustomerID, v_BookingID, 'REFUND', v_RefundAmount, 'Hoàn tiền vé ' || p_TicketID);
+        VALUES (v_CustomerID, v_BookingID, 'REFUND', v_RefundAmount * 1.10, 'Hoàn tiền vé ' || p_TicketID);
         
-        UPDATE BOOKING SET TotalAmount = TotalAmount - v_RefundAmount WHERE BookingID = v_BookingID;
+        UPDATE BOOKING SET TotalAmount = TotalAmount - (v_RefundAmount * 1.10) WHERE BookingID = v_BookingID;
     END IF;
     COMMIT;
 END;
@@ -926,3 +954,25 @@ EXCEPTION
 END;
 /
 
+
+
+-- mới thêm 
+-- 3. THỦ TỤC LẤY DANH SÁCH VÉ/HÀNH KHÁCH CỦA MỘT ĐƠN ĐẶT VÉ
+CREATE OR REPLACE PROCEDURE SP_GET_BOOKING_TICKETS (
+    p_booking_id IN VARCHAR2,
+    p_cursor OUT SYS_REFCURSOR
+) AS
+BEGIN
+    OPEN p_cursor FOR
+        SELECT p.FullName, p.PassportNumber, s.SeatNumber, p.DateOfBirth,
+               f.FlightNumber, dep.IATACode || ' -> ' || arr.IATACode as Route
+        FROM TICKET t
+        JOIN PASSENGER p ON t.PassengerID = p.PassengerID
+        LEFT JOIN SEAT s ON t.SeatID = s.SeatID
+        LEFT JOIN FLIGHT f ON t.FlightID = f.FlightID
+        LEFT JOIN ROUTE r ON f.RouteID = r.RouteID
+        LEFT JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
+        LEFT JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
+        WHERE t.BookingID = p_booking_id;
+END SP_GET_BOOKING_TICKETS;
+/

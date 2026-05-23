@@ -140,9 +140,20 @@ CREATE TABLE TICKET (
     CONSTRAINT fk_ticket_flight FOREIGN KEY (FlightID) REFERENCES FLIGHT(FlightID),
     CONSTRAINT fk_ticket_seat FOREIGN KEY (SeatID) REFERENCES SEAT(SeatID),
     CONSTRAINT fk_ticket_passenger FOREIGN KEY (PassengerID) REFERENCES PASSENGER(PassengerID),
-    CONSTRAINT uq_ticket_seat UNIQUE (FlightID, SeatID),
     CONSTRAINT uq_passenger_flight UNIQUE (PassengerID, FlightID),
     CONSTRAINT chk_ticket_status CHECK (TicketStatus IN ('BOOKED','PAID','CANCELLED','CHECKED-IN'))
+);
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP INDEX UQ_TICKET_SEAT_ACTIVE';
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END;
+/
+--dùng để đảm bảo không có 2 vé cùng ghế trên 1 chuyến bay
+CREATE UNIQUE INDEX UQ_TICKET_SEAT_ACTIVE ON TICKET (
+    CASE WHEN TicketStatus != 'CANCELLED' THEN FlightID ELSE NULL END,
+    CASE WHEN TicketStatus != 'CANCELLED' THEN SeatID ELSE NULL END
 );
 
 CREATE TABLE PAYMENT (

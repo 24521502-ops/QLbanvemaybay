@@ -7,6 +7,8 @@ public class MyFlightPassengerDTO {
     private String passportNumber;
     private String seatNumber;
     private Date dateOfBirth;
+    private String flightNumber;
+    private String route;
 
     public MyFlightPassengerDTO() {}
 
@@ -21,6 +23,12 @@ public class MyFlightPassengerDTO {
 
     public Date getDateOfBirth() { return dateOfBirth; }
     public void setDateOfBirth(Date dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+
+    public String getFlightNumber() { return flightNumber; }
+    public void setFlightNumber(String flightNumber) { this.flightNumber = flightNumber; }
+
+    public String getRoute() { return route; }
+    public void setRoute(String route) { this.route = route; }
 
     public boolean isAdult() {
         if (dateOfBirth == null) return true;

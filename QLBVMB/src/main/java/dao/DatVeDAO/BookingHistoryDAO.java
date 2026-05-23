@@ -99,6 +99,20 @@ public class BookingHistoryDAO {
         }
     }
 
+    public boolean cancelBooking(String bookingID, String reason) {
+        String sql = "{CALL SP_CANCEL_BOOKING(?, ?)}";
+        try (Connection conn = DBConnection.getConnection();
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.setString(2, reason);
+            cst.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public void refundPayment(String bookingID) {
         String sql = "{CALL SP_REFUND_PAYMENT(?)}";
         try (Connection conn = DBConnection.getConnection();
@@ -140,5 +154,31 @@ public class BookingHistoryDAO {
             e.printStackTrace();
         }
         return 0; // Không tìm thấy hoặc đã quá hạn
+    }
+
+    public List<dto.MyFlightPassengerDTO> getPassengersByBooking(String bookingID) {
+        List<dto.MyFlightPassengerDTO> list = new ArrayList<>();
+        String sql = "{call SP_GET_BOOKING_TICKETS(?, ?)}";
+        try (Connection conn = DBConnection.getConnection();
+             java.sql.CallableStatement cst = conn.prepareCall(sql)) {
+            cst.setString(1, bookingID);
+            cst.registerOutParameter(2, java.sql.Types.REF_CURSOR);
+            cst.execute();
+            try (ResultSet rs = (ResultSet) cst.getObject(2)) {
+                while (rs.next()) {
+                    dto.MyFlightPassengerDTO dto = new dto.MyFlightPassengerDTO();
+                    dto.setFullName(rs.getString("FullName"));
+                    dto.setPassportNumber(rs.getString("PassportNumber"));
+                    dto.setSeatNumber(rs.getString("SeatNumber"));
+                    dto.setDateOfBirth(rs.getDate("DateOfBirth"));
+                    dto.setFlightNumber(rs.getString("FlightNumber"));
+                    dto.setRoute(rs.getString("Route"));
+                    list.add(dto);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

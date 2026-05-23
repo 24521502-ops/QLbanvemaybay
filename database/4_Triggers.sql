@@ -187,7 +187,7 @@ BEGIN
     WHERE BookingID = :NEW.BookingID;
 
     -- Kiểm tra số tiền thanh toán
-    IF :NEW.Amount > v_TotalAmount THEN
+    IF NVL(:NEW.PaymentStatus, 'SUCCESS') != 'REFUNDED' AND :NEW.Amount > v_TotalAmount THEN
         RAISE_APPLICATION_ERROR(-20005, 'RB60: Lỗi! Số tiền thanh toán (' || :NEW.Amount || ') không được vượt quá tổng tiền của Booking (' || v_TotalAmount || ').');
     END IF;
 END;
