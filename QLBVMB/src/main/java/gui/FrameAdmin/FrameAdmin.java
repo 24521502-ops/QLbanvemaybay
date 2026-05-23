@@ -358,14 +358,20 @@ public class FrameAdmin extends JFrame {
     }
 
     private void selectDefaultMenu(JPanel menuPanel) {
+        JButton firstBtn = null;
         for (Component c : menuPanel.getComponents()) {
             if (c instanceof JButton btn) {
+                if (firstBtn == null) firstBtn = btn;
                 if ("Dashboard".equals(btn.getText().trim())) {
                     setSelectedButton(btn);
                     onMenuClicked("Dashboard");
-                    break;
+                    return;
                 }
             }
+        }
+        if (firstBtn != null) {
+            setSelectedButton(firstBtn);
+            onMenuClicked(firstBtn.getText().trim());
         }
     }
 
@@ -391,10 +397,11 @@ public class FrameAdmin extends JFrame {
                 }
             }
             else if ("STAFF_GROUP".equals(role)) {
-                // NHÂN VIÊN: Chỉ thấy 5 module nghiệp vụ
+                // NHÂN VIÊN: Chỉ thấy các module nghiệp vụ
                 if (!"Nhân viên".equals(menuText) && 
                     !"Phân quyền".equals(menuText) && 
-                    !"Dữ liệu gốc".equals(menuText)) {
+                    !"Dữ liệu gốc".equals(menuText) &&
+                    !"Dashboard".equals(menuText)) {
                     list.add(item);
                 }
             } 
