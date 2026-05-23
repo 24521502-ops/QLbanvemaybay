@@ -21,7 +21,7 @@ SELECT
                        WHEN 'Business' THEN 'Bus'
                        WHEN 'Premium Economy' THEN 'Prem'
                        WHEN 'Economy' THEN 'Eco'
-                   END || ':</b> <font color="blue">' || TO_CHAR(Price, 'FM999,999,999,999') || 'đ</font>', 
+                   END || ':</b> <font color="#333333"><b>' || TO_CHAR(Price, 'FM999,999,999,999') || 'đ</b></font>', 
                    '<br>'
                ) WITHIN GROUP (ORDER BY 
                    CASE Class 
