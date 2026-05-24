@@ -221,7 +221,9 @@ public class SeatSelectionPanel extends JPanel {
         scroll.setBorder(null);
         scroll.setOpaque(false);
         scroll.getViewport().setOpaque(false);
-        p.add(scroll);
+        scroll.getVerticalScrollBar().setUnitIncrement(16); // Fix scroll speed
+        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        p.add(scroll, "grow, pushy"); // Fix layout constraint so it takes up available space
 
         return p;
     }
