@@ -976,3 +976,24 @@ BEGIN
         WHERE t.BookingID = p_booking_id;
 END SP_GET_BOOKING_TICKETS;
 /
+
+
+
+
+--Lost Update
+CREATE OR REPLACE PROCEDURE SP_UPDATE_PRICE_DELAY (
+    p_FlightID IN VARCHAR2,
+    p_Class IN VARCHAR2,
+    p_Price IN NUMBER
+) AS
+BEGIN
+    -- Ép hệ thống chờ 5 giây
+    -- (Nếu Oracle bản cũ báo lỗi dòng này, hãy đổi thành DBMS_LOCK.SLEEP(5); )
+    DBMS_SESSION.SLEEP(10); 
+
+    -- Cập nhật giá
+    UPDATE SEATCLASSPRICE
+    SET Price = p_Price
+    WHERE FlightID = p_FlightID AND Class = p_Class;
+END;
+/
