@@ -131,13 +131,32 @@ public class ChuyenBayDAO {
     public boolean capNhatGiaChuyenBay(String flightID, double priceEco, double priceBus, double pricePrem, double priceFirst) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
+            
+            // 1. SET MỨC CÔ LẬP THEO YÊU CẦU CỦA CÔ
+            // Dùng READ_COMMITTED để thấy lỗi Lost Update
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED); 
+            // Khi muốn demo cách KHẮC PHỤC, bạn comment dòng trên lại và mở dòng dưới ra:
+            // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
             updateOrInsertPrice(conn, flightID, "Economy", priceEco);
             updateOrInsertPrice(conn, flightID, "Business", priceBus);
             updateOrInsertPrice(conn, flightID, "Premium Economy", pricePrem);
             updateOrInsertPrice(conn, flightID, "First Class", priceFirst);
+            
+            // 2. TẠM DỪNG 10 GIÂY ĐỂ DEMO
+            // Trong 10 giây này, bạn nhanh tay sang cửa sổ thứ 2 bấm "Lưu" để tạo ra đụng độ (concurrency)
+            System.out.println(">>> Đang treo transaction 10s. Bạn hãy qua cửa sổ thứ 2 bấm Lưu đi!!!");
+            try {
+                Thread.sleep(10000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+
             conn.commit();
+            System.out.println(">>> Đã commit thành công!");
             return true;
         } catch (SQLException e) {
+            System.err.println(">>> LỖI DATABASE (Có thể do đụng độ Transaction): " + e.getMessage());
             e.printStackTrace();
             return false;
         }
