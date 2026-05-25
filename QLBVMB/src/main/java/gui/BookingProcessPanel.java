@@ -28,6 +28,8 @@ public class BookingProcessPanel extends JPanel {
     private String currentBookingID;
     private Timer checkoutTimer;
     private int remainingSeconds = 1200; // 20 minutes
+    private int reloadCounter = 0;
+    private double currentTotalAmount = 0;
 
     // Selection State
     private dto.FlightSearchResultDTO selectedFlight;
@@ -314,6 +316,7 @@ public class BookingProcessPanel extends JPanel {
         double basePrice = getBasePrice();
         // Thuế phí = 10% giá vé
         double total = (basePrice * selectedSeats.size()) * 1.10;
+        this.currentTotalAmount = total;
 
         // Giữ ghế và gộp hóa đơn trong DB khi bắt đầu sang bước Thanh toán
         if (this.currentBookingID == null) {
@@ -342,7 +345,12 @@ public class BookingProcessPanel extends JPanel {
 
         this.selectedFlight = selectedFlights.get(0);
         this.selectedClass = selectedClasses.get(0);
-        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total);
+        
+        // Đọc giá tiền thực tế đã tính toán từ database để demo chính xác lỗi Non-repeatable Read
+        double dbTotal = bookingDAO.getBookingTotalFromDB(currentBookingID);
+        java.util.Map<String, Double> dbBasePrices = bookingDAO.getTicketBasePricesByFlight(currentBookingID);
+        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, dbTotal > 0 ? dbTotal : total, dbBasePrices);
+        
         showStep(3); // Hiện màn hình thanh toán (STEP_4)
     }
 
@@ -375,6 +383,7 @@ public class BookingProcessPanel extends JPanel {
     private void startCountdown() {
         stopTimer();
         remainingSeconds = 1200; // 20 phút
+        reloadCounter = 0;
 
         checkoutTimer = new Timer(1000, e -> {
             remainingSeconds--;
@@ -382,9 +391,24 @@ public class BookingProcessPanel extends JPanel {
                 handleTimeout();
             } else {
                 updateTimerDisplay();
+                
+                // Tải lại dữ liệu mỗi 5 giây để cập nhật giá vé mới từ DB
+                reloadCounter++;
+                if (reloadCounter >= 5) {
+                    reloadCounter = 0;
+                    reloadPaymentData();
+                }
             }
         });
         checkoutTimer.start();
+    }
+
+    private void reloadPaymentData() {
+        if (currentBookingID != null) {
+            double dbTotal = bookingDAO.getBookingTotalFromDB(currentBookingID);
+            java.util.Map<String, Double> dbBasePrices = bookingDAO.getTicketBasePricesByFlight(currentBookingID);
+            paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, dbTotal > 0 ? dbTotal : currentTotalAmount, dbBasePrices);
+        }
     }
 
     private void updateTimerDisplay() {

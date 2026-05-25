@@ -345,7 +345,7 @@ public class PaymentPanel extends JPanel {
     }
 
     public void updateDataMulti(List<dto.FlightSearchResultDTO> flights, List<String> seatClasses,
-            List<List<String>> multiSeats, double totalAmount) {
+            List<List<String>> multiSeats, double totalAmount, java.util.Map<String, Double> dbBasePrices) {
         if (flights == null || flights.isEmpty())
             return;
         this.currentTotal = totalAmount;
@@ -391,10 +391,14 @@ public class PaymentPanel extends JPanel {
             dto.FlightSearchResultDTO flight = flights.get(i);
             String seatClass = seatClasses.get(i);
             double baseP = 0;
-            for (dto.FlightSearchResultDTO.SeatClassInfo sc : flight.getSeatClasses()) {
-                if (sc.getClassName().equalsIgnoreCase(seatClass)) {
-                    baseP = sc.getPrice() * passCount;
-                    break;
+            if (dbBasePrices != null && dbBasePrices.containsKey(flight.getFlightID())) {
+                baseP = dbBasePrices.get(flight.getFlightID());
+            } else {
+                for (dto.FlightSearchResultDTO.SeatClassInfo sc : flight.getSeatClasses()) {
+                    if (sc.getClassName().equalsIgnoreCase(seatClass)) {
+                        baseP = sc.getPrice() * passCount;
+                        break;
+                    }
                 }
             }
             String prefix = flights.size() > 1 ? "Chặng " + (i + 1) + " - " : "";

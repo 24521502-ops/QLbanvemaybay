@@ -22,6 +22,10 @@ public class BookingProcessDAO {
             // Bước 1: Tắt Auto-Commit để tự quản lý Transaction
             conn.setAutoCommit(false);
 
+            // 🛡️ [CÁCH 1]: BẬT DÒNG DƯỚI ĐỂ THIẾT LẬP MỨC CÔ LẬP SERIALIZABLE (ĐỂ SỬA LỖI
+            // NON-REPEATABLE READ)
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
             // Bước 2: Xử lý hành khách bằng Stored Procedure
             List<String> passengerIds = new ArrayList<>();
             if (passengers != null && !passengers.isEmpty()) {
@@ -113,8 +117,10 @@ public class BookingProcessDAO {
             return null;
         } finally {
             try {
-                if (conn != null)
+                if (conn != null) {
+                    conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                     conn.setAutoCommit(true);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -132,6 +138,10 @@ public class BookingProcessDAO {
 
         try {
             conn.setAutoCommit(false);
+
+            // 🛡️ [CÁCH 1]: BẬT DÒNG DƯỚI ĐỂ THIẾT LẬP MỨC CÔ LẬP SERIALIZABLE (ĐỂ SỬA LỖI
+            // NON-REPEATABLE READ)
+            // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
             // 1. Xử lý hành khách bằng Stored Procedure
             List<String> passengerIds = new ArrayList<>();
@@ -206,6 +216,27 @@ public class BookingProcessDAO {
                 cstRecalc.execute();
             }
 
+            /*
+             * =========================================================================
+             * [KHỐI DEMO KHÓA - BẬT DÒNG NÀY ĐỂ THẤY ADMIN BỊ BLOCK KHI UPDATE GIÁ]
+             * =========================================================================
+             * 
+             * Nếu bạn muốn demo cho giáo viên thấy Admin bị block khi sửa giá lúc khách
+             * hàng đang đặt vé:
+             * Hãy bỏ dấu comment (//) ở dòng JOptionPane dưới. Khi bấm thanh toán, một
+             * thông báo sẽ hiện ra
+             * và giữ giao dịch mở. Trong lúc thông báo này đang hiện, bạn sang DBeaver chạy
+             * lệnh UPDATE.
+             * Bạn sẽ thấy DBeaver bị treo (chờ khóa). Khi bấm "OK" trên thông báo này, giao
+             * dịch Java sẽ commit
+             * và giải phóng khóa, giúp DBeaver lập tức chạy xong!
+             */
+            javax.swing.JOptionPane.showMessageDialog(null,
+                    "[DEMO] Đang giữ khóa FOR UPDATE. Hãy sang DBeaver/SQL Client chạy lệnh:\n" +
+                    "  UPDATE SEATCLASSPRICE SET Price = 999 WHERE ...\n" +
+                    "Bạn sẽ thấy SQL bị TREO (chờ khóa).\nNhấn OK để Commit và giải phóng khóa.");
+            /* ========================================================================= */
+
             conn.commit();
             return bookingID;
 
@@ -235,7 +266,32 @@ public class BookingProcessDAO {
         }
     }
 
-    private double getLegPriceFromDB(Connection conn, String flightID, String seatClass) {
+    private double getLegPriceFromDB(Connection conn, String flightID, String seatClass) throws SQLException {
+        /*
+         * =========================================================================
+         * [KHUNG DEMO VÀ KHẮC PHỤC LỖI CONCURRENCY: NON-REPEATABLE READ]
+         * =========================================================================
+         * 
+         * 🛡️ TRẠNG THÁI 1: BẬT MÃ NÀY ĐỂ KHẮC PHỤC LỖI (Sử dụng khóa FOR UPDATE)
+         * (Để kích hoạt sửa lỗi, hãy xóa dấu chú thích /* và * / ở khối dưới)
+         */
+
+        String lockSql = "SELECT Price FROM SEATCLASSPRICE WHERE FlightID = ? AND Class = ? FOR UPDATE";
+        try (PreparedStatement lockPst = conn.prepareStatement(lockSql)) {
+            lockPst.setString(1, flightID);
+            lockPst.setString(2, seatClass);
+            try (ResultSet lockRs = lockPst.executeQuery()) {
+                if (!lockRs.next()) {
+                    throw new SQLException(
+                            "Không tìm thấy cấu hình giá vé cho chuyến bay: " + flightID + ", hạng: " + seatClass);
+                }
+            }
+        }
+
+        /*
+         * 💥 TRẠNG THÁI 2: CHẠY KHÔNG KHÓA ĐỂ DEMO LỖI (Đang kích hoạt mặc định)
+         * (Khối này sẽ truy vấn trực tiếp giá động từ DUAL mà không khóa dòng)
+         */
         String sql = "SELECT FUNC_GET_DYNAMIC_PRICE(?, ?) AS Price FROM DUAL";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, flightID);
@@ -245,10 +301,9 @@ public class BookingProcessDAO {
                     return rs.getDouble("Price");
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-        return 1200000; // Mặc định nếu xảy ra sự cố
+        throw new SQLException("Lỗi khi lấy giá vé từ cơ sở dữ liệu.");
+        /* ========================================================================= */
     }
 
     /**
@@ -354,10 +409,46 @@ public class BookingProcessDAO {
             return false;
         } finally {
             try {
-                if (conn != null)
+                if (conn != null) {
+                    conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                     conn.setAutoCommit(true);
+                }
             } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
+    }
+
+    public double getBookingTotalFromDB(String bookingID) {
+        String sql = "SELECT TotalAmount FROM BOOKING WHERE BookingID = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TotalAmount");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public java.util.Map<String, Double> getTicketBasePricesByFlight(String bookingID) {
+        java.util.Map<String, Double> map = new java.util.HashMap<>();
+        String sql = "SELECT FlightID, SUM(Price) as TotalBasePrice FROM TICKET WHERE BookingID = ? AND TicketStatus != 'CANCELLED' GROUP BY FlightID";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    map.put(rs.getString("FlightID"), rs.getDouble("TotalBasePrice"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 }
