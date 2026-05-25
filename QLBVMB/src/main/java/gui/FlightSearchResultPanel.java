@@ -484,7 +484,12 @@ public class FlightSearchResultPanel extends JPanel {
 
         JPanel mid = new JPanel(new MigLayout("wrap, insets 0, fillx, gapy 4", "[grow, center]"));
         mid.setOpaque(false);
-        JLabel lblDur = new JLabel("2h 15m"); // Sample duration
+        
+        long diff = f.getArrivalTime().getTime() - f.getDepartureTime().getTime();
+        long hours = diff / (3600 * 1000);
+        long minutes = (diff % (3600 * 1000)) / (60 * 1000);
+        String durationStr = hours + "h " + minutes + "m";
+        JLabel lblDur = new JLabel(durationStr);
         lblDur.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblDur.setForeground(TEXT_GRAY);
         JLabel lblLine = new JLabel("<html>- - - - - - -  <font face='Segoe UI Emoji'>🛫</font>  - - - - - - -</html>"); // Sử
