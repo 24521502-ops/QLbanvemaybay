@@ -39,7 +39,7 @@ public class BookingSuccessPanel extends JPanel {
         content.add(lblSub, "gapy 0 10");
 
         // Booking ID Card
-        lblBookingID = new JLabel("BK-888888");
+        lblBookingID = new JLabel("-");
         lblBookingID.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblBookingID.setForeground(new Color(11, 28, 48));
         JPanel idCard = new JPanel(new MigLayout("insets 16 32"));
@@ -58,15 +58,15 @@ public class BookingSuccessPanel extends JPanel {
         lblInfoTitle.setFont(new Font("Segoe UI", Font.BOLD, 16));
         infoCard.add(lblInfoTitle, "gapy 0 10");
 
-        lblRoute = new JLabel("Hà Nội (HAN)  🛫  TP. Hồ Chí Minh (SGN)");
+        lblRoute = new JLabel("-");
         lblRoute.setFont(new Font("Segoe UI", Font.BOLD, 14));
         infoCard.add(lblRoute);
 
-        lblTime = new JLabel("Thứ 6, 25 Thg 10 • 08:00 - 10:15");
+        lblTime = new JLabel("-");
         lblTime.setForeground(new Color(100, 116, 139));
         infoCard.add(lblTime, "gapy 0 8");
 
-        lblSeats = new JLabel("Số ghế: 12A, 12B");
+        lblSeats = new JLabel("-");
         lblSeats.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         infoCard.add(lblSeats);
 
