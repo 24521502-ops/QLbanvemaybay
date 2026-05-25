@@ -72,24 +72,21 @@ public class BookingHomePanel extends JPanel {
         try {
             BookingAirportDAO dao = new BookingAirportDAO();
             airportList = dao.getAllAirportsForDisplay();
-            // Nếu DB trả về rỗng, vẫn thêm dữ liệu mẫu để app chạy được
             if (airportList == null || airportList.isEmpty()) {
-                addDefaultAirports();
+                airportList = new ArrayList<>();
+                JOptionPane.showMessageDialog(null, 
+                    "Không thể tải danh sách sân bay từ Cơ sở dữ liệu.\nVui lòng kiểm tra kết nối Database!", 
+                    "Lỗi Kết Nối CSDL", 
+                    JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
-            addDefaultAirports();
+            airportList = new ArrayList<>();
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, 
+                "Lỗi kết nối cơ sở dữ liệu: " + e.getMessage(), 
+                "Lỗi Kết Nối CSDL", 
+                JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    private void addDefaultAirports() {
-        airportList = new ArrayList<>();
-        airportList.add("Hà Nội (HAN)");
-        airportList.add("Hồ Chí Minh (SGN)");
-        airportList.add("Đà Nẵng (DAD)");
-        airportList.add("Tokyo (HND)");
-        airportList.add("New York (JFK)");
-        airportList.add("Paris (CDG)");
-        airportList.add("London (LHR)");
     }
 
     private void initComponents() {
