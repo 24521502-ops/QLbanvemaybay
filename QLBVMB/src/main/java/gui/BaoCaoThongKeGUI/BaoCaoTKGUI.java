@@ -220,12 +220,16 @@ public class BaoCaoTKGUI extends JPanel {
         JPanel botRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         botRow.setOpaque(false);
 
+        JButton btnExport = mkBtn("Xuất CSV", GREEN, Color.WHITE);
+        btnExport.addActionListener(e -> exportToCSV());
+
         JButton btnRefresh = mkBtn("Làm mới", new Color(0xF3F4F6), DARK);
         btnRefresh.addActionListener(e -> loadData());
 
         JButton btn = mkBtn("Áp dụng", Color.BLACK, Color.WHITE);
         btn.addActionListener(e -> loadData());
 
+        botRow.add(btnExport);
         botRow.add(btnRefresh);
         botRow.add(btn);
 
@@ -510,6 +514,66 @@ public class BaoCaoTKGUI extends JPanel {
                 }
             }
         }.execute();
+    }
+
+    private void exportToCSV() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn nơi lưu báo cáo thống kê");
+        int userSelection = fileChooser.showSaveDialog(this);
+        
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            java.io.File fileToSave = fileChooser.getSelectedFile();
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.endsWith(".csv")) {
+                filePath += ".csv";
+            }
+            
+            try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(filePath), java.nio.charset.StandardCharsets.UTF_8))) {
+                writer.write('\ufeff'); // Ký tự BOM để Excel nhận dạng tiếng Việt có dấu
+                
+                writer.println("BÁO CÁO THỐNG KÊ DOANH THU");
+                writer.println("Từ ngày:," + txtTuNgay.getText() + ",Đến ngày:," + txtDenNgay.getText());
+                writer.println("Hãng bay:," + cboHangBay.getSelectedItem().toString());
+                writer.println();
+                
+                writer.println("--- TỔNG QUAN ---");
+                writer.println("Tổng doanh thu,\"" + lblDT.getText() + "\"");
+                writer.println("Tổng số đặt chỗ,\"" + lblDC.getText() + "\"");
+                writer.println("Chuyến bay hoàn thành,\"" + lblCB.getText() + "\"");
+                writer.println("Tỷ lệ lấp đầy,\"" + lblOcc.getText() + "\"");
+                writer.println();
+                
+                writer.println("--- DOANH THU THEO THÁNG ---");
+                writer.println("Tháng,Doanh Thu");
+                for (int i = 0; i < trendData.length; i++) {
+                    writer.println("Tháng " + (i + 1) + "," + String.format(Locale.US, "%.0f", trendData[i]));
+                }
+                writer.println();
+                
+                writer.println("--- TRẠNG THÁI BOOKING ---");
+                writer.println("Trạng Thái,Số Lượng");
+                if (hangData != null) {
+                    for (Object[] row : hangData) {
+                        writer.println("\"" + row[0] + "\"," + row[1]);
+                    }
+                }
+                writer.println();
+                
+                writer.println("--- DOANH THU THEO HẠNG GHẾ ---");
+                writer.println("Hạng Ghế,Doanh Thu");
+                if (revByClassData != null) {
+                    for (Object[] row : revByClassData) {
+                        writer.println("\"" + row[0] + "\",\"" + String.format(Locale.US, "%.0f", ((Number)row[1]).doubleValue()) + "\"");
+                    }
+                }
+                
+                JOptionPane.showMessageDialog(this, "Xuất báo cáo thành công!\n" + filePath, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Lỗi khi lưu file: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
 
     // ══════════════════════════════════════════════════════════
