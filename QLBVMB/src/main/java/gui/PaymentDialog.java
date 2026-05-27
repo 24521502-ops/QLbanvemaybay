@@ -90,14 +90,21 @@ public class PaymentDialog extends JDialog {
         root.add(topHeader, BorderLayout.NORTH);
 
         // ===== SPLIT CONTENT =====
-        JPanel splitContent = new JPanel(new MigLayout(
+        ScrollablePanel splitContent = new ScrollablePanel(new MigLayout(
                 "insets 16 28 24 28, fill, gapx 24", "[300!] [grow, fill]", "[grow, fill]"));
         splitContent.setBackground(BG_PAGE);
 
         splitContent.add(createSummaryPanel(), "growy");
         splitContent.add(createPaymentForm(), "grow");
 
-        root.add(splitContent, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(splitContent);
+        scrollPane.setBorder(null);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(20);
+
+        root.add(scrollPane, BorderLayout.CENTER);
         setContentPane(root);
     }
 
@@ -336,7 +343,7 @@ public class PaymentDialog extends JDialog {
             loadingDialog.dispose();
             stopTimer();
             isPaid = true;
-            finalPaymentMethod = "MOMO".equals(selectedMethod) ? "MOMO" : "MB BANK";
+            finalPaymentMethod = "MOMO".equals(selectedMethod) ? "MOMO" : "BANK TRANSFER";
 
             // Bước 4: Thông báo thành công (y hệt PaymentPanel)
             JOptionPane.showMessageDialog(this,
@@ -375,5 +382,36 @@ public class PaymentDialog extends JDialog {
     private void stopTimer() {
         if (countdownTimer != null)
             countdownTimer.stop();
+    }
+
+    private static class ScrollablePanel extends JPanel implements Scrollable {
+        public ScrollablePanel(LayoutManager layout) {
+            super(layout);
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 20;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+            return 50;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 }

@@ -25,8 +25,15 @@ public class BookingHistoryBUS {
         boolean bUpdated = dao.updateBookingStatus(bookingID, "CONFIRMED");
         if (bUpdated) {
             dao.updateTicketsStatus(bookingID, "PAID");
-            dao.insertPayment(bookingID, amount, paymentMethod);
-            return true;
+            boolean pInserted = dao.insertPayment(bookingID, amount, paymentMethod);
+            if (pInserted) {
+                return true;
+            } else {
+                // Rollback status if payment registration fails
+                dao.updateBookingStatus(bookingID, "PENDING");
+                dao.updateTicketsStatus(bookingID, "BOOKED");
+                return false;
+            }
         }
         return false;
     }
@@ -41,5 +48,13 @@ public class BookingHistoryBUS {
 
     public List<dto.MyFlightPassengerDTO> getPassengersByBooking(String bookingID) {
         return dao.getPassengersByBooking(bookingID);
+    }
+
+    public double getRefundAmountPreview(String bookingID) {
+        return dao.getRefundAmountPreview(bookingID);
+    }
+
+    public double getOriginalTotalAmount(String bookingID) {
+        return dao.getOriginalTotalAmount(bookingID);
     }
 }
