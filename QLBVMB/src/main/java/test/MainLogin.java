@@ -1,4 +1,4 @@
-package text;
+package test;
 
 import gui.LoginRegesterGUI.loginGUI;
 
@@ -9,7 +9,7 @@ import javax.swing.*;
  *
  * @author Trần Minh Quyền
  */
-public class mainlogin {
+public class MainLogin {
 
     public static void main(String[] args) {
         // Áp dụng FlatLaf để hỗ trợ placeholderText, leadingIcon, roundRect...
