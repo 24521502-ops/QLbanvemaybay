@@ -36,7 +36,7 @@ public class ChuyenBayDAO {
 //        
 //        try(Connection conn = DBConnection.getConnection()) {
 //            conn.setAutoCommit(false);
-//            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+//            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 //            
 //            int cnt1 = 0;
 //            try(PreparedStatement psCnt1 = conn.prepareStatement(cntSql);
@@ -77,7 +77,7 @@ public class ChuyenBayDAO {
 //        }
 //        return list;
 //    }
-
+//
     // LẤY CHI TIẾT 1 CHUYẾN BAY ĐỂ ĐỔ LÊN FORM SỬA
     public Object[] layChiTietChuyenBay(String flightID) {
         String sql = "SELECT f.FlightNumber, f.AirlineID, f.AircraftID, r.DepartureAirportID, r.ArrivalAirportID, f.DepartureTime, f.ArrivalTime, f.Gate "
@@ -184,6 +184,7 @@ public class ChuyenBayDAO {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             //conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+           // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             updateOrInsertPrice(conn, flightID, "Economy", priceEco);
             updateOrInsertPrice(conn, flightID, "Business", priceBus);
             updateOrInsertPrice(conn, flightID, "Premium Economy", pricePrem);
@@ -192,13 +193,12 @@ public class ChuyenBayDAO {
             //try {
             //Thread.sleep(10000);
         //} catch (InterruptedException ex) {
-          //  ex.printStackTrace();
+         //   ex.printStackTrace();
         //}
-            
-            conn.commit();
+            //conn.commit();
             return true;
         } catch (SQLException e) {
-            //System.err.println("Lỗi giao dịch: " + e.getMessage());
+           // System.err.println("Lỗi giao dịch: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

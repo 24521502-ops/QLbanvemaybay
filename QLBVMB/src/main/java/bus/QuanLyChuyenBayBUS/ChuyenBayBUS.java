@@ -9,7 +9,12 @@ public class ChuyenBayBUS {
     private ChuyenBayDAO chuyenBayDAO = new ChuyenBayDAO();
 
     public List<Object[]> layDanhSachChuyenBay() {
-        return chuyenBayDAO.layDanhSachChuyenBay();
+        try {
+            return chuyenBayDAO.layDanhSachChuyenBay();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new java.util.ArrayList<>();
+        }
     }
 
     public boolean huyChuyenBay(String flightID) {
