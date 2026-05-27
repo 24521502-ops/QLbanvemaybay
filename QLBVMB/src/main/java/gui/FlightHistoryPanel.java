@@ -218,34 +218,77 @@ public class FlightHistoryPanel extends JPanel {
         passengersContainer.setBackground(new Color(250, 250, 249));
 
         // Receipt Box
-        JPanel receiptBox = new JPanel(new MigLayout("fillx, insets 15 20 15 20", "[grow][]", "[][][]"));
+        JPanel receiptBox = new JPanel(new MigLayout("fillx, insets 15 20 15 20", "[grow][]", ""));
         receiptBox.setBackground(Color.WHITE);
         receiptBox.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER));
         
         JLabel lblReceiptTitle = new JLabel("Chi tiết Hóa đơn");
         lblReceiptTitle.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lblReceiptTitle.setForeground(TEXT_DARK);
-        
-        String itemName = "CANCELLED".equals(rawStatus) ? "Phí phạt hủy vé" : "Tiền vé";
-        JLabel lblItem1 = new JLabel(itemName + " (" + booking.getTicketCount() + " hành khách)");
-        lblItem1.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblItem1.setForeground(TEXT_DARK);
-        JLabel lblItem1Val = new JLabel(moneyFmt.format(booking.getTotalAmount()));
-        lblItem1Val.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        
-        JLabel lblTotalText = new JLabel("Tổng cộng");
-        lblTotalText.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblTotalText.setForeground(TEXT_DARK);
-        JLabel lblTotalVal = new JLabel(moneyFmt.format(booking.getTotalAmount()));
-        lblTotalVal.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        lblTotalVal.setForeground(TEXT_DARK);
-        
         receiptBox.add(lblReceiptTitle, "span 2, wrap, gapbottom 10");
-        receiptBox.add(lblItem1, "growx");
-        receiptBox.add(lblItem1Val, "wrap");
-        receiptBox.add(new JSeparator(), "span 2, growx, gapy 10 10, wrap");
-        receiptBox.add(lblTotalText, "growx");
-        receiptBox.add(lblTotalVal, "wrap");
+
+        if ("CANCELLED".equals(rawStatus)) {
+            double originalTotal = historyBUS.getOriginalTotalAmount(booking.getBookingID());
+            double refundAmount = Math.max(0, originalTotal - booking.getTotalAmount());
+            
+            JLabel lblOrig = new JLabel("Tiền vé ban đầu (" + booking.getTicketCount() + " hành khách)");
+            lblOrig.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblOrig.setForeground(TEXT_DARK);
+            JLabel lblOrigVal = new JLabel(moneyFmt.format(originalTotal));
+            lblOrigVal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            
+            JLabel lblRef = new JLabel("Đã hoàn lại (thành công)");
+            lblRef.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblRef.setForeground(GREEN_TEXT);
+            JLabel lblRefVal = new JLabel("-" + moneyFmt.format(refundAmount));
+            lblRefVal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblRefVal.setForeground(GREEN_TEXT);
+            
+            JLabel lblFee = new JLabel("Phí phạt hủy vé (khấu trừ)");
+            lblFee.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblFee.setForeground(RED_TEXT);
+            JLabel lblFeeVal = new JLabel(moneyFmt.format(booking.getTotalAmount()));
+            lblFeeVal.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblFeeVal.setForeground(RED_TEXT);
+            
+            JLabel lblTotalText = new JLabel("Tổng chi phí thực tế");
+            lblTotalText.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            lblTotalText.setForeground(TEXT_DARK);
+            JLabel lblTotalVal = new JLabel(moneyFmt.format(booking.getTotalAmount()));
+            lblTotalVal.setFont(new Font("Segoe UI", Font.BOLD, 15));
+            lblTotalVal.setForeground(TEXT_DARK);
+            
+            receiptBox.add(lblOrig, "growx");
+            receiptBox.add(lblOrigVal, "wrap, gapbottom 4");
+            receiptBox.add(lblRef, "growx");
+            receiptBox.add(lblRefVal, "wrap, gapbottom 4");
+            receiptBox.add(lblFee, "growx");
+            receiptBox.add(lblFeeVal, "wrap");
+            
+            receiptBox.add(new JSeparator(), "span 2, growx, gapy 10 10, wrap");
+            
+            receiptBox.add(lblTotalText, "growx");
+            receiptBox.add(lblTotalVal, "wrap");
+        } else {
+            JLabel lblItem1 = new JLabel("Tiền vé (" + booking.getTicketCount() + " hành khách)");
+            lblItem1.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            lblItem1.setForeground(TEXT_DARK);
+            JLabel lblItem1Val = new JLabel(moneyFmt.format(booking.getTotalAmount()));
+            lblItem1Val.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            
+            JLabel lblTotalText = new JLabel("Tổng cộng");
+            lblTotalText.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            lblTotalText.setForeground(TEXT_DARK);
+            JLabel lblTotalVal = new JLabel(moneyFmt.format(booking.getTotalAmount()));
+            lblTotalVal.setFont(new Font("Segoe UI", Font.BOLD, 15));
+            lblTotalVal.setForeground(TEXT_DARK);
+            
+            receiptBox.add(lblItem1, "growx");
+            receiptBox.add(lblItem1Val, "wrap");
+            receiptBox.add(new JSeparator(), "span 2, growx, gapy 10 10, wrap");
+            receiptBox.add(lblTotalText, "growx");
+            receiptBox.add(lblTotalVal, "wrap");
+        }
 
         // Action Buttons Box
         JPanel actionBox = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 15));
@@ -311,18 +354,21 @@ public class FlightHistoryPanel extends JPanel {
                 actionBox.add(lblNote);
             } else {
                 JButton btnCancel = createOutlineButton("Hủy vé & Hoàn tiền", RED_TEXT);
-                final long finalHours = hoursToFlight;
                 btnCancel.addActionListener(e -> {
-                    String msg = "Bạn có chắc muốn hủy vé?\n";
-                    if (finalHours > 72) {
-                        msg += "Chuyến bay còn hơn 72 giờ, phí hủy là 10% giá vé (hoàn lại 90% số tiền).";
-                    } else {
-                        msg += "Chuyến bay còn từ 24 đến 72 giờ, phí hủy là 50% giá vé (hoàn lại 50% số tiền).";
-                    }
-                    int ans = JOptionPane.showConfirmDialog(this, msg, "Xác nhận", JOptionPane.YES_NO_OPTION);
+                    double refundAmount = historyBUS.getRefundAmountPreview(booking.getBookingID());
+                    double totalPaid = booking.getTotalAmount();
+                    double cancelFee = Math.max(0, totalPaid - refundAmount);
+                    
+                    String msg = "Bạn có chắc muốn hủy vé không?\n\n" +
+                                 "• Tổng tiền đã thanh toán: " + moneyFmt.format(totalPaid) + "\n" +
+                                 "• Số tiền sẽ hoàn lại: " + moneyFmt.format(refundAmount) + "\n" +
+                                 "• Phí hủy vé (khấu trừ): " + moneyFmt.format(cancelFee) + "\n\n" +
+                                 "(*) Tiền hoàn sẽ được tự động hoàn lại theo phương thức thanh toán ban đầu.";
+                    
+                    int ans = JOptionPane.showConfirmDialog(this, msg, "Xác nhận hủy vé & hoàn tiền", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                     if (ans == JOptionPane.YES_OPTION) {
                         if (historyBUS.cancelBooking(booking.getBookingID())) {
-                            JOptionPane.showMessageDialog(this, "Hủy vé thành công. Vui lòng kiểm tra email để nhận thông tin hoàn tiền.");
+                            JOptionPane.showMessageDialog(this, "Hủy vé thành công.\nSố tiền " + moneyFmt.format(refundAmount) + " đã được hoàn lại.");
                             loadHistory();
                         }
                     }

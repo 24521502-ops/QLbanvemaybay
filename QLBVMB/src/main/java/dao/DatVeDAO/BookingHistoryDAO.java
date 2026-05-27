@@ -181,4 +181,37 @@ public class BookingHistoryDAO {
         }
         return list;
     }
+
+    public double getRefundAmountPreview(String bookingID) {
+        String sql = "SELECT NVL(SUM(FUNC_CALCULATE_REFUND(TicketID)), 0) * 1.10 AS TotalRefund " +
+                     "FROM TICKET WHERE BookingID = ? AND TicketStatus != 'CANCELLED'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TotalRefund");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public double getOriginalTotalAmount(String bookingID) {
+        String sql = "SELECT NVL(SUM(Price), 0) * 1.10 AS OriginalTotal FROM TICKET WHERE BookingID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("OriginalTotal");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
