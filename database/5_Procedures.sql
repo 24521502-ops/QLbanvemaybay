@@ -286,9 +286,9 @@ BEGIN
     INSERT INTO CUSTOMER (AccountID, FullName, Phone, Email)
     VALUES (v_AccountID, p_FullName, p_Phone, p_Email);
 
-    -- Cấp quyền Khách Hàng (CUSTOMER_GROUP: RG01) mặc định
+    -- Cấp quyền Khách Hàng (CUSTOMER_GROUP: RG04) mặc định
     INSERT INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted)
-    VALUES (v_AccountID, 'RG01', 0);
+    VALUES (v_AccountID, 'RG04', 0);
 
     COMMIT;
 END;

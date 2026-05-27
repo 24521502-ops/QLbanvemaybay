@@ -229,6 +229,10 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 JOptionPane.showMessageDialog(this, "Không thể Delay một chuyến bay đã bị HỦY!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            if (status.contains("COMPLETED")) {
+                JOptionPane.showMessageDialog(this, "Không thể Delay chuyến bay đã HOÀN THÀNH!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             String id = table.getValueAt(row, 8).toString();
             String flightNum = table.getValueAt(row, 0).toString();
             String displayTime = table.getValueAt(row, 2).toString();
@@ -517,11 +521,14 @@ public class QuanLyChuyenBayPanel extends JPanel {
             try {
                 java.util.Date newTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(txtNewTime.getText());
                 if (chuyenBayBUS.delayChuyenBay(flightID, newTime)) {
+                    JOptionPane.showMessageDialog(dialog, "Đánh dấu Delay thành công!");
                     loadDataToTable();
                     dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(dialog, "Không thể Delay chuyến bay này!\nCó thể giờ bay mới không hợp lệ hoặc chuyến bay đã khởi hành.", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog, "Sai định dạng!");
+                JOptionPane.showMessageDialog(dialog, "Sai định dạng ngày giờ (yyyy-MM-dd HH:mm:ss)!", "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             }
         });
         footer.add(btnSave);
