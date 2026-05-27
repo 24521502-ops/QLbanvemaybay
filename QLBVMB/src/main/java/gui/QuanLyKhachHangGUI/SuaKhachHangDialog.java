@@ -111,11 +111,8 @@ public class SuaKhachHangDialog extends JDialog {
             return;
         }
         
-        // Kiểm tra trùng lặp nếu có nhập CCCD hoặc Email
-        String checkDup = customerBUS.kiemTraTrungLap(email.isEmpty() ? null : email, passportVal.isEmpty() ? null : passportVal);
-        // Lưu ý: hàm kiemTraTrungLap hiện tại quét toàn bảng, nên nếu giá trị chưa đổi nó vẫn báo trùng.
-        // Để làm chuẩn nhất ở mức Đồ án, ta ưu tiên gọi luôn hàm Update. Nếu CSDL bị lỗi Unique Constraint thì sẽ tự văng lỗi.
-
+        // Để làm chuẩn nhất ở mức Đồ án, ta ưu tiên gọi luôn hàm Update. 
+        // Nếu CSDL bị lỗi Unique Constraint thì sẽ tự văng lỗi.
         boolean success = customerBUS.suaKhachHang(cusID, phone, email, passportVal);
         if (success) {
             JOptionPane.showMessageDialog(this, "Đã cập nhật thông tin thành công!");
