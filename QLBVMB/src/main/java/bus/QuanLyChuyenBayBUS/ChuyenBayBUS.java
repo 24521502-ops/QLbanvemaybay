@@ -25,7 +25,8 @@ public class ChuyenBayBUS {
         return chuyenBayDAO.delayChuyenBay(flightID, newTime);
     }
 
-    public boolean themChuyenBay(FlightDTO flight, String depAirport, String arrAirport, double priceEco, double priceBus, double pricePrem, double priceFirst) {
+    public boolean themChuyenBay(FlightDTO flight, String depAirport, String arrAirport, double priceEco,
+            double priceBus, double pricePrem, double priceFirst) {
         if (flight.getFlightNumber() == null || flight.getFlightNumber().isEmpty())
             return false;
         return chuyenBayDAO.themChuyenBayUI(flight, depAirport, arrAirport, priceEco, priceBus, pricePrem, priceFirst);
@@ -43,7 +44,8 @@ public class ChuyenBayBUS {
     public boolean capNhatToanBoChuyenBay(String flightID, String flightNum, String airlineID, String aircraftID,
             String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate,
             double priceEco, double priceBus, double pricePrem, double priceFirst) {
-        boolean flightUpdated = chuyenBayDAO.capNhatToanBoChuyenBay(flightID, flightNum, airlineID, aircraftID, depAirport, arrAirport,
+        boolean flightUpdated = chuyenBayDAO.capNhatToanBoChuyenBay(flightID, flightNum, airlineID, aircraftID,
+                depAirport, arrAirport,
                 depTime, arrTime, gate);
         if (flightUpdated) {
             return chuyenBayDAO.capNhatGiaChuyenBay(flightID, priceEco, priceBus, pricePrem, priceFirst);

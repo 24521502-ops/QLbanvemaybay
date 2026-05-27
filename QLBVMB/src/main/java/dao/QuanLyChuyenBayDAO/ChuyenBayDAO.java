@@ -105,7 +105,7 @@ public class ChuyenBayDAO {
             String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate) {
         String sql = "{CALL SP_UPDATE_FLIGHT_FULL(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
-          CallableStatement cs = conn.prepareCall(sql)) {
+                CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, flightID);
             cs.setString(2, flightNum);
             cs.setString(3, airlineID);
@@ -146,7 +146,8 @@ public class ChuyenBayDAO {
         }
     }
 
-    private boolean insertBasePrice(Connection conn, String flightID, String seatClass, double price) throws SQLException {
+    private boolean insertBasePrice(Connection conn, String flightID, String seatClass, double price)
+            throws SQLException {
         String sql = "INSERT INTO SEATCLASSPRICE (PriceID, FlightID, Class, Price) VALUES (?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "PR" + java.util.UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -168,10 +169,18 @@ public class ChuyenBayDAO {
                 String seatClass = rs.getString("Class");
                 double price = rs.getDouble("Price");
                 switch (seatClass) {
-                    case "Economy": prices[0] = price; break;
-                    case "Business": prices[1] = price; break;
-                    case "Premium Economy": prices[2] = price; break;
-                    case "First Class": prices[3] = price; break;
+                    case "Economy":
+                        prices[0] = price;
+                        break;
+                    case "Business":
+                        prices[1] = price;
+                        break;
+                    case "Premium Economy":
+                        prices[2] = price;
+                        break;
+                    case "First Class":
+                        prices[3] = price;
+                        break;
                 }
             }
         } catch (SQLException e) {
@@ -180,7 +189,11 @@ public class ChuyenBayDAO {
         return prices;
     }
 
-    public boolean capNhatGiaChuyenBay(String flightID, double priceEco, double priceBus, double pricePrem, double priceFirst) {
+    // ================================ lost update
+    // ====================================
+
+    public boolean capNhatGiaChuyenBay(String flightID, double priceEco, double priceBus, double pricePrem,
+            double priceFirst) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
             //conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
@@ -204,7 +217,8 @@ public class ChuyenBayDAO {
         }
     }
 
-    private void updateOrInsertPrice(Connection conn, String flightID, String seatClass, double price) throws SQLException {
+    private void updateOrInsertPrice(Connection conn, String flightID, String seatClass, double price)
+            throws SQLException {
         String sqlUpdate = "UPDATE SEATCLASSPRICE SET Price = ? WHERE FlightID = ? AND Class = ?";
         try (PreparedStatement psUpdate = conn.prepareStatement(sqlUpdate)) {
             psUpdate.setDouble(1, price);
@@ -217,10 +231,11 @@ public class ChuyenBayDAO {
         }
     }
 
-    public boolean themChuyenBayUI(FlightDTO flight, String depAirport, String arrAirport, double priceEco, double priceBus, double pricePrem, double priceFirst) {
+    public boolean themChuyenBayUI(FlightDTO flight, String depAirport, String arrAirport, double priceEco,
+            double priceBus, double pricePrem, double priceFirst) {
         String sqlAdd = "{call SP_ADD_FLIGHT_UI(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         String sqlGetId = "SELECT FlightID FROM FLIGHT WHERE FlightNumber = ? AND DepartureTime = ? ORDER BY FlightID DESC";
-        
+
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false); // Bắt đầu transaction
             try (CallableStatement cs = conn.prepareCall(sqlAdd)) {
@@ -235,7 +250,7 @@ public class ChuyenBayDAO {
                 cs.setString(9, "SCHEDULED");
                 cs.execute();
             }
-            
+
             // Lấy ID vừa sinh
             String newFlightID = null;
             try (PreparedStatement ps = conn.prepareStatement(sqlGetId)) {
@@ -247,7 +262,7 @@ public class ChuyenBayDAO {
                     }
                 }
             }
-            
+
             // Chèn giá nền nếu lấy được ID
             if (newFlightID != null) {
                 insertBasePrice(conn, newFlightID, "Economy", priceEco);
@@ -255,7 +270,7 @@ public class ChuyenBayDAO {
                 insertBasePrice(conn, newFlightID, "Premium Economy", pricePrem);
                 insertBasePrice(conn, newFlightID, "First Class", priceFirst);
             }
-            
+
             conn.commit(); // Commit transaction
             return true;
         } catch (SQLException e) {
