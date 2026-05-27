@@ -26,62 +26,58 @@ public class ChuyenBayDAO {
         }
         return list;
     }
-
-    // =================== phantom read ====================
-
-    // public List<Object[]> layDanhSachChuyenBay() throws SQLException {
-    // List<Object[]> list = new ArrayList<>();
-    // String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime,
-    // AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
-    // String cntSql = "SELECT COUNT(*) AS Tong FROM FLIGHT";
-    //
-    // try(Connection conn = DBConnection.getConnection()) {
-    // conn.setAutoCommit(false);
-    // conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-    //
-    // int cnt1 = 0;
-    // try(PreparedStatement psCnt1 = conn.prepareStatement(cntSql);
-    // ResultSet rsCnt1 = psCnt1.executeQuery()) {
-    // if(rsCnt1.next()) cnt1 = rsCnt1.getInt("Tong");
-    // System.out.println("Lan doc 1: Tong so chuyen bay la: " + cnt1);
-    // }
-    //
-    // try {
-    // Thread.sleep(10000);
-    // } catch(InterruptedException e) {
-    // e.printStackTrace();
-    // }
-    //
-    // int cnt2 = 0;
-    // try(PreparedStatement psCnt2 = conn.prepareStatement(cntSql);
-    // ResultSet rsCnt2 = psCnt2.executeQuery()) {
-    // if(rsCnt2.next()) cnt2 = rsCnt2.getInt("Tong");
-    // System.out.println("Lan doc 2: Tong so chuyen bay la: " + cnt2);
-    // if(cnt1 != cnt2) System.out.println("Loi phantom read");
-    // else System.out.println("Loi da duoc sua nho dung SERIALIZABLE");
-    // }
-    //
-    // try (PreparedStatement ps = conn.prepareStatement(sql);
-    // ResultSet rs = ps.executeQuery()) {
-    // while (rs.next()) {
-    // list.add(new Object[] {
-    // rs.getString("FlightNumber"), rs.getString("Route_IATA"),
-    // rs.getTimestamp("DepartureTime"),
-    // rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"),
-    // rs.getString("Gate"),
-    // rs.getString("PricesHTML"), rs.getString("FlightStatus"),
-    // rs.getString("FlightID")
-    // });
-    // }
-    // }
-    // conn.commit();
-    //
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-    // return list;
-    // }
-
+    
+    
+    
+//    public List<Object[]> layDanhSachChuyenBay() throws SQLException {
+//        List<Object[]> list = new ArrayList<>();
+//        String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime, AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
+//        String cntSql = "SELECT COUNT(*) AS Tong FROM FLIGHT";
+//        
+//        try(Connection conn = DBConnection.getConnection()) {
+//            conn.setAutoCommit(false);
+//            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+//            
+//            int cnt1 = 0;
+//            try(PreparedStatement psCnt1 = conn.prepareStatement(cntSql);
+//                    ResultSet rsCnt1 = psCnt1.executeQuery()) {
+//                if(rsCnt1.next()) cnt1 = rsCnt1.getInt("Tong");
+//                System.out.println("Lan doc 1: Tong so chuyen bay la: " + cnt1);
+//            }
+//        
+//            try {
+//                Thread.sleep(10000);
+//            } catch(InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            
+//            int cnt2 = 0;
+//            try(PreparedStatement psCnt2 = conn.prepareStatement(cntSql);
+//                    ResultSet rsCnt2 = psCnt2.executeQuery()) {
+//                if(rsCnt2.next()) cnt2 = rsCnt2.getInt("Tong");
+//                System.out.println("Lan doc 2: Tong so chuyen bay la: " + cnt2);
+//                if(cnt1 != cnt2) System.out.println("Loi phantom read");
+//                else System.out.println("Loi da duoc sua nho dung SERIALIZABLE");
+//        }
+//        
+//        try (PreparedStatement ps = conn.prepareStatement(sql);
+//             ResultSet rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                list.add(new Object[] {
+//                        rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
+//                        rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
+//                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID")
+//                });
+//            }
+//        }
+//            conn.commit();
+//            
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
+//
     // LẤY CHI TIẾT 1 CHUYẾN BAY ĐỂ ĐỔ LÊN FORM SỬA
     public Object[] layChiTietChuyenBay(String flightID) {
         String sql = "SELECT f.FlightNumber, f.AirlineID, f.AircraftID, r.DepartureAirportID, r.ArrivalAirportID, f.DepartureTime, f.ArrivalTime, f.Gate "
@@ -200,22 +196,22 @@ public class ChuyenBayDAO {
             double priceFirst) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
-            // conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            //conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+           // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             updateOrInsertPrice(conn, flightID, "Economy", priceEco);
             updateOrInsertPrice(conn, flightID, "Business", priceBus);
             updateOrInsertPrice(conn, flightID, "Premium Economy", pricePrem);
             updateOrInsertPrice(conn, flightID, "First Class", priceFirst);
-
-            // try {
-            // Thread.sleep(10000);
-            // } catch (InterruptedException ex) {
-            // ex.printStackTrace();
-            // }
-
-            conn.commit();
+            
+            //try {
+            //Thread.sleep(10000);
+        //} catch (InterruptedException ex) {
+         //   ex.printStackTrace();
+        //}
+            //conn.commit();
             return true;
         } catch (SQLException e) {
-            // System.err.println("Lỗi giao dịch: " + e.getMessage());
+           // System.err.println("Lỗi giao dịch: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
