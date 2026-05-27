@@ -160,6 +160,19 @@ public class loginGUI extends JFrame {
         lblDesc.setBounds(24, 426, 380, 50);
         panel.add(lblDesc);
 
+        JLabel lblDemo = new JLabel("<html><u>⚙ Chạy Demo Cô lập Giao dịch (Non-Repeatable Read)</u></html>");
+        lblDemo.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblDemo.setForeground(new Color(14, 165, 233)); // Sky blue
+        lblDemo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblDemo.setBounds(24, 480, 380, 25);
+        lblDemo.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                new gui.NonRepeatableReadDemo().setVisible(true);
+            }
+        });
+        panel.add(lblDemo);
+
         return panel;
     }
 
