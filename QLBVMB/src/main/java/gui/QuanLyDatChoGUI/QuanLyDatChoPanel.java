@@ -465,6 +465,7 @@ public class QuanLyDatChoPanel extends JPanel {
             fireEditingStopped(); 
             int modelRow = table.convertRowIndexToModel(currentRow);
             String bookingID = tableModel.getValueAt(modelRow, 0).toString(); 
+            String status = tableModel.getValueAt(modelRow, 5).toString(); 
             
             if (e.getX() >= 10 && e.getX() <= 35) { 
                 SuaDatChoDialog editDialog = new SuaDatChoDialog((Frame) SwingUtilities.getWindowAncestor(panel), bookingID);
@@ -472,9 +473,13 @@ public class QuanLyDatChoPanel extends JPanel {
                 loadRealData(); 
                 applyFilter();
             } else if (e.getX() >= 40 && e.getX() <= 65) { 
+                if (status.equalsIgnoreCase("Đã hủy") || status.equalsIgnoreCase("CANCELLED")) {
+                    JOptionPane.showMessageDialog(panel, "Đơn đặt chỗ này đã bị hủy từ trước!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
                 int confirm = JOptionPane.showConfirmDialog(panel, "Bạn có chắc chắn muốn HỦY đơn đặt chỗ " + bookingID + " này không?\nHành động sẽ hủy toàn bộ vé bên trong đơn.", "Xác nhận Hủy Đơn", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (confirm == JOptionPane.YES_OPTION) {
-                    boolean isCancelled = bookingBUS.huyDatCho(bookingID, "Khách yêu cầu hủy qua điện thoại");
+                    boolean isCancelled = bookingBUS.huyDatCho(bookingID, "Khách yêu cầu hủy qua hệ thống");
                     if(isCancelled) { 
                         JOptionPane.showMessageDialog(panel, "Đã Hủy đơn " + bookingID + " thành công!"); 
                         loadRealData(); 

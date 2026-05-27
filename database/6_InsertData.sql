@@ -665,3 +665,9 @@ INSERT ALL
 SELECT 1 FROM DUAL;
 
 commit;
+
+select * from flight;
+
+DELETE FROM SEATCLASSPRICE WHERE FlightID = 'FL35';
+DELETE FROM FLIGHT WHERE FlightID = 'FL35';
+commit;

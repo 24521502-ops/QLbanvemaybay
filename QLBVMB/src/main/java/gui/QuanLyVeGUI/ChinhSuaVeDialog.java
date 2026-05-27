@@ -48,7 +48,7 @@ public class ChinhSuaVeDialog extends JDialog {
         mainPanel.add(Box.createVerticalStrut(30));
 
         // 1. Tên Hành khách (Khóa - Không được sửa)
-        mainPanel.add(createInputGroup("Hành khách (Cố định):", fullName, false));
+        mainPanel.add(createLabelGroup("Hành khách (Cố định):", fullName, false));
         mainPanel.add(Box.createVerticalStrut(15));
 
         // 2. Chỗ ngồi / Hạng ghế (Combo Box ĐỘNG LẤY TỪ DB)
@@ -80,8 +80,28 @@ public class ChinhSuaVeDialog extends JDialog {
         mainPanel.add(Box.createVerticalStrut(15));
 
         // 3. Giá vé (Khóa - Giao cho Procedure tính toán)
-        mainPanel.add(createInputGroup("Giá vé mới:", "Hệ thống sẽ tự động tính và cập nhật Booking", false));
+        JPanel pnlGiaVe = createLabelGroup("Giá vé mới tạm tính:", "0 VNĐ", true);
+        JLabel lblGiaVe = (JLabel) pnlGiaVe.getComponent(1); // Lấy cái Label chứa Giá
+        mainPanel.add(pnlGiaVe);
         mainPanel.add(Box.createVerticalStrut(15));
+
+        // Bắt sự kiện khi chọn ghế thì cập nhật Giá
+        cbxHangGhe.addActionListener(e -> {
+            if (cbxHangGhe.getSelectedItem() != null) {
+                String selected = cbxHangGhe.getSelectedItem().toString();
+                if (selected.contains(" - ")) {
+                    String[] parts = selected.split(" - ");
+                    lblGiaVe.setText(parts[parts.length - 1]);
+                } else {
+                    lblGiaVe.setText("0 VNĐ");
+                }
+            }
+        });
+        
+        // Kích hoạt sự kiện lần đầu để lấy giá của ghế đầu tiên
+        if(cbxHangGhe.getItemCount() > 0 && cbxHangGhe.isEnabled()) {
+            cbxHangGhe.setSelectedIndex(0);
+        }
 
         add(mainPanel, BorderLayout.CENTER);
 
@@ -129,22 +149,24 @@ public class ChinhSuaVeDialog extends JDialog {
         add(footer, BorderLayout.SOUTH);
     }
 
-    private JPanel createInputGroup(String label, String value, boolean isEditable) {
+    private JPanel createLabelGroup(String label, String value, boolean isHighlight) {
         JPanel panel = new JPanel(new BorderLayout(0, 5));
         panel.setOpaque(false);
         JLabel lbl = new JLabel(label);
         lbl.setFont(new Font("Inter", Font.BOLD, 13));
         lbl.setForeground(AppColor.TEXT_SECONDARY);
 
-        JTextField txt = new JTextField(value);
-        txt.setFont(new Font("Inter", Font.PLAIN, 14));
-        txt.setPreferredSize(new Dimension(400, 38));
-        txt.setEditable(isEditable);
-        if (!isEditable)
-            txt.setBackground(new Color(243, 244, 246));
+        JLabel valLbl = new JLabel(value);
+        if (isHighlight) {
+            valLbl.setFont(new Font("Inter", Font.BOLD, 20));
+            valLbl.setForeground(new Color(225, 29, 72)); // Màu đỏ hồng nổi bật
+        } else {
+            valLbl.setFont(new Font("Inter", Font.BOLD, 16));
+            valLbl.setForeground(AppColor.TEXT_PRIMARY);
+        }
 
         panel.add(lbl, BorderLayout.NORTH);
-        panel.add(txt, BorderLayout.CENTER);
+        panel.add(valLbl, BorderLayout.CENTER);
         return panel;
     }
 }

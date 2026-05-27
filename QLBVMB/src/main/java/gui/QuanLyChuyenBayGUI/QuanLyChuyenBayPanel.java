@@ -183,7 +183,12 @@ public class QuanLyChuyenBayPanel extends JPanel {
         btnEditInfo.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row == -1) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String status = table.getValueAt(row, 7).toString().toUpperCase();
+            if (status.contains("CANCEL")) {
+                JOptionPane.showMessageDialog(this, "Không thể sửa chuyến bay đã bị HỦY!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             String id = table.getValueAt(row, 8).toString();
@@ -193,14 +198,22 @@ public class QuanLyChuyenBayPanel extends JPanel {
         btnCancel.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row == -1) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String status = table.getValueAt(row, 7).toString().toUpperCase();
+            if (status.contains("CANCEL")) {
+                JOptionPane.showMessageDialog(this, "Chuyến bay này đã bị HỦY từ trước!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
             String id = table.getValueAt(row, 8).toString();
-            if (JOptionPane.showConfirmDialog(this, "Hủy chuyến bay này?", "Xác nhận",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            if (JOptionPane.showConfirmDialog(this, "Hủy chuyến bay này?\nCảnh báo: Hành động này sẽ hủy tất cả các vé thuộc chuyến bay.", "Xác nhận Hủy",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
                 if (chuyenBayBUS.huyChuyenBay(id)) {
+                    JOptionPane.showMessageDialog(this, "Hủy chuyến bay thành công!");
                     loadDataToTable();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Hủy chuyến bay thất bại. Vui lòng kiểm tra lại hệ thống.", "Lỗi CSDL", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -208,7 +221,12 @@ public class QuanLyChuyenBayPanel extends JPanel {
         btnDelay.addActionListener(e -> {
             int row = table.getSelectedRow();
             if (row == -1) {
-                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!");
+                JOptionPane.showMessageDialog(this, "Vui lòng chọn 1 chuyến bay!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String status = table.getValueAt(row, 7).toString().toUpperCase();
+            if (status.contains("CANCEL")) {
+                JOptionPane.showMessageDialog(this, "Không thể Delay một chuyến bay đã bị HỦY!", "Lỗi", JOptionPane.ERROR_MESSAGE);
                 return;
             }
             String id = table.getValueAt(row, 8).toString();

@@ -51,9 +51,9 @@ public class SuaKhachHangDialog extends JDialog {
         txtName.setForeground(AppColor.TEXT_SECONDARY);
 
         txtPassport = createTextField(passport);
-        txtPassport.setEditable(false);
-        txtPassport.setBackground(new Color(241, 245, 249));
-        txtPassport.setForeground(AppColor.TEXT_SECONDARY);
+        txtPassport.setEditable(true); // ĐÃ MỞ KHÓA
+        txtPassport.setBackground(Color.WHITE);
+        txtPassport.setForeground(AppColor.TEXT_PRIMARY);
 
         // 2. Các ô CHO PHÉP SỬA - Thông tin liên hệ
         txtPhone = createTextField(phone);
@@ -87,7 +87,13 @@ public class SuaKhachHangDialog extends JDialog {
 
     private void saveChanges() {
         String phone = txtPhone.getText().trim();
+        if (phone.equals("(Chưa cập nhật)")) phone = "";
+
         String email = txtEmail.getText().trim();
+        if (email.equals("(Chưa cập nhật)")) email = "";
+        
+        String passportVal = txtPassport.getText().trim();
+        if (passportVal.equals("(Chưa cập nhật)")) passportVal = "";
 
         if (phone.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Số điện thoại không được để trống!", "Cảnh báo",
@@ -104,13 +110,18 @@ public class SuaKhachHangDialog extends JDialog {
                     "Lỗi nhập liệu", JOptionPane.ERROR_MESSAGE);
             return;
         }
+        
+        // Kiểm tra trùng lặp nếu có nhập CCCD hoặc Email
+        String checkDup = customerBUS.kiemTraTrungLap(email.isEmpty() ? null : email, passportVal.isEmpty() ? null : passportVal);
+        // Lưu ý: hàm kiemTraTrungLap hiện tại quét toàn bảng, nên nếu giá trị chưa đổi nó vẫn báo trùng.
+        // Để làm chuẩn nhất ở mức Đồ án, ta ưu tiên gọi luôn hàm Update. Nếu CSDL bị lỗi Unique Constraint thì sẽ tự văng lỗi.
 
-        boolean success = customerBUS.suaKhachHang(cusID, phone, email);
+        boolean success = customerBUS.suaKhachHang(cusID, phone, email, passportVal);
         if (success) {
-            JOptionPane.showMessageDialog(this, "Đã cập nhật thông tin liên hệ thành công!");
+            JOptionPane.showMessageDialog(this, "Đã cập nhật thông tin thành công!");
             dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Cập nhật thất bại. Vui lòng kiểm tra lại hệ thống.", "Lỗi CSDL",
+            JOptionPane.showMessageDialog(this, "Cập nhật thất bại.\nCó thể Email hoặc CCCD này đã tồn tại trong hệ thống.", "Lỗi Dữ Liệu",
                     JOptionPane.ERROR_MESSAGE);
         }
     }

@@ -280,19 +280,34 @@ public class ChiTietVeDialog extends JDialog {
         // ==========================================
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setOpaque(false);
-        JButton btnDownload = makeButton("Tải xuống PDF", BRAND_BLUE, Color.WHITE);
+        JButton btnDownload = makeButton("Tải Vé (PNG)", BRAND_BLUE, Color.WHITE);
 
-        final String tenFile = "BoardingPass_" + ticketInfo[0].toString() + ".pdf";
+        final String tenFile = "BoardingPass_" + ticketInfo[0].toString() + ".png";
         btnDownload.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Chọn thư mục lưu Vé điện tử");
             fileChooser.setSelectedFile(new File(tenFile));
             int userSelection = fileChooser.showSaveDialog(this);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
-                JOptionPane.showMessageDialog(this,
-                        "Đã lưu vé thành công tại:\n" + fileChooser.getSelectedFile().getAbsolutePath(), "Hoàn tất",
-                        JOptionPane.INFORMATION_MESSAGE);
-                dispose();
+                File fileToSave = fileChooser.getSelectedFile();
+                if (!fileToSave.getName().toLowerCase().endsWith(".png")) {
+                    fileToSave = new File(fileToSave.getAbsolutePath() + ".png");
+                }
+                try {
+                    java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(
+                            ticketPanel.getWidth(), ticketPanel.getHeight(), java.awt.image.BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g2d = img.createGraphics();
+                    ticketPanel.paint(g2d);
+                    g2d.dispose();
+                    javax.imageio.ImageIO.write(img, "png", fileToSave);
+                    
+                    JOptionPane.showMessageDialog(this,
+                            "Đã xuất Vé điện tử thành công tại:\n" + fileToSave.getAbsolutePath(), "Hoàn tất",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    dispose();
+                } catch(Exception ex) {
+                    JOptionPane.showMessageDialog(this, "Lỗi khi lưu vé: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
         buttonPanel.add(btnDownload);

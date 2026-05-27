@@ -25,12 +25,15 @@ public class CustomerDAO {
              ResultSet rs = pst.executeQuery()) {
              
             while (rs.next()) {
+                String email = rs.getString("Email");
+                String passport = rs.getString("PassportNumber");
+                
                 list.add(new Object[]{
                     rs.getString("CustomerID"),
                     rs.getString("FullName"),
-                    rs.getString("Email"),
+                    (email == null || email.trim().isEmpty()) ? "(Chưa cập nhật)" : email,
                     rs.getString("Phone"),
-                    rs.getString("PassportNumber")
+                    (passport == null || passport.trim().isEmpty()) ? "(Chưa cập nhật)" : passport
                 });
             }
         } catch (Exception e) { 
@@ -74,7 +77,7 @@ public class CustomerDAO {
     }
 
     // 3. Cập nhật Khách hàng (Gọi Procedure - SQL của bạn chỉ cho cập nhật Email & Phone)
-    public boolean suaKhachHang(String customerID, String phone, String email) {
+    public boolean suaKhachHang(String customerID, String phone, String email, String passport) {
         String sql = "{CALL SP_UPDATE_CUSTOMER_INFO(?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
              java.sql.CallableStatement cst = conn.prepareCall(sql)) {
@@ -82,8 +85,16 @@ public class CustomerDAO {
             cst.setString(1, customerID);
             cst.setString(2, phone);
             cst.setString(3, email);
-            
             cst.execute();
+            
+            // Cập nhật riêng trường CCCD/Passport thông qua PreparedStatement do SP không hỗ trợ
+            String sqlPass = "UPDATE CUSTOMER SET PassportNumber = ? WHERE CustomerID = ?";
+            try (PreparedStatement ps = conn.prepareStatement(sqlPass)) {
+                ps.setString(1, passport);
+                ps.setString(2, customerID);
+                ps.executeUpdate();
+            }
+            
             return true;
         } catch (Exception e) { 
             e.printStackTrace(); 

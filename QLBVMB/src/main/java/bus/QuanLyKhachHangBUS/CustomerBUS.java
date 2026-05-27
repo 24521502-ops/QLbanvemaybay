@@ -24,8 +24,8 @@ public class CustomerBUS {
         return customerDAO.themKhachHang(fullName, gender, dob, phone, email, passport, nationality);
     }
 
-    public boolean suaKhachHang(String customerID, String phone, String email) {
-        return customerDAO.suaKhachHang(customerID, phone, email);
+    public boolean suaKhachHang(String customerID, String phone, String email, String passport) {
+        return customerDAO.suaKhachHang(customerID, phone, email, passport);
     }
 
     public String xoaKhachHang(String customerID) {

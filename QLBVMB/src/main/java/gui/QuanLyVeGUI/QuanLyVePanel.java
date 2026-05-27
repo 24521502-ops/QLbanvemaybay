@@ -54,7 +54,7 @@ public class QuanLyVePanel extends JPanel {
         lblCancelledTicket = new JLabel("0");
         
         statsPanel.add(createClickableStatCard("TỔNG VÉ ĐÃ ĐẶT", lblTotalTicket, AppColor.PRIMARY, "ALL"));
-        statsPanel.add(createClickableStatCard("ĐÃ THANH TOÁN (PAID)", lblPaidTicket, AppColor.SUCCESS, "PAID"));
+        statsPanel.add(createClickableStatCard("ĐÃ XÁC NHẬN (CONFIRMED)", lblPaidTicket, AppColor.SUCCESS, "PAID"));
         statsPanel.add(createClickableStatCard("ĐÃ HỦY (CANCELLED)", lblCancelledTicket, AppColor.ERROR, "CANCELLED"));
         
         JPanel toolPanel = new JPanel(new BorderLayout());
