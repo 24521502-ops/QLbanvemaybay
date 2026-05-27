@@ -21,8 +21,6 @@ public class AirlineBUS {
     }
 
     public boolean insert(AirlineDTO dto) {
-        if (dto.getAirlineID() == null || dto.getAirlineID().trim().isEmpty())
-            return false;
         if (dto.getAirlineName() == null || dto.getAirlineName().trim().isEmpty())
             return false;
         return dao.insert(dto);

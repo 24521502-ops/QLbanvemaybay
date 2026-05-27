@@ -107,21 +107,25 @@ public class QuanLyChuyenBayPanel extends JPanel {
         sortMenu.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
 
         // Các Item trong Menu
-        JMenuItem itemTimeAsc = createMenuItem("Giờ khởi hành (Sớm nhất)");
-        JMenuItem itemTimeDesc = createMenuItem("Giờ khởi hành (Muộn nhất)");
+        // Các Item trong Menu
+        JMenuItem itemDateAsc = createMenuItem("Ngày bay (Tăng dần)");
+        JMenuItem itemDateDesc = createMenuItem("Ngày bay (Giảm dần)");
+        JMenuItem itemToday = createMenuItem("Chuyến bay hôm nay");
         JMenuItem itemFlightAsc = createMenuItem("Số hiệu chuyến bay (A-Z)");
         JMenuItem itemStatus = createMenuItem("Trạng thái chuyến bay");
 
         // Gắn hành động sắp xếp cho từng Item
-        itemTimeAsc.addActionListener(e -> applySorting(2, SortOrder.ASCENDING));
-        itemTimeDesc.addActionListener(e -> applySorting(2, SortOrder.DESCENDING));
-        itemFlightAsc.addActionListener(e -> applySorting(0, SortOrder.ASCENDING));
-        itemStatus.addActionListener(e -> applySorting(7, SortOrder.DESCENDING));
+        itemDateAsc.addActionListener(e -> applySortingCustom(1));
+        itemDateDesc.addActionListener(e -> applySortingCustom(2));
+        itemToday.addActionListener(e -> applySortingCustom(3));
+        itemFlightAsc.addActionListener(e -> applySortingCustom(4));
+        itemStatus.addActionListener(e -> applySortingCustom(5));
 
         // Thêm Item vào Menu
-        sortMenu.add(itemTimeAsc);
-        sortMenu.add(itemTimeDesc);
-        sortMenu.addSeparator(); // Đường kẻ ngang phân cách cho đẹp
+        sortMenu.add(itemDateAsc);
+        sortMenu.add(itemDateDesc);
+        sortMenu.add(itemToday);
+        sortMenu.addSeparator(); // Đường kẻ ngang phân cách
         sortMenu.add(itemFlightAsc);
         sortMenu.add(itemStatus);
 
@@ -263,10 +267,49 @@ public class QuanLyChuyenBayPanel extends JPanel {
     }
 
     @SuppressWarnings("unchecked")
-    private void applySorting(int columnIndex, SortOrder order) {
+    private void applySortingCustom(int type) {
         TableRowSorter<DefaultTableModel> sorter = (TableRowSorter<DefaultTableModel>) table.getRowSorter();
+        if (sorter == null) return;
+        
+        java.util.Comparator<String> dateComparator = (s1, s2) -> {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm - dd/MM/yyyy");
+                return sdf.parse(s1).compareTo(sdf.parse(s2));
+            } catch (Exception e) { return s1.compareTo(s2); }
+        };
+        
+        java.util.Comparator<String> todayFirstComparator = (s1, s2) -> {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm - dd/MM/yyyy");
+                java.util.Date d1 = sdf.parse(s1);
+                java.util.Date d2 = sdf.parse(s2);
+                java.text.SimpleDateFormat dayFormat = new java.text.SimpleDateFormat("dd/MM/yyyy");
+                String todayStr = dayFormat.format(new java.util.Date());
+                boolean isToday1 = dayFormat.format(d1).equals(todayStr);
+                boolean isToday2 = dayFormat.format(d2).equals(todayStr);
+                
+                if (isToday1 && !isToday2) return -1;
+                if (!isToday1 && isToday2) return 1;
+                return d1.compareTo(d2);
+            } catch (Exception e) { return s1.compareTo(s2); }
+        };
+
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-        sortKeys.add(new RowSorter.SortKey(columnIndex, order));
+        if (type == 1) {
+            sorter.setComparator(2, dateComparator);
+            sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+        } else if (type == 2) {
+            sorter.setComparator(2, dateComparator);
+            sortKeys.add(new RowSorter.SortKey(2, SortOrder.DESCENDING));
+        } else if (type == 3) {
+            sorter.setComparator(2, todayFirstComparator);
+            sortKeys.add(new RowSorter.SortKey(2, SortOrder.ASCENDING));
+        } else if (type == 4) {
+            sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        } else if (type == 5) {
+            sortKeys.add(new RowSorter.SortKey(7, SortOrder.DESCENDING));
+        }
+        
         sorter.setSortKeys(sortKeys);
         sorter.sort();
     }

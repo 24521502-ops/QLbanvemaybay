@@ -21,8 +21,6 @@ public class AircraftBUS {
     }
 
     public boolean insert(AircraftDTO dto) {
-        if (dto.getAircraftID() == null || dto.getAircraftID().trim().isEmpty())
-            return false;
         if (dto.getModel() == null || dto.getModel().trim().isEmpty())
             return false;
         return dao.insert(dto);

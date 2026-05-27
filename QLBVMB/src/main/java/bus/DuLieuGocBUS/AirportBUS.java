@@ -21,8 +21,6 @@ public class AirportBUS {
     }
 
     public boolean insert(AirportDTO dto) {
-        if (dto.getAirportID() == null || dto.getAirportID().trim().isEmpty())
-            return false;
         if (dto.getAirportName() == null || dto.getAirportName().trim().isEmpty())
             return false;
         return dao.insert(dto);

@@ -152,13 +152,14 @@ public class EmployeeDAO {
      * Cập nhật nhân viên bằng Stored Procedure SP_UPDATE_EMPLOYEE
      */
     public boolean update(EmployeeDTO emp) {
-        String sql = "{CALL SP_UPDATE_EMPLOYEE(?, ?, ?, ?)}";
+        String sql = "{CALL SP_UPDATE_EMPLOYEE(?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
                 CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, emp.getEmployeeID());
-            cs.setString(2, emp.getPosition());
-            cs.setString(3, emp.getPhone());
-            cs.setString(4, emp.getEmail());
+            cs.setString(2, emp.getFullName());
+            cs.setString(3, emp.getPosition());
+            cs.setString(4, emp.getPhone());
+            cs.setString(5, emp.getEmail());
             cs.execute();
             return true;
         } catch (SQLException e) {

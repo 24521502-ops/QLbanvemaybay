@@ -56,11 +56,12 @@ public class RoleGroupDAO {
 
     // Thêm nhóm quyền mới
     public boolean insert(RoleGroupDTO dto) {
-        String sql = "{CALL SP_ADD_ROLE_GROUP(?)}";
+        String sql = "INSERT INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES (?, ?, 0)";
         try (Connection conn = DBConnection.getConnection();
-             CallableStatement cst = conn.prepareCall(sql)) {
-            cst.setString(1, dto.getNameRoleGroup());
-            cst.execute();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dto.getRoleGroupID());
+            ps.setString(2, dto.getNameRoleGroup());
+            ps.executeUpdate();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();

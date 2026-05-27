@@ -357,13 +357,14 @@ END;
 --Cập nhật chức vụ và liên hệ của Nhân viên:
 CREATE OR REPLACE PROCEDURE SP_UPDATE_EMPLOYEE (
     p_EmployeeID IN VARCHAR2,
+    p_FullName IN VARCHAR2,
     p_Position IN VARCHAR2,
     p_Phone IN VARCHAR2,
     p_Email IN VARCHAR2
 ) AS
 BEGIN
     UPDATE EMPLOYEE
-    SET Position = p_Position, Phone = p_Phone, Email = p_Email
+    SET FullName = p_FullName, Position = p_Position, Phone = p_Phone, Email = p_Email
     WHERE EmployeeID = p_EmployeeID;
 
     IF SQL%ROWCOUNT = 0 THEN
@@ -424,7 +425,7 @@ END;
 
 CREATE OR REPLACE PROCEDURE SP_ADD_ROLE_GROUP (p_NameRoleGroup IN VARCHAR2) AS
 BEGIN
-    INSERT INTO ROLE_GROUP (NameRoleGroup) VALUES (p_NameRoleGroup);
+    INSERT INTO ROLE_GROUP (NameRoleGroup, IsDeleted) VALUES (p_NameRoleGroup, 0);
     COMMIT;
 END;
 /

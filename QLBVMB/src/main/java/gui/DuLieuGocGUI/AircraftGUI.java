@@ -500,6 +500,7 @@ public class AircraftGUI extends JPanel {
             
             txtModel.setText(dto.getModel());
             txtCapacity.setText(dto.getCapacity() != null ? String.valueOf(dto.getCapacity()) : "");
+            txtCapacity.setEditable(false);
             txtYear.setText(dto.getManufactureYear() != null ? String.valueOf(dto.getManufactureYear()) : "");
             
             txtFirstSeats.setEditable(false);
