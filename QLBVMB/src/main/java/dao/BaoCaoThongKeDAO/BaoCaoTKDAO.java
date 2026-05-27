@@ -586,4 +586,100 @@ public class BaoCaoTKDAO {
         }
         return new java.sql.Date[]{ new java.sql.Date(System.currentTimeMillis()), new java.sql.Date(System.currentTimeMillis()) };
     }
+
+    // ==================== XUẤT CSV CHI TIẾT ====================
+    public List<Object[]> getChiTietThanhToan(Date tuNgay, Date denNgay, String hangBay) {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT p.PaymentID, b.BookingID, p.PaymentDate, p.Amount, p.PaymentMethod " +
+                     "FROM Payment p " +
+                     "JOIN Booking b ON p.BookingID = b.BookingID " +
+                     "WHERE p.PaymentStatus = 'SUCCESS' " +
+                     "AND p.PaymentDate BETWEEN ? AND ? " +
+                     "AND (? = 'ALL' OR EXISTS (SELECT 1 FROM Ticket t JOIN Flight f ON t.FlightID = f.FlightID WHERE t.BookingID = b.BookingID AND f.AirlineID = ?)) " +
+                     "ORDER BY p.PaymentDate";
+        try (Connection con = DBConnection.getConnection()) {
+            if (con == null) return list;
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setDate(1, tuNgay);
+                ps.setDate(2, denNgay);
+                ps.setString(3, hangBay);
+                ps.setString(4, hangBay);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    list.add(new Object[]{ rs.getString("PaymentID"), rs.getString("BookingID"), rs.getTimestamp("PaymentDate"), rs.getDouble("Amount"), rs.getString("PaymentMethod") });
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Object[]> getChiTietBooking(Date tuNgay, Date denNgay, String hangBay) {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT b.BookingID, b.BookingDate, c.FullName, b.TotalAmount, b.Status " +
+                     "FROM Booking b " +
+                     "JOIN Customer c ON b.CustomerID = c.CustomerID " +
+                     "WHERE b.BookingDate BETWEEN ? AND ? " +
+                     "AND (? = 'ALL' OR EXISTS (SELECT 1 FROM Ticket t JOIN Flight f ON t.FlightID = f.FlightID WHERE t.BookingID = b.BookingID AND f.AirlineID = ?)) " +
+                     "ORDER BY b.BookingDate";
+        try (Connection con = DBConnection.getConnection()) {
+            if (con == null) return list;
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setDate(1, tuNgay);
+                ps.setDate(2, denNgay);
+                ps.setString(3, hangBay);
+                ps.setString(4, hangBay);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    list.add(new Object[]{ rs.getString("BookingID"), rs.getTimestamp("BookingDate"), rs.getString("FullName"), rs.getDouble("TotalAmount"), rs.getString("Status") });
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    public List<Object[]> getChiTietVeHangGhe(Date tuNgay, Date denNgay, String hangBay) {
+        List<Object[]> list = new ArrayList<>();
+        String sql = "SELECT t.TicketID, f.FlightNumber, s.Class, t.Price, t.TicketStatus " +
+                     "FROM Ticket t " +
+                     "JOIN Flight f ON t.FlightID = f.FlightID " +
+                     "JOIN Seat s ON t.SeatID = s.SeatID " +
+                     "WHERE f.DepartureTime BETWEEN ? AND ? " +
+                     "AND (? = 'ALL' OR f.AirlineID = ?) " +
+                     "ORDER BY f.DepartureTime, s.Class";
+        try (Connection con = DBConnection.getConnection()) {
+            if (con == null) return list;
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setDate(1, tuNgay);
+                ps.setDate(2, denNgay);
+                ps.setString(3, hangBay);
+                ps.setString(4, hangBay);
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    list.add(new Object[]{ rs.getString("TicketID"), rs.getString("FlightNumber"), rs.getString("Class"), rs.getDouble("Price"), rs.getString("TicketStatus") });
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return list;
+    }
+
+    // ──────────── Lấy danh sách các năm có giao dịch ────────────
+    public List<Integer> getAvailableYears() {
+        List<Integer> list = new ArrayList<>();
+        String sql = "SELECT DISTINCT EXTRACT(YEAR FROM PaymentDate) AS nam FROM Payment WHERE PaymentStatus = 'SUCCESS' ORDER BY nam DESC";
+        try (Connection con = DBConnection.getConnection()) {
+            if (con != null) {
+                try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+                    while (rs.next()) {
+                        list.add(rs.getInt("nam"));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        if (list.isEmpty()) {
+            list.add(java.time.Year.now().getValue());
+        }
+        return list;
+    }
 }
