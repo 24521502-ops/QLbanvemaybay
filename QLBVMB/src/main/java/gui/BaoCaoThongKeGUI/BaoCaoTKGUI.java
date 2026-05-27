@@ -61,6 +61,8 @@ public class BaoCaoTKGUI extends JPanel {
     private List<Object[]> hangData = new ArrayList<>();
     private List<Object[]> revByClassData = new ArrayList<>();
 
+    private JComboBox<Integer> cboTrendYear;
+
     public BaoCaoTKGUI() {
         setBackground(BG);
         setLayout(new BorderLayout(0, 0));
@@ -220,8 +222,8 @@ public class BaoCaoTKGUI extends JPanel {
         JPanel botRow = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         botRow.setOpaque(false);
 
-        JButton btnExport = mkBtn("Xuất CSV", GREEN, Color.WHITE);
-        btnExport.addActionListener(e -> exportToCSV());
+        JButton btnExport = mkBtn("Xuất Excel", GREEN, Color.WHITE);
+        btnExport.addActionListener(e -> exportToExcel());
 
         JButton btnRefresh = mkBtn("Làm mới", new Color(0xF3F4F6), DARK);
         btnRefresh.addActionListener(e -> loadData());
@@ -253,8 +255,8 @@ public class BaoCaoTKGUI extends JPanel {
         btn.setForeground(fg);
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
-        btn.setPreferredSize(new Dimension(85, 30));
-        btn.setMaximumSize(new Dimension(85, 30));
+        btn.setPreferredSize(new Dimension(105, 30));
+        btn.setMaximumSize(new Dimension(105, 30));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
     }
@@ -407,7 +409,41 @@ public class BaoCaoTKGUI extends JPanel {
         // Top: Line chart (doanh thu theo tháng)
         JPanel lc = mkCardBase();
         lc.setLayout(new BorderLayout(0, 8));
-        lc.add(mkChartHeader("Xu hướng Doanh thu", "Theo tháng trong năm hiện tại"), BorderLayout.NORTH);
+        
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setOpaque(false);
+        
+        JPanel titlePanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        titlePanel.setOpaque(false);
+        JLabel t = new JLabel("Xu hướng Doanh thu");
+        t.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        t.setForeground(DARK);
+        JLabel s = new JLabel("Theo tháng trong năm");
+        s.setFont(F_SMALL);
+        s.setForeground(GRAY);
+        titlePanel.add(t);
+        titlePanel.add(s);
+        
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(new JLabel("Chọn năm:"));
+        
+        cboTrendYear = new JComboBox<>();
+        try {
+            List<Integer> years = bus.getAvailableYears();
+            for (Integer y : years) {
+                cboTrendYear.addItem(y);
+            }
+        } catch (Exception e) {}
+        cboTrendYear.setFont(F_BODY);
+        cboTrendYear.setFocusable(false);
+        cboTrendYear.addActionListener(e -> updateTrendChart());
+        rightPanel.add(cboTrendYear);
+
+        headerPanel.add(titlePanel, BorderLayout.WEST);
+        headerPanel.add(rightPanel, BorderLayout.EAST);
+        
+        lc.add(headerPanel, BorderLayout.NORTH);
         lineChart = new LineChart(trendData);
         lc.add(lineChart, BorderLayout.CENTER);
 
@@ -474,10 +510,11 @@ public class BaoCaoTKGUI extends JPanel {
                 Object[] summary = { dt, dc, cb, occ };
 
                 // 3. Lấy dữ liệu biểu đồ (có lọc)
-                // Trend: lấy theo năm của ngày bắt đầu
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(d1);
-                double[] trend = bus.getDoanhThuTheoThang(cal.get(Calendar.YEAR), hangBay);
+                int selectedYear = java.time.Year.now().getValue();
+                if (cboTrendYear != null && cboTrendYear.getSelectedItem() != null) {
+                    selectedYear = (Integer) cboTrendYear.getSelectedItem();
+                }
+                double[] trend = bus.getDoanhThuTheoThang(selectedYear, hangBay);
 
                 List<Object[]> statusStats = bus.getBookingStatusStats(d1, d2, hangBay);
                 List<Object[]> revByClass = bus.getDoanhThuTheoHang(d1, d2, hangBay);
@@ -503,6 +540,8 @@ public class BaoCaoTKGUI extends JPanel {
                     double occ = summary[3] instanceof Number ? ((Number) summary[3]).doubleValue() : 0;
                     lblOcc.setText(String.format("%.2f%%", occ));
 
+                    // Đã loại bỏ việc cập nhật lblTrendYear vì sử dụng cboTrendYear thay thế
+
                     lineChart.setData(trendData);
                     barChart.setData(hangData);
                     pieChart.setData(revByClassData);
@@ -516,58 +555,154 @@ public class BaoCaoTKGUI extends JPanel {
         }.execute();
     }
 
-    private void exportToCSV() {
+    private void updateTrendChart() {
+        if (cboTrendYear == null || cboTrendYear.getSelectedItem() == null) return;
+        new SwingWorker<double[], Void>() {
+            @Override
+            protected double[] doInBackground() throws Exception {
+                int selectedYear = (Integer) cboTrendYear.getSelectedItem();
+                String hangBay = "ALL";
+                Object selected = cboHangBay.getSelectedItem();
+                if (selected instanceof AirlineItem) {
+                    hangBay = ((AirlineItem) selected).id;
+                }
+                return bus.getDoanhThuTheoThang(selectedYear, hangBay);
+            }
+            @Override
+            protected void done() {
+                try {
+                    trendData = get();
+                    if (lineChart != null) {
+                        lineChart.setData(trendData);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }.execute();
+    }
+
+    private void exportToExcel() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Chọn nơi lưu báo cáo thống kê");
+        fileChooser.setSelectedFile(new java.io.File("BaoCaoThongKe.xls"));
         int userSelection = fileChooser.showSaveDialog(this);
         
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             java.io.File fileToSave = fileChooser.getSelectedFile();
             String filePath = fileToSave.getAbsolutePath();
-            if (!filePath.endsWith(".csv")) {
-                filePath += ".csv";
+            if (!filePath.endsWith(".xls")) {
+                filePath += ".xls";
             }
             
             try (java.io.PrintWriter writer = new java.io.PrintWriter(new java.io.OutputStreamWriter(new java.io.FileOutputStream(filePath), java.nio.charset.StandardCharsets.UTF_8))) {
-                writer.write('\ufeff'); // Ký tự BOM để Excel nhận dạng tiếng Việt có dấu
+                writer.println("<html><head><meta charset=\"UTF-8\">");
+                writer.println("<style>");
+                writer.println("table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin-bottom: 20px; }");
+                writer.println("th, td { border: 1px solid #000; padding: 8px; text-align: left; }");
+                writer.println("th { background-color: #d9e1f2; font-weight: bold; }");
+                writer.println(".header { text-align: center; font-size: 20px; font-weight: bold; background-color: #4472c4; color: white; }");
+                writer.println("</style></head><body>");
+
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"5\" class=\"header\">BÁO CÁO THỐNG KÊ DOANH THU</th></tr>");
+                writer.println("<tr><td colspan=\"2\"><b>Từ ngày:</b> " + txtTuNgay.getText() + "</td><td colspan=\"3\"><b>Đến ngày:</b> " + txtDenNgay.getText() + "</td></tr>");
+                writer.println("<tr><td colspan=\"5\"><b>Hãng bay:</b> " + cboHangBay.getSelectedItem().toString() + "</td></tr>");
+                writer.println("</table>");
                 
-                writer.println("BÁO CÁO THỐNG KÊ DOANH THU");
-                writer.println("Từ ngày:," + txtTuNgay.getText() + ",Đến ngày:," + txtDenNgay.getText());
-                writer.println("Hãng bay:," + cboHangBay.getSelectedItem().toString());
-                writer.println();
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"2\">TỔNG QUAN</th></tr>");
+                writer.println("<tr><td>Tổng doanh thu</td><td>" + lblDT.getText() + "</td></tr>");
+                writer.println("<tr><td>Tổng số đặt chỗ</td><td>" + lblDC.getText() + "</td></tr>");
+                writer.println("<tr><td>Chuyến bay hoàn thành</td><td>" + lblCB.getText() + "</td></tr>");
+                writer.println("<tr><td>Tỷ lệ lấp đầy</td><td>" + lblOcc.getText() + "</td></tr>");
+                writer.println("</table>");
                 
-                writer.println("--- TỔNG QUAN ---");
-                writer.println("Tổng doanh thu,\"" + lblDT.getText() + "\"");
-                writer.println("Tổng số đặt chỗ,\"" + lblDC.getText() + "\"");
-                writer.println("Chuyến bay hoàn thành,\"" + lblCB.getText() + "\"");
-                writer.println("Tỷ lệ lấp đầy,\"" + lblOcc.getText() + "\"");
-                writer.println();
-                
-                writer.println("--- DOANH THU THEO THÁNG ---");
-                writer.println("Tháng,Doanh Thu");
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"2\">DOANH THU THEO THÁNG</th></tr>");
+                writer.println("<tr><th>Tháng</th><th>Doanh Thu</th></tr>");
                 for (int i = 0; i < trendData.length; i++) {
-                    writer.println("Tháng " + (i + 1) + "," + String.format(Locale.US, "%.0f", trendData[i]));
+                    writer.println("<tr><td>Tháng " + (i + 1) + "</td><td>" + String.format(Locale.US, "%.0f", trendData[i]) + "</td></tr>");
                 }
-                writer.println();
+                writer.println("</table>");
                 
-                writer.println("--- TRẠNG THÁI BOOKING ---");
-                writer.println("Trạng Thái,Số Lượng");
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"2\">TRẠNG THÁI BOOKING</th></tr>");
+                writer.println("<tr><th>Trạng Thái</th><th>Số Lượng</th></tr>");
                 if (hangData != null) {
                     for (Object[] row : hangData) {
-                        writer.println("\"" + row[0] + "\"," + row[1]);
+                        writer.println("<tr><td>" + row[0] + "</td><td>" + row[1] + "</td></tr>");
                     }
                 }
-                writer.println();
+                writer.println("</table>");
                 
-                writer.println("--- DOANH THU THEO HẠNG GHẾ ---");
-                writer.println("Hạng Ghế,Doanh Thu");
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"2\">DOANH THU THEO HẠNG GHẾ</th></tr>");
+                writer.println("<tr><th>Hạng Ghế</th><th>Doanh Thu</th></tr>");
                 if (revByClassData != null) {
                     for (Object[] row : revByClassData) {
-                        writer.println("\"" + row[0] + "\",\"" + String.format(Locale.US, "%.0f", ((Number)row[1]).doubleValue()) + "\"");
+                        writer.println("<tr><td>" + row[0] + "</td><td>" + String.format(Locale.US, "%.0f", ((Number)row[1]).doubleValue()) + "</td></tr>");
                     }
                 }
+                writer.println("</table>");
                 
-                JOptionPane.showMessageDialog(this, "Xuất báo cáo thành công!\n" + filePath, "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                // DATA
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                java.sql.Date d1 = new java.sql.Date(sdf.parse(txtTuNgay.getText()).getTime());
+                java.sql.Date d2 = new java.sql.Date(sdf.parse(txtDenNgay.getText()).getTime());
+                String hangBay = "ALL";
+                Object selected = cboHangBay.getSelectedItem();
+                if (selected instanceof AirlineItem) {
+                    hangBay = ((AirlineItem) selected).id;
+                }
+                SimpleDateFormat sdfDateTime = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+                // CHI TIẾT TỪNG CHUYẾN BAY
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"8\">CHI TIẾT TỪNG CHUYẾN BAY</th></tr>");
+                writer.println("<tr><th>Mã Chuyến Bay</th><th>Số Hiệu</th><th>Tuyến Bay</th><th>Ngày Giờ Bay</th><th>Số Vé Đã Bán</th><th>Doanh Thu</th><th>Tỷ Lệ Lấp Đầy (%)</th><th>Trạng Thái</th></tr>");
+                List<Object[]> chiTiet = bus.getThongTinChuyenBayChiTiet(d1, d2, hangBay);
+                for (Object[] row : chiTiet) {
+                    String depTime = row[3] != null ? sdfDateTime.format((java.util.Date) row[3]) : "";
+                    writer.println("<tr><td>" + row[0] + "</td><td>" + row[1] + "</td><td>" + row[2] + "</td><td>" + depTime + "</td><td>" + row[4] + "</td><td>" + String.format(Locale.US, "%.0f", ((Number)row[5]).doubleValue()) + "</td><td>" + String.format(Locale.US, "%.1f", ((Number)row[6]).doubleValue()) + "</td><td>" + row[7] + "</td></tr>");
+                }
+                writer.println("</table>");
+                
+                // CHI TIẾT THANH TOÁN
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"5\">CHI TIẾT CÁC KHOẢN THANH TOÁN (XU HƯỚNG DOANH THU)</th></tr>");
+                writer.println("<tr><th>Mã Thanh Toán</th><th>Mã Booking</th><th>Ngày Thanh Toán</th><th>Số Tiền</th><th>Phương Thức</th></tr>");
+                List<Object[]> ctThanhToan = bus.getChiTietThanhToan(d1, d2, hangBay);
+                for (Object[] row : ctThanhToan) {
+                    String pTime = row[2] != null ? sdfDateTime.format((java.util.Date) row[2]) : "";
+                    writer.println("<tr><td>" + row[0] + "</td><td>" + row[1] + "</td><td>" + pTime + "</td><td>" + String.format(Locale.US, "%.0f", ((Number)row[3]).doubleValue()) + "</td><td>" + row[4] + "</td></tr>");
+                }
+                writer.println("</table>");
+
+                // CHI TIẾT TRẠNG THÁI BOOKING
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"5\">CHI TIẾT TRẠNG THÁI BOOKING</th></tr>");
+                writer.println("<tr><th>Mã Booking</th><th>Ngày Đặt</th><th>Tên Khách Hàng</th><th>Tổng Tiền</th><th>Trạng Thái</th></tr>");
+                List<Object[]> ctBooking = bus.getChiTietBooking(d1, d2, hangBay);
+                for (Object[] row : ctBooking) {
+                    String bTime = row[1] != null ? sdfDateTime.format((java.util.Date) row[1]) : "";
+                    writer.println("<tr><td>" + row[0] + "</td><td>" + bTime + "</td><td>" + row[2] + "</td><td>" + String.format(Locale.US, "%.0f", ((Number)row[3]).doubleValue()) + "</td><td>" + row[4] + "</td></tr>");
+                }
+                writer.println("</table>");
+
+                // CHI TIẾT DOANH THU THEO HẠNG GHẾ
+                writer.println("<table>");
+                writer.println("<tr><th colspan=\"5\">CHI TIẾT BÁN VÉ (THEO HẠNG GHẾ)</th></tr>");
+                writer.println("<tr><th>Mã Vé</th><th>Số Hiệu Chuyến Bay</th><th>Hạng Ghế</th><th>Giá Vé</th><th>Trạng Thái Vé</th></tr>");
+                List<Object[]> ctVe = bus.getChiTietVeHangGhe(d1, d2, hangBay);
+                for (Object[] row : ctVe) {
+                    writer.println("<tr><td>" + row[0] + "</td><td>" + row[1] + "</td><td>" + row[2] + "</td><td>" + String.format(Locale.US, "%.0f", ((Number)row[3]).doubleValue()) + "</td><td>" + row[4] + "</td></tr>");
+                }
+                writer.println("</table>");
+                
+                writer.println("</body></html>");
+                
+                JOptionPane.showMessageDialog(this, "Xuất báo cáo thành công!\n" + filePath + "\n\nLưu ý: Nếu Excel cảnh báo định dạng file, hãy ấn 'Yes/Đồng ý' để tiếp tục mở.", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 
             } catch (Exception ex) {
                 ex.printStackTrace();

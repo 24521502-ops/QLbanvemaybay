@@ -110,4 +110,21 @@ public class BaoCaoTKBUS {
     public java.sql.Date[] getDateRange() {
         return dao.getDateRange();
     }
+
+    // ==================== XUẤT CSV CHI TIẾT ====================
+    public List<Object[]> getChiTietThanhToan(Date tuNgay, Date denNgay, String hangBay) {
+        return dao.getChiTietThanhToan(tuNgay, denNgay, hangBay);
+    }
+
+    public List<Object[]> getChiTietBooking(Date tuNgay, Date denNgay, String hangBay) {
+        return dao.getChiTietBooking(tuNgay, denNgay, hangBay);
+    }
+
+    public List<Object[]> getChiTietVeHangGhe(Date tuNgay, Date denNgay, String hangBay) {
+        return dao.getChiTietVeHangGhe(tuNgay, denNgay, hangBay);
+    }
+
+    public List<Integer> getAvailableYears() {
+        return dao.getAvailableYears();
+    }
 }
