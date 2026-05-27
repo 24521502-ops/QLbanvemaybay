@@ -14,14 +14,18 @@ public class VeDAO {
     public List<Object[]> layDanhSachVeChoGUI() {
         List<Object[]> list = new ArrayList<>();
 
-        // Đã JOIN thêm bảng FLIGHT để lấy FlightNumber và DepartureTime
+        // Đã JOIN thêm bảng FLIGHT, ROUTE, AIRPORT để lấy Hành trình bay
         String sql = "SELECT t.TicketID, t.BookingID, p.FullName, "
-                + "f.FlightNumber, TO_CHAR(f.DepartureTime, 'DD/MM/YYYY') AS NgayBay, "
+                + "f.FlightNumber || ' (' || dep.IATACode || ' -> ' || arr.IATACode || ')' AS ChuyenBay, "
+                + "TO_CHAR(f.DepartureTime, 'DD/MM/YYYY') AS NgayBay, "
                 + "s.Class, t.Price, t.TicketStatus "
                 + "FROM TICKET t "
                 + "LEFT JOIN PASSENGER p ON t.PassengerID = p.PassengerID "
                 + "LEFT JOIN SEAT s ON t.SeatID = s.SeatID "
                 + "LEFT JOIN FLIGHT f ON t.FlightID = f.FlightID "
+                + "LEFT JOIN ROUTE r ON f.RouteID = r.RouteID "
+                + "LEFT JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID "
+                + "LEFT JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID "
                 + "ORDER BY t.TicketID DESC";
 
         try (Connection conn = DBConnection.getConnection();
@@ -33,7 +37,7 @@ public class VeDAO {
                         rs.getString("TicketID"), // Cột 0
                         rs.getString("BookingID"), // Cột 1
                         rs.getString("FullName") != null ? rs.getString("FullName") : "Khách vãng lai", // Cột 2
-                        rs.getString("FlightNumber"), // Cột 3 (Mới)
+                        rs.getString("ChuyenBay"), // Cột 3 (Mới)
                         rs.getString("NgayBay"), // Cột 4 (Mới)
                         rs.getString("Class"), // Cột 5
                         rs.getDouble("Price"), // Cột 6
@@ -129,11 +133,12 @@ public class VeDAO {
         return data;
     }
 
-    // 2. TÌM GHẾ TRỐNG TRÊN CHUYẾN BAY (Loại trừ các ghế đã có người đặt)
+    // 2. TÌM GHẾ TRỐNG TRÊN CHUYẾN BAY (Bổ sung thêm giá tiền)
     public List<String> layDanhSachGheTrong(String flightID) {
         List<String> list = new ArrayList<>();
-        String sql = "SELECT s.SeatID, s.SeatNumber, s.Class " +
+        String sql = "SELECT s.SeatID, s.SeatNumber, s.Class, scp.Price " +
                 "FROM SEAT s JOIN FLIGHT f ON s.AircraftID = f.AircraftID " +
+                "LEFT JOIN SEATCLASSPRICE scp ON f.FlightID = scp.FlightID AND s.Class = scp.Class " +
                 "WHERE f.FlightID = ? " +
                 "AND s.SeatID NOT IN (SELECT SeatID FROM TICKET WHERE FlightID = ? AND TicketStatus != 'CANCELLED') " +
                 "ORDER BY s.Class, s.SeatNumber";
@@ -153,9 +158,13 @@ public class VeDAO {
                         hangGhe = "Phổ thông đặc biệt";
                     else if (hangGhe.equalsIgnoreCase("First Class"))
                         hangGhe = "Hạng nhất";
+                    // Lấy Giá
+                    double price = rs.getDouble("Price");
+                    java.text.DecimalFormat formatter = new java.text.DecimalFormat("###,###,###");
+                    String giaTien = (price > 0) ? formatter.format(price) + " VNĐ" : "Chưa có giá";
 
-                    // Ghép thành chuỗi: "ST01 - 1A - Thương gia"
-                    list.add(rs.getString("SeatID") + " - " + rs.getString("SeatNumber") + " - " + hangGhe);
+                    // Ghép thành chuỗi: "ST01 - 1A - Thương gia - 4,000,000 VNĐ"
+                    list.add(rs.getString("SeatID") + " - " + rs.getString("SeatNumber") + " - " + hangGhe + " - " + giaTien);
                 }
             }
         } catch (Exception e) {

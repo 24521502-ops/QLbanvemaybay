@@ -11,8 +11,9 @@ import bus.QuanLyDatChoBUS.BookingBUS;
 
 public class ThemDatChoDialog extends JDialog {
 
-    private JComboBox<String> cbxKhachHang, cbxChuyenBay, cbxGhe;
-    private JTextField txtTenHanhKhach, txtCCCD;
+    private JComboBox<String> cbxChuyenBay, cbxGhe;
+    private JTextField txtSdtNguoiDat, txtTenNguoiDat, txtTenHanhKhach, txtCCCD;
+    private String currentCustomerID = "";
     private JLabel lblTotal; // Label hiển thị tổng tiền
     private BookingBUS bookingBUS;
 
@@ -58,12 +59,39 @@ public class ThemDatChoDialog extends JDialog {
         gbc.insets = new Insets(0, 10, 25, 10);
         gbc.weightx = 0.5;
 
-        // Dòng 1: Khách hàng
+        // Dòng 1: Khách hàng (SĐT & Tên)
         gbc.gridy = 0;
         gbc.gridx = 0;
-        gbc.gridwidth = 2;
-        cbxKhachHang = new JComboBox<>();
-        body.add(createInputGroup("NGƯỜI ĐẶT VÉ (CUSTOMER)", cbxKhachHang), gbc);
+        gbc.gridwidth = 1;
+        
+        txtSdtNguoiDat = createStyledTextField("Nhập SĐT người đặt...", true);
+        txtSdtNguoiDat.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                String sdt = txtSdtNguoiDat.getText().trim();
+                if (sdt.length() >= 9) {
+                    String[] cus = bookingBUS.timKhachHangBangSdt(sdt);
+                    if (cus != null) {
+                        currentCustomerID = cus[0];
+                        txtTenNguoiDat.setText(cus[1]);
+                        txtTenNguoiDat.setEditable(false);
+                        txtTenNguoiDat.setBackground(new Color(241, 245, 249));
+                    } else {
+                        currentCustomerID = "";
+                        txtTenNguoiDat.setEditable(true);
+                        txtTenNguoiDat.setBackground(Color.WHITE);
+                    }
+                } else {
+                    currentCustomerID = "";
+                    txtTenNguoiDat.setEditable(true);
+                    txtTenNguoiDat.setBackground(Color.WHITE);
+                }
+            }
+        });
+        body.add(createInputGroup("SĐT NGƯỜI ĐẶT VÉ", txtSdtNguoiDat), gbc);
+
+        gbc.gridx = 1;
+        txtTenNguoiDat = createStyledTextField("Nhập họ tên người đặt...", true);
+        body.add(createInputGroup("HỌ TÊN NGƯỜI ĐẶT VÉ", txtTenNguoiDat), gbc);
 
         // Dòng 2: Chuyến bay
         gbc.gridy = 1;
@@ -133,11 +161,6 @@ public class ThemDatChoDialog extends JDialog {
 
     // Đổ dữ liệu Khách hàng và Chuyến bay lúc vừa bật Form
     private void loadDataToComboBoxes() {
-        cbxKhachHang.removeAllItems();
-        for (String c : bookingBUS.layDanhSachKhachHang()) {
-            cbxKhachHang.addItem(c);
-        }
-
         cbxChuyenBay.removeAllItems();
         for (String f : bookingBUS.layDanhSachChuyenBay()) {
             cbxChuyenBay.addItem(f);
@@ -180,9 +203,12 @@ public class ThemDatChoDialog extends JDialog {
 
     // Logic lưu xuống Database gọi Procedure
     private void xuLyTaoDatCho() {
-        if (cbxKhachHang.getSelectedItem() == null || cbxChuyenBay.getSelectedItem() == null ||
+        String sdtNguoiDat = txtSdtNguoiDat.getText().trim();
+        String tenNguoiDat = txtTenNguoiDat.getText().trim();
+
+        if (sdtNguoiDat.isEmpty() || tenNguoiDat.isEmpty() || cbxChuyenBay.getSelectedItem() == null ||
                 cbxGhe.getSelectedItem() == null || cbxGhe.getSelectedItem().toString().equals("Hết ghế trống!")) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn đầy đủ Khách hàng, Chuyến bay và Ghế ngồi!", "Lỗi",
+            JOptionPane.showMessageDialog(this, "Vui lòng nhập/chọn đầy đủ thông tin Khách hàng, Chuyến bay và Ghế ngồi!", "Lỗi",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -196,12 +222,12 @@ public class ThemDatChoDialog extends JDialog {
             return;
         }
 
-        String cusID = cbxKhachHang.getSelectedItem().toString().split(" - ")[0];
+        String cusID = currentCustomerID; // Mã khách hàng (rỗng nếu là khách mới)
         String flightID = cbxChuyenBay.getSelectedItem().toString().split(" - ")[0];
         String seatID = cbxGhe.getSelectedItem().toString().split(" - ")[0];
         String empID = "EMP02";
 
-        boolean success = bookingBUS.taoDatChoMoi(cusID, empID, flightID, seatID);
+        boolean success = bookingBUS.taoDatChoMoi(cusID, tenNguoiDat, sdtNguoiDat, empID, flightID, seatID, tenNguoiBay, cccd);
         if (success) {
             // ĐÃ SỬA: Hiển thị thông báo chi tiết hơn để chứng minh logic chuẩn
             JOptionPane.showMessageDialog(this,

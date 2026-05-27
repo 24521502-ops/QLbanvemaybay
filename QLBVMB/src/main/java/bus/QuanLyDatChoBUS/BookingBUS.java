@@ -61,8 +61,12 @@ public class BookingBUS {
         return bookingDAO.layDanhSachGheTrong(flightID);
     }
 
-    public boolean taoDatChoMoi(String customerID, String employeeID, String flightID, String seatID) {
-        return bookingDAO.taoDatChoMoi(customerID, employeeID, flightID, seatID);
+    public String[] timKhachHangBangSdt(String sdt) {
+        return bookingDAO.timKhachHangBangSdt(sdt);
+    }
+
+    public boolean taoDatChoMoi(String customerID, String tenNguoiDat, String sdtNguoiDat, String employeeID, String flightID, String seatID, String tenNguoiBay, String cccd) {
+        return bookingDAO.taoDatChoMoi(customerID, tenNguoiDat, sdtNguoiDat, employeeID, flightID, seatID, tenNguoiBay, cccd);
     }
 
     public boolean huyDatCho(String bookingID, String reason) {

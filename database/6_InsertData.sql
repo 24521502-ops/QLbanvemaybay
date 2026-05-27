@@ -3641,3 +3641,128 @@ ALTER TRIGGER TRG_RB60_CHECK_PAYMENT_AMOUNT ENABLE;
 ALTER TRIGGER TRG_RB64_CHECK_TICKET_PAYMENT ENABLE;
 ALTER TRIGGER TRG_RB66_BOOKING_MUST_HAVE_TICKET ENABLE;
 COMMIT;
+
+-- BẢNG DANH MỤC CHỨC NĂNG (FUNCTION)
+INSERT ALL
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN01', 'DASHBOARD', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN02', 'FLIGHT_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN03', 'BOOKING_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN04', 'TICKET_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN05', 'CUSTOMER_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN06', 'EMPLOYEE_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN07', 'ROLE_MANAGEMENT', 0)
+    INTO "FUNCTION" (FunctionID, NameFunction, IsDeleted) VALUES ('FN08', 'DATA_MANAGEMENT', 0)
+SELECT 1 FROM DUAL;
+
+-- BẢNG QUYỀN HẠN (ROLE)
+INSERT ALL
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL01', 'FN01', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL02', 'FN02', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL03', 'FN03', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL04', 'FN04', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL05', 'FN05', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL06', 'FN06', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL07', 'FN07', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL08', 'FN08', 1, 1, 1, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL09', 'FN01', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL10', 'FN02', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL11', 'FN03', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL12', 'FN04', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL13', 'FN05', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL14', 'FN06', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL15', 'FN07', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL16', 'FN08', 0, 0, 0, 0, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL17', 'FN01', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL18', 'FN02', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL19', 'FN03', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL20', 'FN04', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL21', 'FN05', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL22', 'FN06', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL23', 'FN07', 1, 1, 0, 1, 1, 0)
+    INTO ROLE (RoleID, FunctionID, AddPerm, EditPerm, DeletePerm, DownloadPerm, ViewPerm, IsDeleted) VALUES ('RL24', 'FN08', 1, 1, 0, 1, 1, 0)
+SELECT 1 FROM DUAL;
+
+-- BẢNG NHÓM QUYỀN (ROLE_GROUP)
+INSERT ALL
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES ('RG01', 'ADMIN_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES ('RG02', 'MANAGER_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES ('RG03', 'STAFF_GROUP', 0)
+    INTO ROLE_GROUP (RoleGroupID, NameRoleGroup, IsDeleted) VALUES ('RG04', 'CUSTOMER_GROUP', 0)
+SELECT 1 FROM DUAL;
+
+-- BẢNG GÁN NHÓM QUYỀN VỚI QUYỀN (ROLE_GROUP_ASSIGN_ROLE)
+INSERT ALL
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL01', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL02', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL03', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL04', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL05', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL06', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL07', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG01', 'RL08', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL01', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL02', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL03', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL04', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL05', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG02', 'RL06', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG03', 'RL18', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG03', 'RL19', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG03', 'RL20', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG03', 'RL21', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG04', 'RL09', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG04', 'RL11', 0)
+    INTO ROLE_GROUP_ASSIGN_ROLE (RoleGroupID, RoleID, IsDeleted) VALUES ('RG04', 'RL12', 0)
+SELECT 1 FROM DUAL;
+
+-- BẢNG GÁN TÀI KHOẢN VỚI NHÓM QUYỀN (ACCOUNT_ASSIGN_ROLE_GROUP)
+INSERT ALL
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC01', 'RG01', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC02', 'RG02', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC03', 'RG02', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC04', 'RG03', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC05', 'RG03', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC06', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC07', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC08', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC09', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC10', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC11', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC12', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC13', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC14', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC15', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC16', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC17', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC18', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC19', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC20', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC21', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC22', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC23', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC24', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC25', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC26', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC27', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC28', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC29', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC30', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC31', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC32', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC33', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC34', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC35', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC36', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC37', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC38', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC39', 'RG04', 0)
+    INTO ACCOUNT_ASSIGN_ROLE_GROUP (AccountID, RoleGroupID, IsDeleted) VALUES ('ACC40', 'RG04', 0)
+SELECT 1 FROM DUAL;
+
+commit;
+
+select * from flight;
+
+DELETE FROM SEATCLASSPRICE WHERE FlightID = 'FL35';
+DELETE FROM FLIGHT WHERE FlightID = 'FL35';
+commit;

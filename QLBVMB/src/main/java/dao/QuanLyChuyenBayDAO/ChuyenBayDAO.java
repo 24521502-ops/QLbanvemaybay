@@ -11,63 +11,72 @@ public class ChuyenBayDAO {
     public List<Object[]> layDanhSachChuyenBay() {
         List<Object[]> list = new ArrayList<>();
         String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime, AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
-        String countSql = "SELECT COUNT(*) AS total FROM FLIGHT";
-        
-        try (Connection conn = DBConnection.getConnection()) {
-            conn.setAutoCommit(false); // Bắt đầu Transaction
-            
-            // 1. SET MỨC CÔ LẬP THEO YÊU CẦU CỦA CÔ
-            // Mức READ_COMMITTED sẽ bị lỗi Bóng Ma (Phantom Read) - Đọc 2 lần ra 2 kết quả khác nhau
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            // Mở dòng dưới đây để KHẮC PHỤC lỗi Bóng Ma (Đọc 2 lần kết quả giống y hệt nhau)
-            // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-            // --- LẦN ĐỌC THỨ NHẤT ---
-            int count1 = 0;
-            try (PreparedStatement psCount = conn.prepareStatement(countSql);
-                 ResultSet rsCount = psCount.executeQuery()) {
-                if (rsCount.next()) count1 = rsCount.getInt("total");
-                System.out.println("\n========== BẮT ĐẦU DEMO PHANTOM READ ==========");
-                System.out.println("[Giao dịch 1] Lần đọc 1: Tổng số chuyến bay là: " + count1);
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                list.add(new Object[] {
+                        rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
+                        rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
+                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID")
+                });
             }
-
-            // --- NGỦ 10 GIÂY ---
-            // Tranh thủ lúc này, bạn qua Cửa sổ 2 bấm THÊM 1 chuyến bay mới nha!
-            System.out.println("[Giao dịch 1] Đang chờ 10s... Nhanh tay qua cửa sổ kia THÊM chuyến bay đi bạn!");
-            try { Thread.sleep(10000); } catch (InterruptedException e) { e.printStackTrace(); }
-
-            // --- LẦN ĐỌC THỨ HAI (TRONG CÙNG 1 GIAO DỊCH) ---
-            int count2 = 0;
-            try (PreparedStatement psCount2 = conn.prepareStatement(countSql);
-                 ResultSet rsCount2 = psCount2.executeQuery()) {
-                if (rsCount2.next()) count2 = rsCount2.getInt("total");
-                System.out.println("[Giao dịch 1] Lần đọc 2 (Sau 10s): Tổng số chuyến bay là: " + count2);
-                
-                if (count1 != count2) {
-                    System.out.println("=> LỖI BÓNG MA (PHANTOM READ) XUẤT HIỆN! Đang cùng 1 giao dịch mà số lượng lại tăng lên!");
-                } else {
-                    System.out.println("=> KHÔNG BỊ BÓNG MA! Số lượng vẫn được giữ nguyên (nhờ SERIALIZABLE).");
-                }
-                System.out.println("================================================\n");
-            }
-
-            // Lấy dữ liệu thật đổ ra UI
-            try (PreparedStatement ps = conn.prepareStatement(sql);
-                 ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    list.add(new Object[] {
-                            rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
-                            rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
-                            rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID")
-                    });
-                }
-            }
-            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return list;
     }
+    
+    
+    
+//    public List<Object[]> layDanhSachChuyenBay() throws SQLException {
+//        List<Object[]> list = new ArrayList<>();
+//        String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime, AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
+//        String cntSql = "SELECT COUNT(*) AS Tong FROM FLIGHT";
+//        
+//        try(Connection conn = DBConnection.getConnection()) {
+//            conn.setAutoCommit(false);
+//            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+//            
+//            int cnt1 = 0;
+//            try(PreparedStatement psCnt1 = conn.prepareStatement(cntSql);
+//                    ResultSet rsCnt1 = psCnt1.executeQuery()) {
+//                if(rsCnt1.next()) cnt1 = rsCnt1.getInt("Tong");
+//                System.out.println("Lan doc 1: Tong so chuyen bay la: " + cnt1);
+//            }
+//        
+//            try {
+//                Thread.sleep(10000);
+//            } catch(InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//            
+//            int cnt2 = 0;
+//            try(PreparedStatement psCnt2 = conn.prepareStatement(cntSql);
+//                    ResultSet rsCnt2 = psCnt2.executeQuery()) {
+//                if(rsCnt2.next()) cnt2 = rsCnt2.getInt("Tong");
+//                System.out.println("Lan doc 2: Tong so chuyen bay la: " + cnt2);
+//                if(cnt1 != cnt2) System.out.println("Loi phantom read");
+//                else System.out.println("Loi da duoc sua nho dung SERIALIZABLE");
+//        }
+//        
+//        try (PreparedStatement ps = conn.prepareStatement(sql);
+//             ResultSet rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                list.add(new Object[] {
+//                        rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
+//                        rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
+//                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID")
+//                });
+//            }
+//        }
+//            conn.commit();
+//            
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return list;
+//    }
 
     // LẤY CHI TIẾT 1 CHUYẾN BAY ĐỂ ĐỔ LÊN FORM SỬA
     public Object[] layChiTietChuyenBay(String flightID) {
@@ -95,7 +104,8 @@ public class ChuyenBayDAO {
     public boolean capNhatToanBoChuyenBay(String flightID, String flightNum, String airlineID, String aircraftID,
             String depAirport, String arrAirport, java.util.Date depTime, java.util.Date arrTime, String gate) {
         String sql = "{CALL SP_UPDATE_FLIGHT_FULL(?, ?, ?, ?, ?, ?, ?, ?, ?)}";
-        try (Connection conn = DBConnection.getConnection(); CallableStatement cs = conn.prepareCall(sql)) {
+        try (Connection conn = DBConnection.getConnection();
+          CallableStatement cs = conn.prepareCall(sql)) {
             cs.setString(1, flightID);
             cs.setString(2, flightNum);
             cs.setString(3, airlineID);
@@ -173,13 +183,22 @@ public class ChuyenBayDAO {
     public boolean capNhatGiaChuyenBay(String flightID, double priceEco, double priceBus, double pricePrem, double priceFirst) {
         try (Connection conn = DBConnection.getConnection()) {
             conn.setAutoCommit(false);
+            //conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             updateOrInsertPrice(conn, flightID, "Economy", priceEco);
             updateOrInsertPrice(conn, flightID, "Business", priceBus);
             updateOrInsertPrice(conn, flightID, "Premium Economy", pricePrem);
             updateOrInsertPrice(conn, flightID, "First Class", priceFirst);
+            
+            //try {
+            //Thread.sleep(10000);
+        //} catch (InterruptedException ex) {
+          //  ex.printStackTrace();
+        //}
+            
             conn.commit();
             return true;
         } catch (SQLException e) {
+            //System.err.println("Lỗi giao dịch: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
