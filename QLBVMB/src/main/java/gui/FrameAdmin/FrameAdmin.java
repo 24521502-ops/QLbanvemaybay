@@ -344,7 +344,55 @@ public class FrameAdmin extends JFrame {
         sep.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
         sep.setAlignmentX(Component.LEFT_ALIGNMENT);
         bottomPanel.add(sep);
-        bottomPanel.add(Box.createVerticalStrut(8));
+        bottomPanel.add(Box.createVerticalStrut(12));
+
+        // Profile panel (Avatar + Name)
+        JPanel profilePanel = new JPanel(new BorderLayout(10, 0));
+        profilePanel.setOpaque(false);
+        profilePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        profilePanel.setMaximumSize(new Dimension(SIDEBAR_WIDTH - 24, 40));
+        
+        // Avatar label
+        JLabel lblSidebarAvt = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(59, 130, 246));
+                g2.fillOval(0, 0, 32, 32);
+                g2.setColor(Color.WHITE);
+                g2.fillOval(11, 6, 10, 10);
+                g2.fillArc(6, 18, 20, 16, 0, 180);
+                g2.dispose();
+            }
+        };
+        lblSidebarAvt.setPreferredSize(new Dimension(32, 32));
+        profilePanel.add(lblSidebarAvt, BorderLayout.WEST);
+
+        // Name and Role
+        JPanel namePnl = new JPanel(new GridLayout(2, 1, 0, 0));
+        namePnl.setOpaque(false);
+        String currentName = (currentAccount != null) ? currentAccount.getUserName() : "Admin";
+        JLabel lblCurrentName = new JLabel(currentName);
+        lblCurrentName.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblCurrentName.setForeground(Color.WHITE);
+
+        String currentRole = (currentAccount != null) ? currentAccount.getRoleGroup() : "ADMIN_GROUP";
+        String currentRoleDisplay = "Quản trị viên";
+        if ("MANAGER_GROUP".equals(currentRole)) currentRoleDisplay = "Quản lý";
+        else if ("STAFF_GROUP".equals(currentRole)) currentRoleDisplay = "Nhân viên";
+        else if ("CUSTOMER_GROUP".equals(currentRole)) currentRoleDisplay = "Khách hàng";
+
+        JLabel lblCurrentRole = new JLabel(currentRoleDisplay);
+        lblCurrentRole.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblCurrentRole.setForeground(new Color(148, 163, 184)); // Slate 400
+
+        namePnl.add(lblCurrentName);
+        namePnl.add(lblCurrentRole);
+        profilePanel.add(namePnl, BorderLayout.CENTER);
+
+        bottomPanel.add(profilePanel);
+        bottomPanel.add(Box.createVerticalStrut(12));
 
         JButton btnLogout = createMenuButton("Logout", "logout");
         bottomPanel.add(btnLogout);
