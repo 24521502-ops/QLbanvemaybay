@@ -406,4 +406,21 @@ public class BookingProcessDAO {
         }
         return 0.0;
     }
+
+    public java.util.Map<String, Double> getTicketPricesByFlight(String bookingID) {
+        java.util.Map<String, Double> prices = new java.util.HashMap<>();
+        String sql = "SELECT FlightID, MAX(Price) AS Price FROM TICKET WHERE BookingID = ? AND TicketStatus != 'CANCELLED' GROUP BY FlightID";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    prices.put(rs.getString("FlightID"), rs.getDouble("Price"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return prices;
+    }
 }

@@ -346,9 +346,29 @@ public class BookingProcessPanel extends JPanel {
             total = actualTotal;
         }
 
+        // Lấy danh sách giá vé thực tế từ database (giá động)
+        java.util.Map<String, Double> dbPrices = bookingDAO.getTicketPricesByFlight(this.currentBookingID);
+        List<Double> legPrices = new ArrayList<>();
+        for (int idx = 0; idx < selectedFlights.size(); idx++) {
+            dto.FlightSearchResultDTO f = selectedFlights.get(idx);
+            Double p = dbPrices.get(f.getFlightID());
+            if (p == null || p <= 0) {
+                double baseP = 0;
+                String cls = selectedClasses.get(idx);
+                for (dto.FlightSearchResultDTO.SeatClassInfo sc : f.getSeatClasses()) {
+                    if (sc.getClassName().equalsIgnoreCase(cls)) {
+                        baseP = sc.getPrice();
+                        break;
+                    }
+                }
+                p = baseP > 0 ? baseP : 1200000.0;
+            }
+            legPrices.add(p);
+        }
+
         this.selectedFlight = selectedFlights.get(0);
         this.selectedClass = selectedClasses.get(0);
-        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total);
+        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, legPrices, total);
         showStep(3); // Hiện màn hình thanh toán (STEP_4)
     }
 
