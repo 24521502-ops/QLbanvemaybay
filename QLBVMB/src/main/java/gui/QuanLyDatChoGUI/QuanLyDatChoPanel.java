@@ -9,34 +9,34 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.*;
-import util.AppColor; 
+import util.AppColor;
 
 public class QuanLyDatChoPanel extends JPanel {
 
     private DefaultTableModel tableModel;
     private JTable table;
-    private JTextField txtSearch; 
+    private JTextField txtSearch;
     private JLabel lblTotalBooking, lblConfirmedBooking, lblCancelledBooking;
-    private TableRowSorter<DefaultTableModel> rowSorter; 
-    private BookingBUS bookingBUS; 
-    
+    private TableRowSorter<DefaultTableModel> rowSorter;
+    private BookingBUS bookingBUS;
+
     // Màu Zebra chuẩn y hệt bản Quản lý Chuyến bay / Quản lý Vé
-    private final Color ZEBRA_COLOR = new Color(252, 252, 253); 
+    private final Color ZEBRA_COLOR = new Color(252, 252, 253);
 
     public QuanLyDatChoPanel() {
         bookingBUS = new BookingBUS();
         initComponents();
         customizeTable();
-        loadRealData(); 
+        loadRealData();
     }
 
     private void initComponents() {
         setLayout(new BorderLayout(0, 20));
-        setBackground(AppColor.BACKGROUND); 
+        setBackground(AppColor.BACKGROUND);
         setBorder(new EmptyBorder(30, 40, 30, 40));
 
         // ==========================================
-        // 1. HEADER 
+        // 1. HEADER
         // ==========================================
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setOpaque(false);
@@ -63,21 +63,21 @@ public class QuanLyDatChoPanel extends JPanel {
         statsPanel.setOpaque(false);
         statsPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 120));
         statsPanel.setBorder(new EmptyBorder(15, 0, 5, 0));
-        
+
         lblTotalBooking = new JLabel("0");
         lblConfirmedBooking = new JLabel("0");
         lblCancelledBooking = new JLabel("0");
-        
+
         statsPanel.add(createClickableStatCard("TỔNG ĐƠN ĐẶT CHỖ", lblTotalBooking, AppColor.PRIMARY, "ALL"));
         statsPanel.add(createClickableStatCard("ĐÃ XÁC NHẬN", lblConfirmedBooking, AppColor.SUCCESS, "CONFIRMED"));
         statsPanel.add(createClickableStatCard("ĐÃ HỦY", lblCancelledBooking, AppColor.ERROR, "CANCELLED"));
 
         // ==========================================
-        // 3. TOOLBAR 
+        // 3. TOOLBAR
         // ==========================================
         JPanel toolbarPanel = new JPanel(new BorderLayout());
         toolbarPanel.setOpaque(false);
-        toolbarPanel.setBorder(new EmptyBorder(15, 0, 0, 0)); 
+        toolbarPanel.setBorder(new EmptyBorder(15, 0, 0, 0));
 
         // Nhóm công cụ bên Trái (WEST)
         JPanel pnlLeftTools = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
@@ -87,33 +87,40 @@ public class QuanLyDatChoPanel extends JPanel {
         txtSearch.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         txtSearch.setPreferredSize(new Dimension(340, 42));
         txtSearch.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(AppColor.BORDER), 
-            new EmptyBorder(8, 12, 8, 12)
-        ));
+                BorderFactory.createLineBorder(AppColor.BORDER),
+                new EmptyBorder(8, 12, 8, 12)));
         txtSearch.putClientProperty("JTextField.placeholderText", "Nhập mã đặt chỗ, tên KH hoặc trạng thái...");
         txtSearch.putClientProperty("JTextField.leadingIcon", new SearchIcon());
         txtSearch.putClientProperty("JComponent.roundRect", true);
         txtSearch.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { applyFilter(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                applyFilter();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                applyFilter();
+            }
+
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                applyFilter();
+            }
         });
 
-        JButton btnRefresh = makeSecondaryButton("Làm mới"); 
+        JButton btnRefresh = makeSecondaryButton("Làm mới");
         btnRefresh.setPreferredSize(new Dimension(130, 42));
         btnRefresh.addActionListener(e -> {
-            txtSearch.setText(""); 
+            txtSearch.setText("");
             if (rowSorter != null) {
                 rowSorter.setRowFilter(null);
                 rowSorter.setSortKeys(null);
             }
-            loadRealData(); 
+            loadRealData();
             txtSearch.requestFocus();
         });
 
         JButton btnSort = makeSecondaryButton("Sắp xếp ▼");
         btnSort.setPreferredSize(new Dimension(120, 42));
-        
+
         JPopupMenu sortMenu = new JPopupMenu();
         sortMenu.setBackground(Color.WHITE);
         sortMenu.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
@@ -122,19 +129,22 @@ public class QuanLyDatChoPanel extends JPanel {
         JMenuItem itemSortIdAsc = createMenuItem("Mã đặt chỗ (A - Z)");
         JMenuItem itemSortDateAsc = createMenuItem("Ngày đi (Gần nhất)");
         JMenuItem itemSortDateDesc = createMenuItem("Ngày đi (Xa nhất)");
+        JMenuItem itemSortToday = createMenuItem("Chuyến bay hôm nay");
         JMenuItem itemSortStatus = createMenuItem("Trạng thái (A - Z)");
 
-        itemSortDef.addActionListener(e -> applySorting(0, SortOrder.DESCENDING));
-        itemSortIdAsc.addActionListener(e -> applySorting(0, SortOrder.ASCENDING));
-        itemSortDateAsc.addActionListener(e -> applySorting(3, SortOrder.ASCENDING));
-        itemSortDateDesc.addActionListener(e -> applySorting(3, SortOrder.DESCENDING));
-        itemSortStatus.addActionListener(e -> applySorting(5, SortOrder.ASCENDING));
+        itemSortDef.addActionListener(e -> applySortingCustom(0));
+        itemSortIdAsc.addActionListener(e -> applySortingCustom(1));
+        itemSortDateAsc.addActionListener(e -> applySortingCustom(2));
+        itemSortDateDesc.addActionListener(e -> applySortingCustom(3));
+        itemSortToday.addActionListener(e -> applySortingCustom(4));
+        itemSortStatus.addActionListener(e -> applySortingCustom(5));
 
         sortMenu.add(itemSortDef);
         sortMenu.add(itemSortIdAsc);
         sortMenu.addSeparator();
         sortMenu.add(itemSortDateAsc);
         sortMenu.add(itemSortDateDesc);
+        sortMenu.add(itemSortToday);
         sortMenu.addSeparator();
         sortMenu.add(itemSortStatus);
 
@@ -147,13 +157,15 @@ public class QuanLyDatChoPanel extends JPanel {
         // Nhóm thao tác bên Phải (EAST)
         JPanel pnlRightTools = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         pnlRightTools.setOpaque(false);
-        
+
         JButton btnAdd = makePrimaryButton("+ Thêm đặt chỗ");
         btnAdd.addActionListener(e -> {
-            // Lưu ý: Nếu báo lỗi ở dialog này thì chỉnh lại tên package/import cho khớp code cũ của bạn nhé
+            // Lưu ý: Nếu báo lỗi ở dialog này thì chỉnh lại tên package/import cho khớp
+            // code cũ của bạn nhé
             ThemDatChoDialog dialog = new ThemDatChoDialog((Frame) SwingUtilities.getWindowAncestor(this));
             dialog.setVisible(true);
-            loadRealData(); applyFilter();
+            loadRealData();
+            applyFilter();
         });
         pnlRightTools.add(btnAdd);
 
@@ -169,15 +181,18 @@ public class QuanLyDatChoPanel extends JPanel {
         add(topPanel, BorderLayout.NORTH);
 
         // ==========================================
-        // 4. BẢNG DANH SÁCH 
+        // 4. BẢNG DANH SÁCH
         // ==========================================
         JPanel panelTableCard = new JPanel(new BorderLayout());
         panelTableCard.setBackground(Color.WHITE);
         panelTableCard.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
 
-        String[] cols = {"MÃ ĐẶT CHỖ", "KHÁCH HÀNG", "CHẶNG BAY", "NGÀY ĐI", "TỔNG TIỀN", "TRẠNG THÁI", "THAO TÁC"};
+        String[] cols = { "MÃ ĐẶT CHỖ", "KHÁCH HÀNG", "CHẶNG BAY", "NGÀY ĐI", "TỔNG TIỀN", "TRẠNG THÁI", "THAO TÁC" };
         tableModel = new DefaultTableModel(cols, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return c == 6; } 
+            @Override
+            public boolean isCellEditable(int r, int c) {
+                return c == 6;
+            }
         };
 
         table = new JTable(tableModel);
@@ -201,9 +216,71 @@ public class QuanLyDatChoPanel extends JPanel {
         }
     }
 
-    private void applySorting(int columnIndex, SortOrder order) {
+    private void applySortingCustom(int type) {
+        if (rowSorter == null)
+            return;
+
+        java.util.Comparator<String> dateComparator = (s1, s2) -> {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
+                return sdf.parse(s1).compareTo(sdf.parse(s2));
+            } catch (Exception e) {
+                return s1.compareTo(s2);
+            }
+        };
+
+        java.util.Comparator<String> todayFirstComparator = (s1, s2) -> {
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
+                java.util.Date d1 = sdf.parse(s1);
+                java.util.Date d2 = sdf.parse(s2);
+
+                // Lấy mốc 0h00 của ngày hôm nay
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                cal.set(java.util.Calendar.MINUTE, 0);
+                cal.set(java.util.Calendar.SECOND, 0);
+                cal.set(java.util.Calendar.MILLISECOND, 0);
+                java.util.Date todayDate = cal.getTime();
+
+                boolean isPast1 = d1.before(todayDate);
+                boolean isPast2 = d2.before(todayDate);
+
+                // Nếu 1 là tương lai/hôm nay, 2 là quá khứ -> 1 xếp trên
+                if (!isPast1 && isPast2)
+                    return -1;
+                // Nếu 2 là tương lai/hôm nay, 1 là quá khứ -> 2 xếp trên
+                if (isPast1 && !isPast2)
+                    return 1;
+
+                // Nếu cùng nhóm (cùng tương lai hoặc cùng quá khứ) -> xếp tăng dần
+                return d1.compareTo(d2);
+            } catch (Exception e) {
+                return s1.compareTo(s2);
+            }
+        };
+
         List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-        sortKeys.add(new RowSorter.SortKey(columnIndex, order));
+        if (type == 0) { // Mã đặt chỗ Mới nhất
+            rowSorter.setComparator(0, null);
+            sortKeys.add(new RowSorter.SortKey(0, SortOrder.DESCENDING));
+        } else if (type == 1) { // Mã đặt chỗ A-Z
+            rowSorter.setComparator(0, null);
+            sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        } else if (type == 2) { // Ngày đi Gần nhất (Ascending)
+            rowSorter.setComparator(3, dateComparator);
+            sortKeys.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
+        } else if (type == 3) { // Ngày đi Xa nhất (Descending)
+            rowSorter.setComparator(3, dateComparator);
+            sortKeys.add(new RowSorter.SortKey(3, SortOrder.DESCENDING));
+        } else if (type == 4) { // Chuyến bay hôm nay
+            rowSorter.setComparator(3, todayFirstComparator);
+            sortKeys.add(new RowSorter.SortKey(3, SortOrder.ASCENDING));
+        } else if (type == 5) { // Trạng thái
+            rowSorter.setComparator(5, null);
+            sortKeys.add(new RowSorter.SortKey(5, SortOrder.ASCENDING));
+        }
+
         rowSorter.setSortKeys(sortKeys);
         rowSorter.sort();
     }
@@ -221,31 +298,44 @@ public class QuanLyDatChoPanel extends JPanel {
     private JPanel createClickableStatCard(String title, JLabel lblCount, Color themeColor, String filterType) {
         JPanel card = new JPanel(new BorderLayout(0, 10));
         card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 5, 0, 0, themeColor), new EmptyBorder(20, 25, 20, 25)));
-        JLabel lblT = new JLabel(title); lblT.setFont(new Font("Segoe UI", Font.BOLD, 12)); lblT.setForeground(AppColor.TEXT_SECONDARY);
-        lblCount.setFont(new Font("Segoe UI", Font.BOLD, 42)); lblCount.setForeground(AppColor.TEXT_PRIMARY);
-        card.add(lblT, BorderLayout.NORTH); card.add(lblCount, BorderLayout.CENTER); 
-        
+        card.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createMatteBorder(0, 5, 0, 0, themeColor),
+                new EmptyBorder(20, 25, 20, 25)));
+        JLabel lblT = new JLabel(title);
+        lblT.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblT.setForeground(AppColor.TEXT_SECONDARY);
+        lblCount.setFont(new Font("Segoe UI", Font.BOLD, 42));
+        lblCount.setForeground(AppColor.TEXT_PRIMARY);
+        card.add(lblT, BorderLayout.NORTH);
+        card.add(lblCount, BorderLayout.CENTER);
+
         card.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                if (filterType.equals("ALL")) rowSorter.setRowFilter(null);
-                else if (filterType.equals("CONFIRMED")) rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Xác nhận", 5));
-                else if (filterType.equals("CANCELLED")) rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Hủy", 5));
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (filterType.equals("ALL"))
+                    rowSorter.setRowFilter(null);
+                else if (filterType.equals("CONFIRMED"))
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Xác nhận", 5));
+                else if (filterType.equals("CANCELLED"))
+                    rowSorter.setRowFilter(RowFilter.regexFilter("(?i)Hủy", 5));
             }
-            @Override public void mouseEntered(MouseEvent e) { 
-                card.setCursor(new Cursor(Cursor.HAND_CURSOR)); 
-                card.setBackground(ZEBRA_COLOR); 
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                card.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                card.setBackground(ZEBRA_COLOR);
             }
-            @Override public void mouseExited(MouseEvent e) { 
-                card.setBackground(Color.WHITE); 
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                card.setBackground(Color.WHITE);
             }
         });
         return card;
     }
 
     private void loadRealData() {
-        tableModel.setRowCount(0); 
-        List<Object[]> listRaw = bookingBUS.layDanhSachDatCho(); 
+        tableModel.setRowCount(0);
+        List<Object[]> listRaw = bookingBUS.layDanhSachDatCho();
         java.text.DecimalFormat formatter = new java.text.DecimalFormat("###,###,###");
 
         int total = 0, confirmed = 0, cancelled = 0;
@@ -255,34 +345,41 @@ public class QuanLyDatChoPanel extends JPanel {
             String fullName = (String) raw[1];
             String email = (String) raw[2];
             String route = (String) raw[3];
-            String flightInfo = raw[4] + " • " + raw[5]; 
+            String flightInfo = raw[4] + " • " + raw[5];
             String date = (String) raw[6];
-            
+
             Double totalAmount = null;
-            if(raw[7] != null) {
-                totalAmount = Double.valueOf(raw[7].toString()); 
+            if (raw[7] != null) {
+                totalAmount = Double.valueOf(raw[7].toString());
             }
-            String formattedMoney = (totalAmount != null && totalAmount > 0) ? formatter.format(totalAmount) + "&nbsp;VNĐ" : "0&nbsp;VNĐ";
-            String status = (String) raw[8]; 
+            String formattedMoney = (totalAmount != null && totalAmount > 0)
+                    ? formatter.format(totalAmount) + "&nbsp;VNĐ"
+                    : "0&nbsp;VNĐ";
+            String status = (String) raw[8];
 
             // Cập nhật số liệu thống kê
             total++;
             if (status != null) {
-                if (status.equalsIgnoreCase("Đã xác nhận")) confirmed++;
-                else if (status.equalsIgnoreCase("Đã hủy")) cancelled++;
+                if (status.equalsIgnoreCase("Đã xác nhận"))
+                    confirmed++;
+                else if (status.equalsIgnoreCase("Đã hủy"))
+                    cancelled++;
             }
 
-            String htmlKhachHang = "<html><b><font size='4' face='Segoe UI'>" + fullName + "</font></b><br><font color='#64748b' face='Segoe UI'>" + email + "</font></html>";
-            String htmlChangBay = "<html><b><font size='4' face='Segoe UI'>" + route + "</font></b><br><font color='#64748b' face='Segoe UI'>" + flightInfo + "</font></html>";
-            String htmlTongTien = "<html><b><font color='#0f172a' face='Segoe UI'>" + formattedMoney + "</font></b></html>";
+            String htmlKhachHang = "<html><b><font size='4' face='Segoe UI'>" + fullName
+                    + "</font></b><br><font color='#64748b' face='Segoe UI'>" + email + "</font></html>";
+            String htmlChangBay = "<html><b><font size='4' face='Segoe UI'>" + route
+                    + "</font></b><br><font color='#64748b' face='Segoe UI'>" + flightInfo + "</font></html>";
+            String htmlTongTien = "<html><b><font color='#0f172a' face='Segoe UI'>" + formattedMoney
+                    + "</font></b></html>";
 
-            tableModel.addRow(new Object[]{
-                bookingID, htmlKhachHang, htmlChangBay, date, htmlTongTien, status, ""
+            tableModel.addRow(new Object[] {
+                    bookingID, htmlKhachHang, htmlChangBay, date, htmlTongTien, status, ""
             });
         }
-        
+
         // Đổ số liệu lên các thẻ Stats
-        if(lblTotalBooking != null) {
+        if (lblTotalBooking != null) {
             lblTotalBooking.setText(String.valueOf(total));
             lblConfirmedBooking.setText(String.valueOf(confirmed));
             lblCancelledBooking.setText(String.valueOf(cancelled));
@@ -309,186 +406,298 @@ public class QuanLyDatChoPanel extends JPanel {
     // LỘT XÁC BẢNG: ĐỒNG BỘ NGỰA VẰN VÀ ĐƯỜNG KẺ MẢNH
     // ===============================================
     private void customizeTable() {
-        table.setRowHeight(65); 
+        table.setRowHeight(65);
         table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        
-        table.setShowVerticalLines(false); 
+
+        table.setShowVerticalLines(false);
         table.setShowHorizontalLines(false);
         table.setIntercellSpacing(new Dimension(0, 0));
-        table.setSelectionBackground(new Color(243, 244, 246)); 
+        table.setSelectionBackground(new Color(243, 244, 246));
         table.setSelectionForeground(AppColor.PRIMARY);
 
         JTableHeader header = table.getTableHeader();
-        header.setPreferredSize(new Dimension(header.getWidth(), 48)); 
+        header.setPreferredSize(new Dimension(header.getWidth(), 48));
         header.setBackground(Color.WHITE);
         header.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, AppColor.BORDER));
-        
+
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
-                setForeground(new Color(100, 116, 139)); 
-                setFont(new Font("Segoe UI", Font.BOLD, 12)); 
+                setForeground(new Color(100, 116, 139));
+                setFont(new Font("Segoe UI", Font.BOLD, 12));
                 setBackground(Color.WHITE);
                 return this;
             }
         };
-        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) table.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
+        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++)
+            table.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
 
         DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer() {
-            @Override public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
+            @Override
+            public Component getTableCellRendererComponent(JTable t, Object v, boolean s, boolean f, int r, int c) {
                 super.getTableCellRendererComponent(t, v, s, f, r, c);
                 setOpaque(true);
-                
+
                 setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
-                    new EmptyBorder(0, 15, 0, 15)
-                ));
-                
+                        BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER),
+                        new EmptyBorder(0, 15, 0, 15)));
+
                 if (!s) {
                     setBackground(r % 2 == 0 ? Color.WHITE : ZEBRA_COLOR);
                 }
-                
+
                 setForeground(AppColor.TEXT_PRIMARY);
                 if (c == 0) {
-                    setFont(new Font("Segoe UI", Font.BOLD, 14)); 
+                    setFont(new Font("Segoe UI", Font.BOLD, 14));
                 } else {
-                    setFont(new Font("Segoe UI", Font.PLAIN, 14)); 
+                    setFont(new Font("Segoe UI", Font.PLAIN, 14));
                 }
                 return this;
             }
         };
-        
-        table.getColumnModel().getColumn(0).setCellRenderer(defaultRenderer); 
-        table.getColumnModel().getColumn(1).setCellRenderer(defaultRenderer); 
-        table.getColumnModel().getColumn(2).setCellRenderer(defaultRenderer); 
-        table.getColumnModel().getColumn(3).setCellRenderer(defaultRenderer); 
-        table.getColumnModel().getColumn(4).setCellRenderer(defaultRenderer); 
 
-        table.getColumnModel().getColumn(5).setCellRenderer(new BadgeRenderer()); 
-        table.getColumnModel().getColumn(6).setCellRenderer(new ActionRenderer());  
-        table.getColumnModel().getColumn(6).setCellEditor(new ActionEditor());       
-        
-        table.getColumnModel().getColumn(0).setPreferredWidth(110); 
-        table.getColumnModel().getColumn(1).setPreferredWidth(210); 
-        table.getColumnModel().getColumn(2).setPreferredWidth(200); 
-        table.getColumnModel().getColumn(3).setPreferredWidth(140); 
-        table.getColumnModel().getColumn(4).setPreferredWidth(140); 
-        table.getColumnModel().getColumn(5).setPreferredWidth(120); 
-        table.getColumnModel().getColumn(6).setPreferredWidth(90); 
+        table.getColumnModel().getColumn(0).setCellRenderer(defaultRenderer);
+        table.getColumnModel().getColumn(1).setCellRenderer(defaultRenderer);
+        table.getColumnModel().getColumn(2).setCellRenderer(defaultRenderer);
+        table.getColumnModel().getColumn(3).setCellRenderer(defaultRenderer);
+        table.getColumnModel().getColumn(4).setCellRenderer(defaultRenderer);
+
+        table.getColumnModel().getColumn(5).setCellRenderer(new BadgeRenderer());
+        table.getColumnModel().getColumn(6).setCellRenderer(new ActionRenderer());
+        table.getColumnModel().getColumn(6).setCellEditor(new ActionEditor());
+
+        table.getColumnModel().getColumn(0).setPreferredWidth(110);
+        table.getColumnModel().getColumn(1).setPreferredWidth(210);
+        table.getColumnModel().getColumn(2).setPreferredWidth(200);
+        table.getColumnModel().getColumn(3).setPreferredWidth(140);
+        table.getColumnModel().getColumn(4).setPreferredWidth(140);
+        table.getColumnModel().getColumn(5).setPreferredWidth(120);
+        table.getColumnModel().getColumn(6).setPreferredWidth(90);
     }
 
     private JButton makePrimaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(AppColor.PRIMARY); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8); g2.dispose(); super.paintComponent(g);
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(AppColor.PRIMARY);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(Color.WHITE); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); btn.setPreferredSize(new Dimension(160, 42)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(Color.WHITE);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btn.setPreferredSize(new Dimension(160, 42));
+        return btn;
     }
 
     private JButton makeSecondaryButton(String text) {
         JButton btn = new JButton(text) {
-            @Override protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE); g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
-                g2.setColor(AppColor.BORDER); g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 8, 8); g2.dispose(); super.paintComponent(g);
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 8, 8);
+                g2.setColor(AppColor.BORDER);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 8, 8);
+                g2.dispose();
+                super.paintComponent(g);
             }
         };
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 14)); btn.setForeground(AppColor.TEXT_PRIMARY); btn.setContentAreaFilled(false); btn.setBorderPainted(false); btn.setCursor(new Cursor(Cursor.HAND_CURSOR)); return btn;
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btn.setForeground(AppColor.TEXT_PRIMARY);
+        btn.setContentAreaFilled(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return btn;
     }
 
     class BadgeRenderer extends JPanel implements TableCellRenderer {
-        private String text = ""; private Color bgColor = Color.WHITE; private Color fgColor = Color.BLACK;
-        public BadgeRenderer() { 
-            setOpaque(true); 
-            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER)); 
+        private String text = "";
+        private Color bgColor = Color.WHITE;
+        private Color fgColor = Color.BLACK;
+
+        public BadgeRenderer() {
+            setOpaque(true);
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER));
         }
 
-        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
             setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : ZEBRA_COLOR));
             if (value != null) {
                 text = value.toString();
-                if (text.equalsIgnoreCase("Đã xác nhận")) { bgColor = new Color(219, 234, 254); fgColor = new Color(30, 64, 175); } 
-                else if (text.equalsIgnoreCase("Chờ thanh toán")) { bgColor = new Color(241, 245, 249); fgColor = new Color(71, 85, 105); } 
-                else if (text.equalsIgnoreCase("Đã hủy")) { bgColor = new Color(254, 226, 226); fgColor = new Color(153, 27, 27); } 
-                else { bgColor = new Color(243, 244, 246); fgColor = new Color(75, 85, 99); }
-            } else { text = ""; } return this;
+                if (text.equalsIgnoreCase("Đã xác nhận")) {
+                    bgColor = new Color(219, 234, 254);
+                    fgColor = new Color(30, 64, 175);
+                } else if (text.equalsIgnoreCase("Chờ thanh toán")) {
+                    bgColor = new Color(241, 245, 249);
+                    fgColor = new Color(71, 85, 105);
+                } else if (text.equalsIgnoreCase("Đã hủy")) {
+                    bgColor = new Color(254, 226, 226);
+                    fgColor = new Color(153, 27, 27);
+                } else {
+                    bgColor = new Color(243, 244, 246);
+                    fgColor = new Color(75, 85, 99);
+                }
+            } else {
+                text = "";
+            }
+            return this;
         }
 
-        @Override protected void paintComponent(Graphics g) {
-            super.paintComponent(g); if(text.isEmpty()) return;
-            Graphics2D g2 = (Graphics2D) g.create(); g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setFont(new Font("Segoe UI", Font.BOLD, 12)); FontMetrics fm = g2.getFontMetrics();
-            int paddingX = 14, paddingY = 6; int width = fm.stringWidth(text) + paddingX * 2; int height = fm.getHeight() + paddingY * 2;
-            int x = 15; int y = (getHeight() - height) / 2;
-            g2.setColor(bgColor); g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8)); 
-            g2.setColor(fgColor); g2.drawString(text, x + paddingX, y + fm.getAscent() + paddingY - 1); g2.dispose();
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (text.isEmpty())
+                return;
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            FontMetrics fm = g2.getFontMetrics();
+            int paddingX = 14, paddingY = 6;
+            int width = fm.stringWidth(text) + paddingX * 2;
+            int height = fm.getHeight() + paddingY * 2;
+            int x = 15;
+            int y = (getHeight() - height) / 2;
+            g2.setColor(bgColor);
+            g2.fill(new RoundRectangle2D.Double(x, y, width, height, 8, 8));
+            g2.setColor(fgColor);
+            g2.drawString(text, x + paddingX, y + fm.getAscent() + paddingY - 1);
+            g2.dispose();
         }
     }
 
     class ActionRenderer extends JPanel implements TableCellRenderer {
-        public ActionRenderer() { 
-            setOpaque(true); 
-            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER)); 
+        public ActionRenderer() {
+            setOpaque(true);
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, AppColor.BORDER));
         }
-        @Override public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : ZEBRA_COLOR)); return this;
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                int row, int column) {
+            setBackground(isSelected ? table.getSelectionBackground() : (row % 2 == 0 ? Color.WHITE : ZEBRA_COLOR));
+            return this;
         }
-        @Override protected void paintComponent(Graphics g) {
-            super.paintComponent(g); Graphics2D g2 = (Graphics2D) g.create();
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18)); g2.setColor(new Color(100, 116, 139));
-            g2.drawString("✏️", 15, (getHeight() / 2) + 6); 
-            g2.drawString("🗑️", 45, (getHeight() / 2) + 6); 
+            g2.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 18));
+            g2.setColor(new Color(100, 116, 139));
+            g2.drawString("✏️", 15, (getHeight() / 2) + 6);
+            g2.drawString("🗑️", 45, (getHeight() / 2) + 6);
             g2.dispose();
         }
     }
 
     class ActionEditor extends AbstractCellEditor implements TableCellEditor, MouseListener {
-        private JPanel panel; private int currentRow;
-        
-        public ActionEditor() { 
-            panel = new ActionRenderer(); 
-            panel.addMouseListener(this); 
+        private JPanel panel;
+        private int currentRow;
+
+        public ActionEditor() {
+            panel = new ActionRenderer();
+            panel.addMouseListener(this);
         }
-        
-        @Override public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            currentRow = row; 
-            panel.setBackground(table.getSelectionBackground()); 
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
+                int column) {
+            currentRow = row;
+            panel.setBackground(table.getSelectionBackground());
             return panel;
         }
-        @Override public Object getCellEditorValue() { return null; }
-        
-        @Override public void mouseClicked(MouseEvent e) {
-            fireEditingStopped(); 
+
+        @Override
+        public Object getCellEditorValue() {
+            return null;
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            fireEditingStopped();
             int modelRow = table.convertRowIndexToModel(currentRow);
-            String bookingID = tableModel.getValueAt(modelRow, 0).toString(); 
-            String status = tableModel.getValueAt(modelRow, 5).toString(); 
-            
-            if (e.getX() >= 10 && e.getX() <= 35) { 
-                SuaDatChoDialog editDialog = new SuaDatChoDialog((Frame) SwingUtilities.getWindowAncestor(panel), bookingID);
-                editDialog.setVisible(true); 
-                loadRealData(); 
-                applyFilter();
-            } else if (e.getX() >= 40 && e.getX() <= 65) { 
-                if (status.equalsIgnoreCase("Đã hủy") || status.equalsIgnoreCase("CANCELLED")) {
-                    JOptionPane.showMessageDialog(panel, "Đơn đặt chỗ này đã bị hủy từ trước!", "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            String bookingID = tableModel.getValueAt(modelRow, 0).toString();
+            String status = tableModel.getValueAt(modelRow, 5).toString();
+            String departureDateStr = tableModel.getValueAt(modelRow, 3).toString();
+
+            boolean isDeparted = false;
+            try {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm");
+                java.util.Date depDate = sdf.parse(departureDateStr);
+                if (depDate.before(new java.util.Date())) {
+                    isDeparted = true;
+                }
+            } catch (Exception ex) {
+            }
+
+            if (e.getX() >= 10 && e.getX() <= 35) {
+                if (isDeparted) {
+                    JOptionPane.showMessageDialog(panel,
+                            "Chuyến bay đã khởi hành (hoặc đã hoàn thành)!\nKhông thể chỉnh sửa (đổi vé) cho đơn đặt chỗ này nữa.",
+                            "Từ chối thao tác", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-                int confirm = JOptionPane.showConfirmDialog(panel, "Bạn có chắc chắn muốn HỦY đơn đặt chỗ " + bookingID + " này không?\nHành động sẽ hủy toàn bộ vé bên trong đơn.", "Xác nhận Hủy Đơn", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                SuaDatChoDialog editDialog = new SuaDatChoDialog((Frame) SwingUtilities.getWindowAncestor(panel),
+                        bookingID);
+                editDialog.setVisible(true);
+                loadRealData();
+                applyFilter();
+            } else if (e.getX() >= 40 && e.getX() <= 65) {
+                if (status.equalsIgnoreCase("Đã hủy") || status.equalsIgnoreCase("CANCELLED")) {
+                    JOptionPane.showMessageDialog(panel, "Đơn đặt chỗ này đã bị hủy từ trước!", "Thông báo",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                if (isDeparted) {
+                    JOptionPane.showMessageDialog(panel,
+                            "Chuyến bay đã khởi hành (hoặc đã hoàn thành)!\nKhông thể hủy đơn đặt chỗ này.",
+                            "Từ chối thao tác", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                int confirm = JOptionPane.showConfirmDialog(panel,
+                        "Bạn có chắc chắn muốn HỦY đơn đặt chỗ " + bookingID
+                                + " này không?\nHành động sẽ hủy toàn bộ vé bên trong đơn.",
+                        "Xác nhận Hủy Đơn", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
                 if (confirm == JOptionPane.YES_OPTION) {
                     boolean isCancelled = bookingBUS.huyDatCho(bookingID, "Khách yêu cầu hủy qua hệ thống");
-                    if(isCancelled) { 
-                        JOptionPane.showMessageDialog(panel, "Đã Hủy đơn " + bookingID + " thành công!"); 
-                        loadRealData(); 
-                        applyFilter(); 
+                    if (isCancelled) {
+                        JOptionPane.showMessageDialog(panel, "Đã Hủy đơn " + bookingID + " thành công!");
+                        loadRealData();
+                        applyFilter();
                     }
                 }
             }
         }
-        @Override public void mousePressed(MouseEvent e) {} @Override public void mouseReleased(MouseEvent e) {} @Override public void mouseEntered(MouseEvent e) {} @Override public void mouseExited(MouseEvent e) {}
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+        }
     }
 
     private static class SearchIcon implements Icon {
@@ -496,24 +705,35 @@ public class QuanLyDatChoPanel extends JPanel {
         public void paintIcon(Component c, Graphics g, int x, int y) {
             Graphics2D g2 = (Graphics2D) g.create();
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2.setColor(new Color(148, 163, 184)); 
+            g2.setColor(new Color(148, 163, 184));
             g2.setStroke(new BasicStroke(1.5f));
             g2.drawOval(x + 4, y + 4, 8, 8);
             g2.drawLine(x + 10, y + 10, x + 14, y + 14);
             g2.dispose();
         }
-        @Override public int getIconWidth() { return 20; }
-        @Override public int getIconHeight() { return 20; }
+
+        @Override
+        public int getIconWidth() {
+            return 20;
+        }
+
+        @Override
+        public int getIconHeight() {
+            return 20;
+        }
     }
-    
+
     public static void main(String[] args) {
-        try { UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf()); } catch (Exception ex) {}
-        
+        try {
+            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
+        } catch (Exception ex) {
+        }
+
         SwingUtilities.invokeLater(() -> {
             JFrame frame = new JFrame("Quản Lý Đặt Chỗ - TIU AIRLINES");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(1200, 800); 
-            frame.setLocationRelativeTo(null); 
+            frame.setSize(1200, 800);
+            frame.setLocationRelativeTo(null);
             frame.add(new QuanLyDatChoPanel());
             frame.setVisible(true);
         });

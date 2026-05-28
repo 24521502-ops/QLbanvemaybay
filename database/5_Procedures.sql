@@ -409,8 +409,8 @@ BEGIN
     SELECT Class INTO v_SeatClass FROM SEAT WHERE SeatID = p_NewSeatID;
     SELECT Price INTO v_NewPrice FROM SEATCLASSPRICE WHERE FlightID = p_NewFlightID AND Class = v_SeatClass;
 
+    -- Chỉ update vé, Trigger TRG_UPDATE_BOOKING_TOTAL sẽ tự động lo phần tính toán TotalAmount
     UPDATE TICKET SET FlightID = p_NewFlightID, SeatID = p_NewSeatID, Price = v_NewPrice WHERE TicketID = p_TicketID;
-    UPDATE BOOKING SET TotalAmount = TotalAmount + (v_NewPrice - v_OldPrice) WHERE BookingID = v_BookingID;
     COMMIT;
 END;
 /

@@ -9,7 +9,7 @@ SELECT
     dep.IATACode || ' -> ' || arr.IATACode AS Route_IATA,
     f.DepartureTime,
     f.ArrivalTime,
-    a.Model AS AircraftModel,
+    '<html><div style="font-family: Segoe UI, sans-serif; font-size: 13px;"><b>' || al.AirlineName || '</b><br><font color="#555555" style="font-size: 11px;">' || a.Model || '</font></div></html>' AS AircraftModel,
     f.Gate,
     f.FlightStatus,
     (
@@ -59,7 +59,8 @@ FROM FLIGHT f
 JOIN ROUTE r ON f.RouteID = r.RouteID
 JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID
 JOIN AIRPORT arr ON r.ArrivalAirportID = arr.AirportID
-JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID;
+JOIN AIRCRAFT a ON f.AircraftID = a.AircraftID
+JOIN AIRLINE al ON f.AirlineID = al.AirlineID;
 /
 
 

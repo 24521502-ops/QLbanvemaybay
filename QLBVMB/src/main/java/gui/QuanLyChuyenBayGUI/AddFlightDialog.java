@@ -132,6 +132,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
         getContentPane().add(headerPanel, BorderLayout.NORTH);
         JScrollPane scrollPane = new JScrollPane(bodyPanel);
         scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(40); // Tăng tốc độ cuộn chuột nhanh hơn
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(40);
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         getContentPane().add(footerPanel, BorderLayout.SOUTH);
 

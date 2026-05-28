@@ -171,6 +171,16 @@ public class QuanLyChuyenBayPanel extends JPanel {
         table.getColumnModel().getColumn(9).setMinWidth(0);
         table.getColumnModel().getColumn(9).setMaxWidth(0);
 
+        // Chỉnh độ rộng ưu tiên cho các cột để không bị che khuất chữ
+        table.getColumnModel().getColumn(0).setPreferredWidth(80);  // Số hiệu
+        table.getColumnModel().getColumn(1).setPreferredWidth(100); // Hành trình
+        table.getColumnModel().getColumn(2).setPreferredWidth(150); // Khởi hành
+        table.getColumnModel().getColumn(3).setPreferredWidth(150); // Hạ cánh
+        table.getColumnModel().getColumn(4).setPreferredWidth(220); // Tàu bay (Cho rộng ra)
+        table.getColumnModel().getColumn(5).setPreferredWidth(60);  // Cổng
+        table.getColumnModel().getColumn(6).setPreferredWidth(150); // Bảng giá
+        table.getColumnModel().getColumn(7).setPreferredWidth(120); // Trạng thái
+
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.getViewport().setBackground(AppColor.SURFACE);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
