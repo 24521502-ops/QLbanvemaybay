@@ -11,10 +11,11 @@ import java.util.List;
 public class NotificationDialog extends JPopupMenu {
 
     private final JPanel container;
+    private final JPanel listPanel;
+    private final JScrollPane scrollPane;
 
     public NotificationDialog() {
-        container = new JPanel();
-        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container = new JPanel(new BorderLayout());
         container.setBackground(Color.WHITE);
         container.setBorder(new EmptyBorder(8, 8, 8, 8));
         
@@ -30,30 +31,50 @@ public class NotificationDialog extends JPopupMenu {
         lblTitle.setForeground(AppColor.TEXT_PRIMARY);
         header.add(lblTitle, BorderLayout.WEST);
         
-        container.add(header);
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
+        topPanel.add(header, BorderLayout.NORTH);
+        topPanel.add(new JSeparator(), BorderLayout.CENTER);
+        topPanel.add(Box.createVerticalStrut(8), BorderLayout.SOUTH);
+        
+        container.add(topPanel, BorderLayout.NORTH);
+        
+        listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(Color.WHITE);
+        
+        scrollPane = new JScrollPane(listPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBackground(Color.WHITE);
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        
+        container.add(scrollPane, BorderLayout.CENTER);
         add(container);
     }
 
     public void updateNotifications(List<NotificationDTO> notifications) {
-        // Giữ lại phần header
-        Component header = container.getComponent(0);
-        container.removeAll();
-        container.add(header);
-        container.add(new JSeparator());
-        container.add(Box.createVerticalStrut(8));
+        listPanel.removeAll();
 
         if (notifications == null || notifications.isEmpty()) {
             JLabel lblNoData = new JLabel("Không có thông báo mới");
             lblNoData.setFont(new Font("Segoe UI", Font.ITALIC, 13));
             lblNoData.setForeground(AppColor.TEXT_SECONDARY);
             lblNoData.setBorder(new EmptyBorder(20, 20, 20, 20));
-            container.add(lblNoData);
+            listPanel.add(lblNoData);
         } else {
             for (NotificationDTO dto : notifications) {
-                container.add(createNotiItem(dto));
-                container.add(Box.createVerticalStrut(8));
+                listPanel.add(createNotiItem(dto));
+                listPanel.add(Box.createVerticalStrut(8));
             }
         }
+        
+        int prefWidth = Math.max(300, listPanel.getPreferredSize().width + 30); // 30 for scrollbar width
+        int prefHeight = Math.min(450, listPanel.getPreferredSize().height + 10); // max height 450px
+        scrollPane.setPreferredSize(new Dimension(prefWidth, prefHeight));
+        
         pack();
         revalidate();
         repaint();
