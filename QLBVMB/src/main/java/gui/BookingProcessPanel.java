@@ -340,12 +340,36 @@ public class BookingProcessPanel extends JPanel {
             startCountdown(); // Khởi tạo duy nhất 1 Timer đếm ngược 20 phút chung
         }
 
+        // Lấy lại tổng tiền thực tế trong database sau khi transaction kết thúc (vì giá
+        // có thể đã thay đổi)
+        double actualTotal = bookingDAO.getBookingTotalAmount(this.currentBookingID);
+        if (actualTotal > 0) {
+            total = actualTotal;
+        }
+
+        // Lấy danh sách giá vé thực tế từ database (giá động)
+        java.util.Map<String, Double> dbPrices = bookingDAO.getTicketPricesByFlight(this.currentBookingID);
+        List<Double> legPrices = new ArrayList<>();
+        for (int idx = 0; idx < selectedFlights.size(); idx++) {
+            dto.FlightSearchResultDTO f = selectedFlights.get(idx);
+            Double p = dbPrices.get(f.getFlightID());
+            if (p == null || p <= 0) {
+                double baseP = 0;
+                String cls = selectedClasses.get(idx);
+                for (dto.FlightSearchResultDTO.SeatClassInfo sc : f.getSeatClasses()) {
+                    if (sc.getClassName().equalsIgnoreCase(cls)) {
+                        baseP = sc.getPrice();
+                        break;
+                    }
+                }
+                p = baseP > 0 ? baseP : 1200000.0;
+            }
+            legPrices.add(p);
+        }
+
         this.selectedFlight = selectedFlights.get(0);
         this.selectedClass = selectedClasses.get(0);
-        
-        List<Double> legPrices = bookingDAO.getTicketPricesByFlight(this.currentBookingID);
-        
-        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total, legPrices);
+        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, legPrices, total);
         showStep(3); // Hiện màn hình thanh toán (STEP_4)
     }
 

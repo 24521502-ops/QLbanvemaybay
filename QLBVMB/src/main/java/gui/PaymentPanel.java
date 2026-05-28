@@ -345,7 +345,7 @@ public class PaymentPanel extends JPanel {
     }
 
     public void updateDataMulti(List<dto.FlightSearchResultDTO> flights, List<String> seatClasses,
-            List<List<String>> multiSeats, double totalAmount, List<Double> legPrices) {
+            List<List<String>> multiSeats, List<Double> legPrices, double totalAmount) {
         if (flights == null || flights.isEmpty())
             return;
         this.currentTotal = totalAmount;
@@ -388,11 +388,11 @@ public class PaymentPanel extends JPanel {
         p.add(new JSeparator(), "gapy 8 8");
 
         for (int i = 0; i < flights.size(); i++) {
-            double baseP = legPrices != null && i < legPrices.size() ? legPrices.get(i) : 0;
+            double baseP = legPrices.get(i) * passCount;
             String prefix = flights.size() > 1 ? "Chặng " + (i + 1) + " - " : "";
-            createPriceRow(p, prefix + "Giá vé cơ bản", df.format(baseP) + " VND");
+            createPriceRow(p, prefix + "Giá vé cơ bản (x" + passCount + ")", df.format(baseP) + " VND");
             double tax = baseP * 0.10;
-            createPriceRow(p, prefix + "Thuế & Phí", df.format(tax) + " VND");
+            createPriceRow(p, prefix + "Thuế & Phí (x" + passCount + ")", df.format(tax) + " VND");
         }
 
         p.add(new JSeparator(), "gapy 8 8");
