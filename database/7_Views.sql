@@ -21,7 +21,7 @@ SELECT
                        WHEN 'Business' THEN 'Bus'
                        WHEN 'Premium Economy' THEN 'Prem'
                        WHEN 'Economy' THEN 'Eco'
-                   END || ':</b> <font color="#333333"><b>' || TO_CHAR(Price, 'FM999,999,999,999') || 'đ</b></font>', 
+                   END || ':</b> <font color="#333333"><b>' || TO_CHAR(FUNC_GET_DYNAMIC_PRICE(f.FlightID, Class), 'FM999,999,999,999') || 'đ</b></font>', 
                    '<br>'
                ) WITHIN GROUP (ORDER BY 
                    CASE Class 
@@ -33,7 +33,28 @@ SELECT
                ) || '</div></html>'
         FROM SEATCLASSPRICE 
         WHERE FlightID = f.FlightID
-    ) AS PricesHTML
+    ) AS PricesHTML,
+    (
+        SELECT '<html><div style="font-family: Arial; font-size: 11px;"><b>GIÁ GỐC:</b><br>' || 
+               LISTAGG(
+                   CASE Class 
+                       WHEN 'First Class' THEN 'First'
+                       WHEN 'Business' THEN 'Bus'
+                       WHEN 'Premium Economy' THEN 'Prem'
+                       WHEN 'Economy' THEN 'Eco'
+                   END || ': ' || TO_CHAR(Price, 'FM999,999,999,999') || 'đ', 
+                   '<br>'
+               ) WITHIN GROUP (ORDER BY 
+                   CASE Class 
+                       WHEN 'First Class' THEN 1
+                       WHEN 'Business' THEN 2
+                       WHEN 'Premium Economy' THEN 3
+                       WHEN 'Economy' THEN 4
+                   END
+               ) || '</div></html>'
+        FROM SEATCLASSPRICE 
+        WHERE FlightID = f.FlightID
+    ) AS BasePricesHTML
 FROM FLIGHT f
 JOIN ROUTE r ON f.RouteID = r.RouteID
 JOIN AIRPORT dep ON r.DepartureAirportID = dep.AirportID

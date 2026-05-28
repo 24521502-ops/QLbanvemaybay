@@ -156,7 +156,7 @@ public class QuanLyChuyenBayPanel extends JPanel {
         panelTableCard.setBackground(AppColor.SURFACE);
         panelTableCard.setBorder(BorderFactory.createLineBorder(AppColor.BORDER));
 
-        String[] cols = { "SỐ HIỆU", "HÀNH TRÌNH", "KHỞI HÀNH", "HẠ CÁNH", "TÀU BAY", "CỔNG", "BẢNG GIÁ", "TRẠNG THÁI", "ID_ẨN" };
+        String[] cols = { "SỐ HIỆU", "HÀNH TRÌNH", "KHỞI HÀNH", "HẠ CÁNH", "TÀU BAY", "CỔNG", "BẢNG GIÁ", "TRẠNG THÁI", "ID_ẨN", "TOOLTIP_ẨN" };
         tableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int r, int c) {
@@ -168,6 +168,8 @@ public class QuanLyChuyenBayPanel extends JPanel {
         table.setAutoCreateRowSorter(true);
         table.getColumnModel().getColumn(8).setMinWidth(0);
         table.getColumnModel().getColumn(8).setMaxWidth(0);
+        table.getColumnModel().getColumn(9).setMinWidth(0);
+        table.getColumnModel().getColumn(9).setMaxWidth(0);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.getViewport().setBackground(AppColor.SURFACE);
@@ -283,13 +285,24 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("HH:mm - dd/MM/yyyy");
                 java.util.Date d1 = sdf.parse(s1);
                 java.util.Date d2 = sdf.parse(s2);
-                java.text.SimpleDateFormat dayFormat = new java.text.SimpleDateFormat("dd/MM/yyyy");
-                String todayStr = dayFormat.format(new java.util.Date());
-                boolean isToday1 = dayFormat.format(d1).equals(todayStr);
-                boolean isToday2 = dayFormat.format(d2).equals(todayStr);
                 
-                if (isToday1 && !isToday2) return -1;
-                if (!isToday1 && isToday2) return 1;
+                // Lấy mốc 0h00 của ngày hôm nay
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+                cal.set(java.util.Calendar.MINUTE, 0);
+                cal.set(java.util.Calendar.SECOND, 0);
+                cal.set(java.util.Calendar.MILLISECOND, 0);
+                java.util.Date todayDate = cal.getTime();
+                
+                boolean isPast1 = d1.before(todayDate);
+                boolean isPast2 = d2.before(todayDate);
+                
+                // Nếu 1 là tương lai/hôm nay, 2 là quá khứ -> 1 xếp trên
+                if (!isPast1 && isPast2) return -1;
+                // Nếu 2 là tương lai/hôm nay, 1 là quá khứ -> 2 xếp trên
+                if (isPast1 && !isPast2) return 1;
+                
+                // Nếu cùng nhóm (cùng tương lai hoặc cùng quá khứ) -> xếp tăng dần
                 return d1.compareTo(d2);
             } catch (Exception e) { return s1.compareTo(s2); }
         };
@@ -440,6 +453,18 @@ public class QuanLyChuyenBayPanel extends JPanel {
                 setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
                 if (!sel)
                     setBackground(r % 2 == 0 ? AppColor.SURFACE : new Color(252, 252, 253));
+
+                if (c == 6) { // Cột Bảng giá
+                    int modelRow = t.convertRowIndexToModel(r);
+                    Object tooltipObj = tableModel.getValueAt(modelRow, 9); // Cột ẩn số 9 chứa BasePricesHTML
+                    if (tooltipObj != null) {
+                        setToolTipText(tooltipObj.toString());
+                    } else {
+                        setToolTipText(null);
+                    }
+                } else {
+                    setToolTipText(null);
+                }
 
                 if (c == 0 && val != null) {
                     setFont(new Font("Segoe UI", Font.BOLD, 14));

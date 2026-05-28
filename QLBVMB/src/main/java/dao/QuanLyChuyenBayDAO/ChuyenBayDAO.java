@@ -10,7 +10,7 @@ public class ChuyenBayDAO {
 
     public List<Object[]> layDanhSachChuyenBay() {
         List<Object[]> list = new ArrayList<>();
-        String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime, AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
+        String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime, AircraftModel, Gate, PricesHTML, FlightStatus, FlightID, BasePricesHTML FROM VW_FLIGHT_LIST";
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -18,7 +18,7 @@ public class ChuyenBayDAO {
                 list.add(new Object[] {
                         rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
                         rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
-                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID")
+                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID"), rs.getString("BasePricesHTML")
                 });
             }
         } catch (SQLException e) {
