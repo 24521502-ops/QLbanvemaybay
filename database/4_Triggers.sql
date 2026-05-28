@@ -1,26 +1,7 @@
 
 -- ================================= Bảng TICKET =================================
 
---1.Trigger kiểm tra không được trùng ghế trong 1 chuyến bay (RB58)----
-CREATE OR REPLACE TRIGGER TRG_No_Duplicate_Seat
-BEFORE INSERT OR UPDATE ON TICKET
-FOR EACH ROW
-DECLARE
-    v_count NUMBER;
-BEGIN
-    SELECT COUNT(*) INTO v_count
-    FROM TICKET
-    WHERE FlightID = :NEW.FlightID
-      AND SeatID   = :NEW.SeatID;
-
-    IF v_count > 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 
-        'Ghế này đã được đặt trong chuyến bay!');
-    END IF;
-END;
-/
-
---2.Trigger kiểm tra số vé không vượt quá số ghế (RB65)//
+--**2.Trigger kiểm tra số vé không vượt quá số ghế (RB65)
 CREATE OR REPLACE TRIGGER TRG_PREVENT_OVERBOOKING
 BEFORE INSERT ON TICKET
 FOR EACH ROW
@@ -37,7 +18,7 @@ END;
 /
 
 
---3.Trigger cập nhật TotalAmount của BOOKING (RB67)//
+--**3.Trigger cập nhật TotalAmount của BOOKING (RB67)//
 CREATE OR REPLACE TRIGGER TRG_UPDATE_BOOKING_TOTAL
 AFTER INSERT OR UPDATE OF Price OR DELETE ON TICKET
 FOR EACH ROW
@@ -60,7 +41,7 @@ BEGIN
 END;
 /
 
---4.Trigger không được đặt vé sau khi chuyến bay đã khởi hành (RB63)//
+--**4.Trigger không được đặt vé sau khi chuyến bay đã khởi hành (RB63)//
 CREATE OR REPLACE TRIGGER TRG_PREVENT_PAST_BOOKING
 BEFORE INSERT ON TICKET
 FOR EACH ROW
@@ -74,7 +55,7 @@ BEGIN
 END;
 /
 
---5.Trigger ghế phải thuộc đúng máy bay của chuyến bay (RB62)
+--**5.Trigger ghế phải thuộc đúng máy bay của chuyến bay (RB62)
 CREATE OR REPLACE TRIGGER TRG_RB65_CHECK_SEAT_AIRCRAFT
 BEFORE INSERT OR UPDATE ON TICKET
 FOR EACH ROW
@@ -83,13 +64,13 @@ DECLARE
     v_SeatAircraftID VARCHAR2(20);   -- Đã sửa thành VARCHAR2
 BEGIN
     -- Lấy AircraftID của chuyến bay
-    SELECT AircraftID INTO v_FlightAircraftID 
-    FROM FLIGHT 
+    SELECT AircraftID INTO v_FlightAircraftID
+    FROM FLIGHT
     WHERE FlightID = :NEW.FlightID;
-    
+
     -- Lấy AircraftID của ghế được chọn
-    SELECT AircraftID INTO v_SeatAircraftID 
-    FROM SEAT 
+    SELECT AircraftID INTO v_SeatAircraftID
+    FROM SEAT
     WHERE SeatID = :NEW.SeatID;
 
     -- Kiểm tra đối chiếu
@@ -99,7 +80,7 @@ BEGIN
 END;
 /
 
---6.Ràng buộc 64: Vé chỉ hợp lệ khi đã có thanh toán
+--**6.Ràng buộc 64: Vé chỉ hợp lệ khi đã có thanh toán
 CREATE OR REPLACE TRIGGER TRG_RB64_CHECK_TICKET_PAYMENT
 BEFORE UPDATE ON TICKET
 FOR EACH ROW
@@ -124,7 +105,7 @@ END;
 
 -- ================================= Bảng FLIGHT =================================
 
---7.Trigger kiểm tra thời gian chuyến bay hợp lệ (RB50)--------
+--**7.Trigger kiểm tra thời gian chuyến bay hợp lệ (RB50)--------
 CREATE OR REPLACE TRIGGER TRG_Check_Flight_Time
 BEFORE INSERT OR UPDATE ON FLIGHT
 FOR EACH ROW
@@ -134,9 +115,9 @@ BEGIN
         'Thời gian đến phải lớn hơn thời gian đi!');
     END IF;
 END;
+/
 
-
---8. Trigger: Máy bay sử dụng cho chuyến bay phải thuộc cùng hãng (RB61)
+--**8. Trigger: Máy bay sử dụng cho chuyến bay phải thuộc cùng hãng (RB61)
 CREATE OR REPLACE TRIGGER TRG_Check_Airline_Aircraft 
 BEFORE INSERT OR UPDATE ON FLIGHT 
 FOR EACH ROW 
@@ -153,11 +134,12 @@ BEGIN
 END;
 /
 
---9 Đảm bảo máy bay không bay 2 chuyến cùng lúc
+--**9 Đảm bảo máy bay không bay 2 chuyến cùng lúc
 CREATE OR REPLACE TRIGGER TRG_CHECK_AIRCRAFT_OVERLAP
 BEFORE INSERT OR UPDATE ON FLIGHT
 FOR EACH ROW
 DECLARE
+    PRAGMA AUTONOMOUS_TRANSACTION;
     v_Count NUMBER;
 BEGIN
     -- Đã sửa số 0 thành chuỗi '0' trong hàm NVL
@@ -169,12 +151,14 @@ BEGIN
     IF v_Count > 0 THEN
         RAISE_APPLICATION_ERROR(-20004, 'Lỗi: Máy bay bị trùng lịch bay.');
     END IF;
+    
+    COMMIT;
 END;
 /
 
 -- ================================= Bảng PAYMENT =================================
     
---10. Trigger tự tạo Transaction History khi thanh toán---------//
+--**10. Trigger tự tạo Transaction History khi thanh toán---------//
 CREATE OR REPLACE TRIGGER TRG_LOG_SUCCESSFUL_PAYMENT
 AFTER INSERT OR UPDATE OF PaymentStatus ON PAYMENT
 FOR EACH ROW
@@ -190,7 +174,7 @@ END;
 /
 
 
---11. Ràng buộc 60: Payment không vượt quá tổng tiền Booking
+--**11. Ràng buộc 60: Payment không vượt quá tổng tiền Booking
 CREATE OR REPLACE TRIGGER TRG_RB60_CHECK_PAYMENT_AMOUNT
 BEFORE INSERT OR UPDATE ON PAYMENT
 FOR EACH ROW
@@ -203,28 +187,28 @@ BEGIN
     WHERE BookingID = :NEW.BookingID;
 
     -- Kiểm tra số tiền thanh toán
-    IF :NEW.Amount > v_TotalAmount THEN
+    IF NVL(:NEW.PaymentStatus, 'SUCCESS') != 'REFUNDED' AND :NEW.Amount > v_TotalAmount THEN
         RAISE_APPLICATION_ERROR(-20005, 'RB60: Lỗi! Số tiền thanh toán (' || :NEW.Amount || ') không được vượt quá tổng tiền của Booking (' || v_TotalAmount || ').');
     END IF;
 END;
-
+/
 
 -- ================================= Bảng USERS =================================
 
---12. cập nhật ngày sửa users---------
+--**12. cập nhật ngày sửa users---------
 CREATE OR REPLACE TRIGGER TRG_UPDATE_USER
 BEFORE UPDATE ON USERS
 FOR EACH ROW
 BEGIN
     :NEW.Updated_At := SYSDATE;
 END;
-
+/
 
 
 
 -- ================================= Bảng BOOKING =================================
 
---13. Ràng buộc 66: Mỗi đơn đặt vé phải có ít nhất một vé
+--**13. Ràng buộc 66: Mỗi đơn đặt vé phải có ít nhất một vé
 CREATE OR REPLACE TRIGGER TRG_RB66_BOOKING_MUST_HAVE_TICKET
 BEFORE UPDATE ON BOOKING
 FOR EACH ROW
@@ -244,3 +228,5 @@ BEGIN
         END IF;
     END IF;
 END;
+/
+

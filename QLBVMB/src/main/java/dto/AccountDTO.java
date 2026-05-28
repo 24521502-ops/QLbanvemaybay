@@ -11,6 +11,8 @@ public class AccountDTO {
     private Date createdAt;
     private Date updatedAt;
     private Integer isDeleted;
+    private String roleGroup;
+    private String customerID;
 
     public AccountDTO() {}
 
@@ -34,4 +36,8 @@ public class AccountDTO {
     public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
     public Integer getIsDeleted() { return isDeleted; }
     public void setIsDeleted(Integer isDeleted) { this.isDeleted = isDeleted; }
+    public String getRoleGroup() { return roleGroup; }
+    public void setRoleGroup(String roleGroup) { this.roleGroup = roleGroup; }
+    public String getCustomerID() { return customerID; }
+    public void setCustomerID(String customerID) { this.customerID = customerID; }
 }

@@ -1,7 +1,6 @@
 # QLbanvemaybay
 
 **làm module: tạo branches mới làm rồi push lên ko làm trực tiếp trên branches main
--link canva: https://canva.link/07sp1n4nspv6ad3
 
 ## Việc cần làm trước khi code
 1. Đọc [Cấu trúc dự án](DOC/PROJECT_STRUCTURE.md)

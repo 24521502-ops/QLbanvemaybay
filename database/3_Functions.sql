@@ -56,35 +56,6 @@ EXCEPTION
 END;
 /
 
--- 5. Tạo mã vé PNR tự động 
-CREATE OR REPLACE FUNCTION FUNC_GENERATE_TICKET_CODE (p_FlightID IN VARCHAR2, p_SeatID IN VARCHAR2) RETURN VARCHAR2 AS
-    v_FlightNum VARCHAR2(50); v_SeatNum VARCHAR2(10);
-BEGIN
-    SELECT FlightNumber INTO v_FlightNum FROM FLIGHT WHERE FlightID = p_FlightID;
-    SELECT SeatNumber INTO v_SeatNum FROM SEAT WHERE SeatID = p_SeatID;
-    
-    RETURN v_FlightNum || '-' || v_SeatNum || '-' || TO_CHAR(SYSDATE, 'MMDD');
-END;
-/
-
--- 6. Kiểm tra điều kiện Check-in 
-CREATE OR REPLACE FUNCTION FUNC_CHECK_VALID_CHECKIN (p_TicketID IN VARCHAR2) RETURN VARCHAR2 AS
-    v_TicketStatus VARCHAR2(50); v_DepartureTime DATE; v_HoursToFlight NUMBER;
-BEGIN
-    SELECT t.TicketStatus, f.DepartureTime INTO v_TicketStatus, v_DepartureTime
-    FROM TICKET t JOIN FLIGHT f ON t.FlightID = f.FlightID WHERE t.TicketID = p_TicketID;
-
-    IF v_TicketStatus != 'PAID' THEN RETURN 'TỪ CHỐI: Vé chưa thanh toán/hủy.'; END IF;
-
-    v_HoursToFlight := (v_DepartureTime - SYSDATE) * 24;
-    IF v_HoursToFlight < 0 THEN RETURN 'TỪ CHỐI: Chuyến bay đã cất cánh.';
-    ELSIF v_HoursToFlight > 24 THEN RETURN 'TỪ CHỐI: Chỉ mở check-in trước 24h.';
-    ELSE RETURN 'HỢP LỆ: Đủ điều kiện check-in.'; END IF;
-EXCEPTION
-    WHEN NO_DATA_FOUND THEN RETURN 'LỖI: Vé không tồn tại.';
-END;
-/
-
 -- 7. Function tính "Giờ Lên Máy Bay" để in vé (Page 14)
 CREATE OR REPLACE FUNCTION FUNC_CALCULATE_BOARDING_TIME (p_FlightID IN VARCHAR2) 
 RETURN DATE AS
@@ -104,4 +75,54 @@ EXCEPTION
     WHEN NO_DATA_FOUND THEN
         RETURN NULL;
 END;
+/
+
+-- =========================================================================
+-- PHẦN 1: FUNCTIONS LIÊN QUAN (TÍNH TOÁN GHẾ TRỐNG VÀ GIÁ ĐỘNG)/ wang
+-- =========================================================================
+
+-- 3. HÀM TÍNH THỜI GIAN GIỮ CHỖ CÒN LẠI (GIỚI HẠN 20 PHÚT)
+CREATE OR REPLACE FUNCTION FN_GET_REMAINING_PAYMENT_SEC (
+    p_booking_id IN VARCHAR2
+) RETURN NUMBER AS
+    v_elapsed_sec NUMBER;
+    v_remaining_sec NUMBER := 0;
+BEGIN
+    SELECT ROUND((SYSDATE - BookingDate) * 86400)
+    INTO v_elapsed_sec
+    FROM BOOKING
+    WHERE BookingID = p_booking_id AND Status = 'PENDING';
+    
+    v_remaining_sec := 1200 - v_elapsed_sec;
+    IF v_remaining_sec < 0 THEN
+        v_remaining_sec := 0;
+    END IF;
+    
+    RETURN v_remaining_sec;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN 0;
+END FN_GET_REMAINING_PAYMENT_SEC;
+/
+
+-- 4. HÀM LẤY TÊN THÀNH PHỐ THEO MÃ SÂN BAY IATA
+CREATE OR REPLACE FUNCTION FN_GET_CITY_BY_IATA (
+    p_iata_code IN VARCHAR2
+) RETURN VARCHAR2 AS
+    v_city VARCHAR2(100);
+BEGIN
+    SELECT City
+    INTO v_city
+    FROM AIRPORT
+    WHERE IATACode = p_iata_code;
+    
+    RETURN v_city;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN p_iata_code;
+    WHEN OTHERS THEN
+        RETURN p_iata_code;
+END FN_GET_CITY_BY_IATA;
 /
