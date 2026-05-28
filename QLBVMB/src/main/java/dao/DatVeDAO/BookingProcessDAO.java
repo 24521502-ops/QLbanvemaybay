@@ -360,4 +360,25 @@ public class BookingProcessDAO {
             }
         }
     }
+
+    /**
+     * Lấy giá vé động thực tế cho từng chặng bay từ bảng TICKET
+     */
+    public List<Double> getTicketPricesByFlight(String bookingID) {
+        List<Double> prices = new ArrayList<>();
+        if (bookingID == null) return prices;
+        String sql = "SELECT SUM(t.Price) as TotalPrice FROM TICKET t JOIN FLIGHT f ON t.FlightID = f.FlightID WHERE t.BookingID = ? GROUP BY t.FlightID ORDER BY MIN(f.DepartureTime)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                while (rs.next()) {
+                    prices.add(rs.getDouble("TotalPrice"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return prices;
+    }
 }

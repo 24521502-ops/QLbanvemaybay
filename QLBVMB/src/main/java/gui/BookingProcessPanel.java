@@ -342,7 +342,10 @@ public class BookingProcessPanel extends JPanel {
 
         this.selectedFlight = selectedFlights.get(0);
         this.selectedClass = selectedClasses.get(0);
-        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total);
+        
+        List<Double> legPrices = bookingDAO.getTicketPricesByFlight(this.currentBookingID);
+        
+        paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total, legPrices);
         showStep(3); // Hiện màn hình thanh toán (STEP_4)
     }
 
