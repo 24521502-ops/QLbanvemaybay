@@ -21,26 +21,26 @@ public class loginGUI extends JFrame {
     private final loginBUS loginBUS = new loginBUS();
 
     // ──── Components ────
-    private JTextField     txtUserName;
+    private JTextField txtUserName;
     private JPasswordField txtPassword;
-    private JButton        btnLogin;
-    private JCheckBox      chkShowPassword;
+    private JButton btnLogin;
+    private JCheckBox chkShowPassword;
 
     // ──── Colors ────
-    private static final Color COLOR_BG       = new Color(0xFFFFFF);
+    private static final Color COLOR_BG = new Color(0xFFFFFF);
     private static final Color COLOR_FIELD_BG = new Color(0xF4F6F7);
-    private static final Color COLOR_BORDER   = new Color(0xD5D8DC);
-    private static final Color COLOR_TEXT     = new Color(0x1C2833);
-    private static final Color COLOR_SUBTEXT  = new Color(0x717D7E);
-    private static final Color COLOR_LINK     = new Color(0x2E86C1);
-    private static final Color COLOR_BTN      = new Color(0x1C2833);
+    private static final Color COLOR_BORDER = new Color(0xD5D8DC);
+    private static final Color COLOR_TEXT = new Color(0x1C2833);
+    private static final Color COLOR_SUBTEXT = new Color(0x717D7E);
+    private static final Color COLOR_LINK = new Color(0x2E86C1);
+    private static final Color COLOR_BTN = new Color(0x1C2833);
 
     // ──── Fonts ────
-    private static final Font FONT_TITLE  = new Font("Segoe UI", Font.BOLD, 28);
-    private static final Font FONT_LABEL  = new Font("Segoe UI", Font.BOLD, 11);
-    private static final Font FONT_FIELD  = new Font("Segoe UI", Font.PLAIN, 13);
+    private static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 28);
+    private static final Font FONT_LABEL = new Font("Segoe UI", Font.BOLD, 11);
+    private static final Font FONT_FIELD = new Font("Segoe UI", Font.PLAIN, 13);
     private static final Font FONT_BUTTON = new Font("Segoe UI", Font.BOLD, 14);
-    private static final Font FONT_SMALL  = new Font("Segoe UI", Font.PLAIN, 12);
+    private static final Font FONT_SMALL = new Font("Segoe UI", Font.PLAIN, 12);
 
     public loginGUI() {
         initFrame();
@@ -137,8 +137,16 @@ public class loginGUI extends JFrame {
                 g2.fill(p);
                 g2.dispose();
             }
-            @Override public int getIconWidth() { return 30; }
-            @Override public int getIconHeight() { return 30; }
+
+            @Override
+            public int getIconWidth() {
+                return 30;
+            }
+
+            @Override
+            public int getIconHeight() {
+                return 30;
+            }
         };
         lblLogo.setIcon(planeIcon);
         lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 22));
@@ -154,24 +162,11 @@ public class loginGUI extends JFrame {
 
         JLabel lblDesc = new JLabel(
                 "<html>Hệ thống quản lý hàng không toàn diện.<br>"
-                + "Đăng nhập để tiếp tục hành trình của bạn.</html>");
+                        + "Đăng nhập để tiếp tục hành trình của bạn.</html>");
         lblDesc.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblDesc.setForeground(new Color(200, 200, 200));
         lblDesc.setBounds(24, 426, 380, 50);
         panel.add(lblDesc);
-
-        JLabel lblDemo = new JLabel("<html><u>⚙ Chạy Demo Cô lập Giao dịch (Non-Repeatable Read)</u></html>");
-        lblDemo.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblDemo.setForeground(new Color(14, 165, 233)); // Sky blue
-        lblDemo.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        lblDemo.setBounds(24, 480, 380, 25);
-        lblDemo.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                new gui.NonRepeatableReadDemo().setVisible(true);
-            }
-        });
-        panel.add(lblDemo);
 
         return panel;
     }
@@ -183,7 +178,7 @@ public class loginGUI extends JFrame {
 
         int cx = 70;
         int fw = 320;
-        int y  = 80;
+        int y = 80;
 
         // ─── Tiêu đề ───
         JLabel lblTitle = new JLabel("Chào mừng trở lại!");
@@ -236,7 +231,8 @@ public class loginGUI extends JFrame {
         lblForgot.setBounds(cx + fw - 110, y, 110, 24);
         lblForgot.setHorizontalAlignment(SwingConstants.RIGHT);
         lblForgot.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
+            @Override
+            public void mouseClicked(MouseEvent e) {
                 new ForgotPasswordDialog(loginGUI.this).setVisible(true);
             }
         });
@@ -268,12 +264,17 @@ public class loginGUI extends JFrame {
         btnLogin.addActionListener(e -> handleLogin());
         txtPassword.addActionListener(e -> handleLogin()); // Enter trên password
         txtUserName.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) handleLogin();
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER)
+                    handleLogin();
             }
         });
         lblRegister.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) { openRegister(); }
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                openRegister();
+            }
         });
 
         return panel;
@@ -345,9 +346,9 @@ public class loginGUI extends JFrame {
     private void drawVectorIcon(Graphics2D g2, String type, int x, int y, int size, boolean isFocused) {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        
+
         g2.setColor(isFocused ? COLOR_LINK : COLOR_SUBTEXT);
-        
+
         int pad = 2;
         int w = size - pad * 2;
         int h = size - pad * 2;
@@ -387,14 +388,15 @@ public class loginGUI extends JFrame {
                 g2.setColor(getBackground());
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 super.paintComponent(g);
-                
+
                 int iconSize = 20;
                 int iconY = (getHeight() - iconSize) / 2;
-                
+
                 if (getText().equals(placeholder) || getText().trim().isEmpty()) {
                     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
                 }
-                drawVectorIcon(g2, iconType, 12, iconY, iconSize, hasFocus() || (!getText().equals(placeholder) && !getText().isEmpty()));
+                drawVectorIcon(g2, iconType, 12, iconY, iconSize,
+                        hasFocus() || (!getText().equals(placeholder) && !getText().isEmpty()));
                 g2.dispose();
             }
 
@@ -414,14 +416,17 @@ public class loginGUI extends JFrame {
         field.setBorder(new EmptyBorder(8, 40, 8, 12));
         field.setText(placeholder);
         field.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) {
+            @Override
+            public void focusGained(FocusEvent e) {
                 if (field.getText().equals(placeholder)) {
                     field.setText("");
                     field.setForeground(COLOR_TEXT);
                 }
                 field.repaint();
             }
-            @Override public void focusLost(FocusEvent e) {
+
+            @Override
+            public void focusLost(FocusEvent e) {
                 if (field.getText().trim().isEmpty()) {
                     field.setText(placeholder);
                     field.setForeground(COLOR_SUBTEXT);
@@ -441,10 +446,10 @@ public class loginGUI extends JFrame {
                 g2.setColor(getBackground());
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 10, 10));
                 super.paintComponent(g);
-                
+
                 int iconSize = 20;
                 int iconY = (getHeight() - iconSize) / 2;
-                
+
                 if (getPassword().length == 0) {
                     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f));
                 }
@@ -467,8 +472,15 @@ public class loginGUI extends JFrame {
         field.setBorder(new EmptyBorder(8, 40, 8, 12));
         field.setEchoChar('●');
         field.addFocusListener(new FocusAdapter() {
-            @Override public void focusGained(FocusEvent e) { field.repaint(); }
-            @Override public void focusLost(FocusEvent e) { field.repaint(); }
+            @Override
+            public void focusGained(FocusEvent e) {
+                field.repaint();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                field.repaint();
+            }
         });
         return field;
     }
@@ -479,16 +491,20 @@ public class loginGUI extends JFrame {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                if (getModel().isPressed())        g2.setColor(bg.darker());
-                else if (getModel().isRollover())  g2.setColor(bg.brighter());
-                else                               g2.setColor(bg);
+                if (getModel().isPressed())
+                    g2.setColor(bg.darker());
+                else if (getModel().isRollover())
+                    g2.setColor(bg.brighter());
+                else
+                    g2.setColor(bg);
                 g2.fill(new RoundRectangle2D.Float(0, 0, getWidth() - 1, getHeight() - 1, 12, 12));
                 g2.dispose();
                 super.paintComponent(g);
             }
 
             @Override
-            protected void paintBorder(Graphics g) {}
+            protected void paintBorder(Graphics g) {
+            }
         };
         btn.setFont(FONT_BUTTON);
         btn.setForeground(fg);

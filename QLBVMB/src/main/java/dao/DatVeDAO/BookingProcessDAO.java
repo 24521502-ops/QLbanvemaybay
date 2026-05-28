@@ -133,6 +133,16 @@ public class BookingProcessDAO {
         try {
             conn.setAutoCommit(false);
 
+            // ==========================================
+            // CẤU HÌNH MỨC CÔ LẬP GIAO DỊCH (DEMO)
+            // ==========================================
+            // Mở dòng này (mặc định) để demo lỗi Non-Repeatable Read:
+            // conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+
+            // Mở dòng này để sửa lỗi Non-Repeatable Read (Sử dụng Serializable):
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            // ==========================================
+
             // 1. Xử lý hành khách bằng Stored Procedure
             List<String> passengerIds = new ArrayList<>();
             if (passengers != null && !passengers.isEmpty()) {
@@ -174,7 +184,27 @@ public class BookingProcessDAO {
                     String flightID = flightIDs.get(legIdx);
                     List<String> seats = multiCitySeats.get(legIdx);
                     String seatClass = seatClasses.get(legIdx);
-                    double legPrice = getLegPriceFromDB(conn, flightID, seatClass);
+                    double legPrice1 = getLegPriceFromDB(conn, flightID, seatClass);
+
+                    try {
+                        System.out.println(">>> [DEMO ISO LEVEL] Đọc giá vé lần 1: " + legPrice1 + " VNĐ.");
+                        System.out.println(">>> [DEMO ISO LEVEL] Đang sleep 15 giây để chờ Admin cập nhật giá...");
+                        Thread.sleep(15000);
+                    } catch (InterruptedException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    double legPrice2 = getLegPriceFromDB(conn, flightID, seatClass);
+                    double legPrice = legPrice2;
+
+                    System.out.println(">>> [DEMO ISO LEVEL] Đọc giá vé lần 2: " + legPrice2 + " VNĐ.");
+                    if (legPrice1 != legPrice2) {
+                        System.out.println(">>> [DEMO ISO LEVEL] PHÁT HIỆN LỖI: Giá vé thay đổi từ " + legPrice1
+                                + " -> " + legPrice2 + " (Non-Repeatable Read xảy ra dưới READ COMMITTED)!");
+                    } else {
+                        System.out.println(">>> [DEMO ISO LEVEL] THÀNH CÔNG: Giá vé giữ nguyên " + legPrice1
+                                + " (Tránh lỗi dưới SERIALIZABLE)!");
+                    }
 
                     for (int i = 0; i < seats.size(); i++) {
                         String seatNum = seats.get(i).trim();
@@ -359,5 +389,21 @@ public class BookingProcessDAO {
             } catch (SQLException e) {
             }
         }
+    }
+
+    public double getBookingTotalAmount(String bookingID) {
+        String sql = "SELECT TotalAmount FROM BOOKING WHERE BookingID = ?";
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement pst = conn.prepareStatement(sql)) {
+            pst.setString(1, bookingID);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("TotalAmount");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
     }
 }

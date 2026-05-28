@@ -340,6 +340,12 @@ public class BookingProcessPanel extends JPanel {
             startCountdown(); // Khởi tạo duy nhất 1 Timer đếm ngược 20 phút chung
         }
 
+        // Lấy lại tổng tiền thực tế trong database sau khi transaction kết thúc (vì giá có thể đã thay đổi)
+        double actualTotal = bookingDAO.getBookingTotalAmount(this.currentBookingID);
+        if (actualTotal > 0) {
+            total = actualTotal;
+        }
+
         this.selectedFlight = selectedFlights.get(0);
         this.selectedClass = selectedClasses.get(0);
         paymentPanel.updateDataMulti(selectedFlights, selectedClasses, multiCitySeats, total);

@@ -203,12 +203,7 @@ public class ChuyenBayDAO {
             updateOrInsertPrice(conn, flightID, "Premium Economy", pricePrem);
             updateOrInsertPrice(conn, flightID, "First Class", priceFirst);
             
-            //try {
-            //Thread.sleep(10000);
-        //} catch (InterruptedException ex) {
-         //   ex.printStackTrace();
-        //}
-            //conn.commit();
+            conn.commit();
             return true;
         } catch (SQLException e) {
            // System.err.println("Lỗi giao dịch: " + e.getMessage());
