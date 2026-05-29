@@ -140,7 +140,7 @@ public class BookingProcessDAO {
             // conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
             // Mở dòng này để sửa lỗi Non-Repeatable Read (Sử dụng Serializable):
-            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             // ==========================================
 
             // 1. Xử lý hành khách bằng Stored Procedure
