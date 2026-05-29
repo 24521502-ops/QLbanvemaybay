@@ -18,7 +18,8 @@ public class ChuyenBayDAO {
                 list.add(new Object[] {
                         rs.getString("FlightNumber"), rs.getString("Route_IATA"), rs.getTimestamp("DepartureTime"),
                         rs.getTimestamp("ArrivalTime"), rs.getString("AircraftModel"), rs.getString("Gate"),
-                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID"), rs.getString("BasePricesHTML")
+                        rs.getString("PricesHTML"), rs.getString("FlightStatus"), rs.getString("FlightID"),
+                        rs.getString("BasePricesHTML")
                 });
             }
         } catch (SQLException e) {
@@ -34,24 +35,24 @@ public class ChuyenBayDAO {
     // String sql = "SELECT FlightNumber, Route_IATA, DepartureTime, ArrivalTime,
     // AircraftModel, Gate, PricesHTML, FlightStatus, FlightID FROM VW_FLIGHT_LIST";
     // String cntSql = "SELECT COUNT(*) AS Tong FROM FLIGHT";
-    //
+
     // try(Connection conn = DBConnection.getConnection()) {
     // conn.setAutoCommit(false);
     // conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-    //
+    // conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
     // int cnt1 = 0;
     // try(PreparedStatement psCnt1 = conn.prepareStatement(cntSql);
     // ResultSet rsCnt1 = psCnt1.executeQuery()) {
     // if(rsCnt1.next()) cnt1 = rsCnt1.getInt("Tong");
     // System.out.println("Lan doc 1: Tong so chuyen bay la: " + cnt1);
     // }
-    //
+
     // try {
     // Thread.sleep(10000);
     // } catch(InterruptedException e) {
     // e.printStackTrace();
     // }
-    //
+
     // int cnt2 = 0;
     // try(PreparedStatement psCnt2 = conn.prepareStatement(cntSql);
     // ResultSet rsCnt2 = psCnt2.executeQuery()) {
@@ -60,7 +61,7 @@ public class ChuyenBayDAO {
     // if(cnt1 != cnt2) System.out.println("Loi phantom read");
     // else System.out.println("Loi da duoc sua nho dung SERIALIZABLE");
     // }
-    //
+
     // try (PreparedStatement ps = conn.prepareStatement(sql);
     // ResultSet rs = ps.executeQuery()) {
     // while (rs.next()) {
@@ -75,13 +76,13 @@ public class ChuyenBayDAO {
     // }
     // }
     // conn.commit();
-    //
+
     // } catch (SQLException e) {
     // e.printStackTrace();
     // }
     // return list;
     // }
-    //
+
     // LẤY CHI TIẾT 1 CHUYẾN BAY ĐỂ ĐỔ LÊN FORM SỬA
     public Object[] layChiTietChuyenBay(String flightID) {
         String sql = "SELECT f.FlightNumber, f.AirlineID, f.AircraftID, r.DepartureAirportID, r.ArrivalAirportID, f.DepartureTime, f.ArrivalTime, f.Gate "

@@ -157,7 +157,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
                 cbSanBayDi.addItem(ap);
                 cbSanBayDen.addItem(ap);
             }
-            
+
             // Lắng nghe sự kiện đổi Hãng bay để load Tàu bay tương ứng
             cbHangBay.addActionListener(e -> {
                 if (cbHangBay.getSelectedItem() != null) {
@@ -165,7 +165,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
                     loadAircrafts(airlineID);
                 }
             });
-            
+
             // Load tàu bay lần đầu tiên
             if (cbHangBay.getItemCount() > 0) {
                 cbHangBay.setSelectedIndex(0);
@@ -180,7 +180,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
         cbTauBay.removeAllItems();
         String sql = "SELECT AircraftID, Model FROM AIRCRAFT WHERE AirlineID = ?";
         try (Connection conn = DBConnection.getConnection();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+                java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, airlineID);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -195,7 +195,7 @@ public class AddFlightDialog extends javax.swing.JDialog {
         try {
             if (txtSoHieu.getText().trim().isEmpty() || cbHangBay.getSelectedItem() == null
                     || cbTauBay.getSelectedItem() == null || cbSanBayDi.getSelectedItem() == null
-                    || txtPriceEco.getText().trim().isEmpty() || txtPriceBus.getText().trim().isEmpty() 
+                    || txtPriceEco.getText().trim().isEmpty() || txtPriceBus.getText().trim().isEmpty()
                     || txtPricePrem.getText().trim().isEmpty() || txtPriceFirst.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Vui lòng nhập đủ thông tin và giá vé!", "Cảnh báo",
                         JOptionPane.WARNING_MESSAGE);
@@ -214,7 +214,8 @@ public class AddFlightDialog extends javax.swing.JDialog {
                     return;
                 }
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập giá vé là số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập giá vé là số hợp lệ!", "Lỗi",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -247,14 +248,16 @@ public class AddFlightDialog extends javax.swing.JDialog {
                     tauBayID, null,
                     depDate, arrDate, txtGate.getText().trim(), "SCHEDULED");
 
-            if (new ChuyenBayBUS().themChuyenBay(newFlight, sbDiID, sbDenID, priceEco, priceBus, pricePrem, priceFirst)) {
+            if (new ChuyenBayBUS().themChuyenBay(newFlight, sbDiID, sbDenID, priceEco, priceBus, pricePrem,
+                    priceFirst)) {
                 JOptionPane.showMessageDialog(this, "Thêm chuyến bay thành công!", "Thành công",
                         JOptionPane.INFORMATION_MESSAGE);
                 if (parentPanel != null)
                     parentPanel.loadDataToTable();
                 dispose();
             } else {
-                JOptionPane.showMessageDialog(this, "Thêm thất bại. Có thể do máy bay bị trùng lịch, lỗi ràng buộc, hoặc số hiệu bị trùng!", "Lỗi",
+                JOptionPane.showMessageDialog(this,
+                        "Thêm thất bại. Có thể do máy bay bị trùng lịch hoặc số hiệu bị trùng!", "Lỗi",
                         JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception ex) {
